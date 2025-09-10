@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Procedural Pixel Film • Nebula Pro Icons</title>
+<meta name="theme-color" content="#0b0b12">
+<style>
+  /* ============ Paleta NebulaPro (FULL) + tokens personalizados ============ */
+  :root{
+    /* Nebula Pro tokens */
+    --bg:#0b0b12;
+    --panel:#121226;
+    --ink:#f7f7ff;
+    --acc:#ff00ff;
+    --ring:#00ffff;
+    --line:#22233a;
+    --ok:#29d3a0;
+    --bad:#ff6b6b;
+    --radius:20px;
+    --blur:20px;
+    /* Personalizados */
+    --glass:#0e0f22cc;
+    /* Hue base para elementos */
+    --agua-h:190;
+    --fogo-h:15;
+    --terra-h:45;
+    --ar-h:160;
+  }
+  html,body{
+    height:100%;margin:0;padding:0;
+    color:var(--ink);
+    font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+    -webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(1200px 600px at 60% -10%, rgba(255,0,255,.14), transparent 50%),
+      radial-gradient(900px 500px at 20% 120%, rgba(0,255,255,.12), transparent 55%),
+      #0b0b12;
+  }
+  .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;}
+  .phone{
+    width:min(430px,96vw);
+    border-radius:34px;
+    background:var(--glass);
+    border:1px solid var(--line);
+    backdrop-filter:blur(18px) saturate(1.2);
+    box-shadow:0 30px 120px rgba(0,0,0,.55),0 0 180px rgba(255,0,255,.2),0 0 200px rgba(0,255,255,.2);
+    padding:16px 16px 20px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  header{display:flex;align-items:center;justify-content:center;padding-bottom:4px;}
+  header h1{margin:0;font-size:22px;font-weight:900;letter-spacing:.3px;}
+  .screen{
+    position:relative;
+    height:260px;
+    border-radius:24px;
+    overflow:hidden;
+    border:1.5px solid var(--line);
+    background:linear-gradient(180deg,#0b0b18,#0b0b0f);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 0 22px var(--acc),0 0 40px var(--ring);
+  }
+  #film{display:block;width:100%;height:100%;image-rendering:pixelated;}
+  #bg{position:fixed;inset:0;z-index:-1;image-rendering:pixelated;opacity:0.4;display:none;}
+  /* Botões */
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;}
+  .row-els{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:4px;}
+  .pill{
+    appearance:none;
+    border:none;
+    border-radius:999px;
+    padding:12px 16px;
+    font-weight:700;
+    letter-spacing:.2px;
+    background:linear-gradient(180deg,#302a6f,#211f57);
+    color:var(--ink);
+    box-shadow:0 8px 26px rgba(0,0,0,.45),0 4px 14px var(--acc);
+    cursor:pointer;
+    transition:background .15s,transform .15s;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  .pill.primary{background:linear-gradient(180deg,var(--acc),var(--ring));color:#0b0b12;}
+  .pill:active{transform:translateY(2px);}
+  .pill[disabled]{opacity:.4;pointer-events:none;}
+  /* Ícones inline */
+  .icon{width:20px;height:20px;display:inline-block;vertical-align:-4px;}
+  .icon svg{width:100%;height:100%;stroke-linecap:round;stroke-linejoin:round;stroke-width:2;}
+  /* Aplica gradiente nos strokes/fills */
+  .grad-stroke{stroke:url(#nebula-stroke);}
+  .grad-fill{fill:url(#nebula-fill);}
+  /* Elementos */
+  .dotbtn{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    border:none;
+    background:transparent;
+    cursor:pointer;
+    color:var(--ink);
+    font-size:12px;
+    gap:6px;
+    transition:transform .15s;
+  }
+  .dotbtn:active{transform:scale(0.96);}
+  .dot{width:28px;height:28px;border-radius:50%;box-shadow:0 4px 10px rgba(0,0,0,.4),0 0 8px currentColor;}
+  .dot.agua{background:hsl(var(--agua-h),80%,55%);}
+  .dot.fogo{background:hsl(var(--fogo-h),80%,55%);}
+  .dot.terra{background:hsl(var(--terra-h),80%,55%);}
+  .dot.ar{background:hsl(var(--ar-h),80%,55%);}
+  .dotbtn.active .dot{outline:2px solid var(--ring);}
+  .small{font-size:13px;color:var(--bad);}
+  /* Livro Vivo */
+  .panel{
+    background:rgba(18,18,40,0.65);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:14px;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  textarea{
+    width:100%;height:100px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:rgba(0,0,0,.2);
+    color:var(--ink);
+    padding:8px;
+    font-family:inherit;
+    font-size:14px;
+    resize:none;
+  }
+  select,input[type=range]{width:100%;}
+  .progress{height:4px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;}
+  .progress i{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--acc),var(--ring));transition:width .15s;}
+  .footer{display:flex;justify-content:space-between;font-size:12px;color:var(--bad);margin-top:8px;}
+</style>
+</head>
+<body>
+<!-- ===== Sprite de ícones Nebula Pro ===== -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="nebula-stroke" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="var(--acc)"/>
+      <stop offset="100%" stop-color="var(--ring)"/>
+    </linearGradient>
+    <linearGradient id="nebula-fill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="var(--acc)"/>
+      <stop offset="100%" stop-color="var(--ring)"/>
+    </linearGradient>
+  </defs>
+  <!-- Elementos -->
+  <symbol id="ico-agua" viewBox="0 0 24 24"><path class="grad-stroke" fill="none" d="M12 3c4 5 7 8 7 12a7 7 0 0 1-14 0c0-4 3-7 7-12Z"/></symbol>
+  <symbol id="ico-fogo" viewBox="0 0 24 24"><path class="grad-stroke" fill="none" d="M12 3c3 3 1 4 3 7 2-1 3-3 3-5 3 3 3 7 1 10a7 7 0 1 1-13-2c1-3 4-4 6-10Z"/></symbol>
+  <symbol id="ico-terra" viewBox="0 0 24 24"><path class="grad-stroke" fill="none" d="M3 17h18M4 13l3-3 4 4 4-4 5 5"/></symbol>
+  <symbol id="ico-ar" viewBox="0 0 24 24"><path class="grad-stroke" fill="none" d="M3 9c3 0 6-2 9 0s6 2 9 0M3 15c4 0 5-2 8-2s5 2 10 2"/></symbol>
+  <!-- Sistema / ações -->
+  <symbol id="ico-pulso" viewBox="0 0 24 24"><path class="grad-stroke" fill="none" d="M3 12h4l2-6 4 12 2-6h6"/></symbol>
+  <symbol id="ico-silencio" viewBox="0 0 24 24"><path class="grad-stroke" fill="none" d="M4 9v6h4l5 4V5L8 9H4Zm12 2 4 4M16 15l4-4"/></symbol>
+  <symbol id="ico-mic" viewBox="0 0 24 24"><rect class="grad-stroke" x="8" y="4" width="8" height="12" rx="4" fill="none"/><path class="grad-stroke" fill="none" d="M12 20v-2m-6-6a6 6 0 0 0 12 0"/></symbol>
+  <symbol id="ico-vento" viewBox="0 0 24 24"><path class="grad-stroke" fill="none" d="M3 9h10a3 3 0 1 0-3-3M3 15h12a3 3 0 1 1-3 3"/></symbol>
+  <symbol id="ico-trace" viewBox="0 0 24 24"><path class="grad-stroke" fill="none" d="M5 19c4-6 6-8 10-14M9 11l4-2M7 15l3-1"/></symbol>
+  <symbol id="ico-recall" viewBox="0 0 24 24"><path class="grad-stroke" fill="none" d="M9 8H4V3m0 5a9 9 0 1 0 9-9"/></symbol>
+  <symbol id="ico-freeze" viewBox="0 0 24 24"><path class="grad-stroke" fill="none" d="M12 2v20M5 5l14 14M19 5 5 19M2 12h20"/></symbol>
+  <symbol id="ico-record" viewBox="0 0 24 24"><circle class="grad-fill" cx="12" cy="12" r="6"/></symbol>
+  <symbol id="ico-bg" viewBox="0 0 24 24"><path class="grad-stroke" fill="none" d="M4 6h16v12H4zM7 14l3-3 3 3 2-2 2 2"/></symbol>
+  <symbol id="ico-book" viewBox="0 0 24 24"><path class="grad-stroke" fill="none" d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 0-3 3V4Z"/></symbol>
+</svg>
+
+<div class="wrap">
+  <div class="phone">
+    <header><h1>Procedural Pixel Film ⚡</h1></header>
+    <div class="screen"><canvas id="film" aria-label="Filme Procedural"></canvas></div>
+    <div class="row">
+      <button class="pill primary" id="btnPlay"><span class="icon"><svg viewBox="0 0 24 24"><use href="#ico-pulso"/></svg></span><span class="lbl">Respirar Pulso</span></button>
+      <button class="pill" id="btnPause"><span class="icon"><svg viewBox="0 0 24 24"><use href="#ico-silencio"/></svg></span><span class="lbl">Silenciar Pulso</span></button>
+    </div>
+    <div class="row-els">
+      <button class="dotbtn active" data-el="agua"><i class="dot agua"></i><span>Água</span></button>
+      <button class="dotbtn" data-el="fogo"><i class="dot fogo"></i><span>Fogo</span></button>
+      <button class="dotbtn" data-el="terra"><i class="dot terra"></i><span>Terra</span></button>
+      <button class="dotbtn" data-el="ar"><i class="dot ar"></i><span>Ar</span></button>
+    </div>
+    <div class="row">
+      <button class="pill" id="btnMic"><span class="icon"><svg viewBox="0 0 24 24"><use href="#ico-mic"/></svg></span><span class="lbl">Escutar o Mundo</span></button>
+      <button class="pill" id="btnBreeze"><span class="icon"><svg viewBox="0 0 24 24"><use href="#ico-vento"/></svg></span><span class="lbl">Soprar o Vento</span></button>
+    </div>
+    <div class="row">
+      <button class="pill" id="btnExport"><span class="icon"><svg viewBox="0 0 24 24"><use href="#ico-trace"/></svg></span><span class="lbl">Guardar Rastro</span></button>
+      <button class="pill" id="btnImport"><span class="icon"><svg viewBox="0 0 24 24"><use href="#ico-recall"/></svg></span><span class="lbl">Reinvocar Filme</span></button>
+    </div>
+    <div class="row">
+      <button class="pill" id="btnFreeze"><span class="icon"><svg viewBox="0 0 24 24"><use href="#ico-freeze"/></svg></span><span class="lbl">Espiral Congelada</span></button>
+      <button class="pill" id="btnRecord"><span class="icon"><svg viewBox="0 0 24 24"><use href="#ico-record"/></svg></span><span class="lbl">Gravar Pulso</span></button>
+    </div>
+    <div class="small"><label style="display:flex;align-items:center;gap:6px;"><input id="toggleBg" type="checkbox"> <span class="icon"><svg viewBox="0 0 24 24"><use href="#ico-bg"/></svg></span>Plano de Fundo</label></div>
+    <div class="panel">
+      <strong><span class="icon"><svg viewBox="0 0 24 24"><use href="#ico-book"/></svg></span> Livro Vivo</strong>
+      <small>Narre o texto abaixo e acompanhe o progresso. (Som precisa de interação no iOS)</small>
+      <textarea id="story">No princípio do Pulso, a água lembrava caminhos que ainda não tinham nome. Cada pixel era uma gota, cada gota, um planeta. Respire, e o filme te respira de volta.</textarea>
+      <div class="row"><div><small>Voz</small><select id="voiceSel"></select></div><div><small>Volume</small><input id="ttsVol" type="range" min="0" max="1" step="0.01" value="1"></div></div>
+      <div class="row"><button class="pill" id="ttsSpeak"><span class="icon"><svg viewBox="0 0 24 24"><use href="#ico-pulso"/></svg></span><span class="lbl">Narrar</span></button><button class="pill" id="ttsStop"><span class="icon"><svg viewBox="0 0 24 24"><use href="#ico-silencio"/></svg></span><span class="lbl">Parar</span></button></div>
+      <div class="progress" aria-label="Progresso"><i id="ttsProg"></i></div>
+    </div>
+    <div class="footer">
+      <span>Nebula Pro • BR icons</span>
+      <span id="status">⏸️ Pausado</span>
+    </div>
+  </div>
+</div>
+<canvas id="bg" aria-hidden="true"></canvas>
+<script>
+(function(){
+  const els = {
+    film: document.getElementById('film'),
+    bg: document.getElementById('bg'),
+    status: document.getElementById('status'),
+    btnPlay: document.getElementById('btnPlay'),
+    btnPause: document.getElementById('btnPause'),
+    btnFreeze: document.getElementById('btnFreeze'),
+    btnMic: document.getElementById('btnMic'),
+    btnBreeze: document.getElementById('btnBreeze'),
+    btnExport: document.getElementById('btnExport'),
+    btnImport: document.getElementById('btnImport'),
+    btnRecord: document.getElementById('btnRecord'),
+    toggleBg: document.getElementById('toggleBg'),
+    story: document.getElementById('story'),
+    voiceSel: document.getElementById('voiceSel'),
+    ttsVol: document.getElementById('ttsVol'),
+    ttsSpeak: document.getElementById('ttsSpeak'),
+    ttsStop: document.getElementById('ttsStop'),
+    ttsProg: document.getElementById('ttsProg'),
+  };
+
+  let running = false;
+  let frozen = false;
+  let baseHue = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--agua-h')) || 190;
+
+  function fit(){
+    const rect = els.film.parentElement.getBoundingClientRect();
+    els.film.width = rect.width;
+    els.film.height = rect.height;
+    els.bg.width = window.innerWidth;
+    els.bg.height = window.innerHeight;
+  }
+  window.addEventListener('resize', fit, {passive:true});
+  fit();
+
+  const ctx = els.film.getContext('2d');
+  const ctxBG = els.bg.getContext('2d');
+
+  function drawFrame(ctx, w, h){
+    ctx.fillStyle = 'rgba(0,0,0,0.08)';
+    ctx.fillRect(0,0,w,h);
+    const t = performance.now()*0.05;
+    const p = 8;
+    for(let x=0; x<w; x+=p){
+      for(let y=0; y<h; y+=p){
+        const hue = (baseHue + (x+y)*0.3 + t) % 360;
+        ctx.fillStyle = `hsl(${hue},80%,55%)`;
+        ctx.fillRect(x,y,p,p);
+      }
+    }
+  }
+  function loop(){
+    if(running && !frozen){
+      drawFrame(ctx, els.film.width, els.film.height);
+      if(!els.bg.hidden){
+        drawFrame(ctxBG, els.bg.width, els.bg.height);
+      }
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  document.querySelectorAll('.dotbtn[data-el]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.dotbtn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const el = btn.getAttribute('data-el');
+      switch(el){
+        case 'agua': baseHue = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--agua-h')); break;
+        case 'fogo': baseHue = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fogo-h')); break;
+        case 'terra': baseHue = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--terra-h')); break;
+        case 'ar': baseHue = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ar-h')); break;
+      }
+    });
+  });
+
+  els.btnPlay.onclick = ()=>{ running=true; els.status.textContent='▶️ Rodando'; };
+  els.btnPause.onclick = ()=>{ running=false; els.status.textContent='⏸️ Pausado'; };
+  els.btnFreeze.onclick = ()=>{
+    frozen = !frozen;
+    const lbl = els.btnFreeze.querySelector('.lbl');
+    lbl.textContent = frozen ? 'Descongelar' : 'Espiral Congelada';
+  };
+  els.btnBreeze.onclick = ()=>{ baseHue = Math.floor(Math.random()*360); };
+  els.toggleBg.onchange = ()=>{ els.bg.hidden = !els.toggleBg.checked; };
+  els.btnExport.onclick = ()=>{
+    const state = {baseHue};
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(state)], {type:'application/json'}));
+    a.download = 'pulso-state.json';
+    a.click();
+  };
+  els.btnImport.onclick = ()=>{
+    const inp=document.createElement('input');
+    inp.type='file';
+    inp.accept='.json,application/json';
+    inp.onchange = async () => {
+      const s = JSON.parse(await inp.files[0].text());
+      baseHue = s.baseHue || baseHue;
+    };
+    inp.click();
+  };
+  els.btnRecord.onclick = ()=>{
+    const stream = els.film.captureStream(30);
+    const rec = new MediaRecorder(stream,{mimeType:'video/webm;codecs=vp9'});
+    const chunks=[];
+    rec.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); };
+    rec.onstop=()=>{
+      const url=URL.createObjectURL(new Blob(chunks,{type:'video/webm'}));
+      const a=document.createElement('a');
+      a.href=url;a.download='pulso.webm';a.click();
+      const lbl = els.btnRecord.querySelector('.lbl');
+      lbl.textContent='Gravar Pulso';
+    };
+    rec.start();
+    const lbl = els.btnRecord.querySelector('.lbl');
+    lbl.textContent='Gravando 15s...';
+    setTimeout(()=>rec.stop(),15000);
+  };
+  // TTS
+  function loadVoices(){
+    const voices = speechSynthesis.getVoices();
+    els.voiceSel.innerHTML='';
+    voices.filter(v=>/pt|en/i.test(v.lang)).forEach(v=>{
+      const o=document.createElement('option');
+      o.value=v.name;
+      o.textContent = `${v.name} (${v.lang})`;
+      els.voiceSel.appendChild(o);
+    });
+  }
+  loadVoices();
+  speechSynthesis.onvoiceschanged = loadVoices;
+  let utter = null;
+  els.ttsSpeak.onclick = ()=>{
+    speechSynthesis.cancel();
+    utter = new SpeechSynthesisUtterance(els.story.value);
+    const v = speechSynthesis.getVoices().find(x=>x.name===els.voiceSel.value);
+    if(v) utter.voice = v;
+    utter.lang = 'pt-BR';
+    utter.rate = 1.0;
+    utter.pitch = 1.0;
+    utter.volume = parseFloat(els.ttsVol.value||'1');
+    utter.onboundary = e=>{
+      const x = Math.min(1,(e.charIndex/(els.story.value.length||1)));
+      els.ttsProg.style.width = (x*100).toFixed(1)+'%';
+    };
+    utter.onend = ()=>{
+      els.ttsProg.style.width='100%';
+      setTimeout(()=>els.ttsProg.style.width='0%',600);
+    };
+    speechSynthesis.speak(utter);
+  };
+  els.ttsStop.onclick = ()=>{ speechSynthesis.cancel(); els.ttsProg.style.width='0%'; };
+})();
+</script>
+</body>
+</html>

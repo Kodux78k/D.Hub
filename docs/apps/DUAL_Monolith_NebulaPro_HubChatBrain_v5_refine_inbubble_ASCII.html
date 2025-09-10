@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>DUAL • Nebula Pro — Hub + Chat + Brain (Monólito v5 — refine-in-bubble + ASCII)</title>
+<meta name="theme-color" content="#0b0b14">
+<style>
+  :root{
+    --bg:#0a0b13; --bg-2:#0b0d1a; --fg:#e9ecff; --muted:#9aa4c7; --soft:#c6c9ff33;
+    --acc:#a77cff; --acc-2:#5ed0ff; --mag:#ff5bd4; --ok:#5bffcf;
+    --card:#0e1224cc; --card-2:#0a0f20b3; --glass:rgba(255,255,255,0.06);
+    --ring:rgba(167,124,255,.35); --shadow: 0 10px 40px rgba(8,12,32,.55), inset 0 1px 0 rgba(255,255,255,.04);
+    --radius:22px; --border:rgba(255,255,255,.08); --tabsH:72px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,ui-monospace,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";color:var(--fg);
+    background: radial-gradient(1200px 900px at 50% -200px, #20163e 0%, #0b0d1a 55%, #070812 100%), #05060c; overflow:hidden;}
+  .app{position:relative;height:100%;display:flex;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
+  header.top{padding:14px 18px 8px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:saturate(130%) blur(8px);
+    background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0));border-bottom:1px solid #ffffff12;}
+  .title{letter-spacing:.18em;font-weight:800;font-size:20px;display:flex;gap:.45ch;align-items:center;}
+  .title .dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 18px var(--acc);display:inline-block}
+  .hdr-actions{display:flex;gap:10px}
+  .icon-btn{width:36px;height:36px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(180deg,#1a1c2c,#0e1122);border:1px solid #ffffff10;box-shadow:var(--shadow);cursor:pointer;position:relative}
+  .badge{position:absolute;right:-2px;top:-2px;width:10px;height:10px;background:var(--mag);border-radius:50%;box-shadow:0 0 10px var(--mag)}
+  main{flex:1;position:relative}
+  section.view{position:absolute;inset:0;padding:18px;padding-bottom:calc(var(--tabsH) + 16px);overflow:auto;display:none;}
+  section.view.active{display:block;animation:fade .22s ease-out}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding-top:6px}
+  .card{background: radial-gradient(120% 120% at 80% 0%, #1c1540aa 0, #0b0e22aa 55%, #0a0d1eaa 100%);
+    border:1px solid #ffffff12;box-shadow:var(--shadow);border-radius:var(--radius);padding:18px 16px;min-height:110px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;isolation:isolate}
+  .card:before{content:"";position:absolute;inset:-1px;border-radius:inherit;z-index:-1;background:conic-gradient(from 30deg at 80% 0%,#a77cff33,#5ed0ff22,#ff5bd422,transparent 60%);filter:blur(18px);opacity:.7}
+  .card .ico{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(180deg,#1b1f37,#0e1228);border:1px solid #ffffff10;box-shadow:inset 0 1px 0 #ffffff20, 0 6px 18px rgba(0,0,0,.4);overflow:hidden}
+  .card h3{margin:12px 0 0;font-size:14px;font-weight:700;letter-spacing:.02em}
+  .card p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+  .fab-row{display:flex;gap:16px;justify-content:center;margin:18px 0 10px}
+  .fab{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(120% 120% at 70% 0%,#261a4f,#0d1126);border:1px solid #ffffff14;box-shadow:var(--shadow)}
+  nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;justify-content:space-around;align-items:center;height:var(--tabsH);
+    padding:10px 14px env(safe-area-inset-bottom);border-top:1px solid #ffffff12;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.04));backdrop-filter:blur(8px);gap:10px}
+  .tab-btn{--size:46px;width:var(--size);height:var(--size);border-radius:16px;display:grid;place-items:center;background:linear-gradient(180deg,#12152a,#0d1124);border:1px solid #ffffff12;box-shadow:var(--shadow);opacity:.85}
+  .tab-btn.active{opacity:1;outline:1px solid var(--ring)}
+
+  /* CHAT */
+  #view-chat .app-frame{width:100%;max-width:900px;margin:0 auto;position:relative;overflow:hidden;background:radial-gradient(1200px 900px at 50% -40%,rgba(255,255,255,.05),transparent 55%);
+    min-height:calc(100dvh - var(--tabsH)); padding:12px 12px calc(12px + var(--tabsH)); border-radius:22px; box-shadow:0 40px 120px rgba(0,0,0,.45)}
+  #view-chat .header{height:56px;display:flex;align-items:center;gap:10px;padding:8px 10px;position:sticky;top:0;z-index:50;background:linear-gradient(180deg,rgba(10,10,18,.9),rgba(10,10,18,.60) 70%,transparent);backdrop-filter:saturate(110%) blur(8px);border-radius:16px}
+  #view-chat .hbtn{width:34px;height:34px;border-radius:12px;border:1px solid rgba(255,255,255,.06);display:grid;place-items:center;background:linear-gradient(180deg,#1c1d32,#121327);box-shadow:var(--shadow);cursor:pointer;user-select:none}
+  #view-chat .title{margin-left:2px;font-weight:700;letter-spacing:2px}
+  #view-chat .page{display:flex;flex-direction:column;padding:8px;gap:10px}
+  #view-chat .scroll{flex:1;overflow:auto;padding:8px 6px 12px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.00))}
+  #view-chat .row{display:flex;gap:8px;margin:8px 8px;position:relative}
+  #view-chat .row.ai{justify-content:flex-start}
+  #view-chat .row.me{justify-content:flex-end}
+  #view-chat .bubble{max-width:82%;padding:12px 14px;border-radius:18px;display:inline-block;position:relative;box-shadow:0 10px 18px rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.05);backdrop-filter:saturate(120%) blur(2px);font-size:16px}
+  #view-chat .bubble .pulse{display:none;margin-top:8px;font-size:12px;color:#cfe2ffbb}
+  #view-chat .bubble .ascii{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:11.5px;line-height:1.1; white-space:pre; color:#cfe2ff99; opacity:.6; margin-top:6px}
+  #view-chat .ai{background:linear-gradient(180deg,rgba(90,60,180,.35),rgba(60,40,120,.35));color:#e6e8ff}
+  #view-chat .me{background:linear-gradient(180deg,rgba(41,211,255,.35),rgba(154,124,255,.35));color:#eafcff}
+  #view-chat .avatar{width:34px;height:34px;border-radius:12px;background:linear-gradient(180deg,#1b1c30,#101124);border:1px solid rgba(255,255,255,.06);display:grid;place-items:center;flex:0 0 auto;box-shadow:var(--shadow)}
+  #view-chat .timestamp{font-size:12px;color:#a3b4c2;margin:2px 12px}
+  #view-chat .composer{position:fixed;left:12px;right:12px;bottom:calc(var(--tabsH) + 6px);z-index:55;margin:0 auto;max-width:900px;padding:10px;border-radius:18px;background:linear-gradient(180deg,#14152a,#101424);display:flex;gap:8px;align-items:center;border:1px solid rgba(255,255,255,.06);box-shadow:var(--shadow)}
+  #view-chat input[type=text]{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 12px;color:var(--fg);outline:none;transition:.2s;min-width:0;font-size:16px}
+  #view-chat .cbtn{width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#1c1d32,#121327);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow);flex:0 0 auto}
+  #view-chat .readout{text-align:center;font-size:12px;color:#cfe9ff99;margin-top:6px;display:flex;align-items:center;gap:6px;justify-content:center;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+  #view-chat .readout .ascii{opacity:.65; white-space:pre; font-size:12px; line-height:1.1}
+  #view-chat .actions{position:absolute;top:-6px;right:0;display:flex;gap:6px;transform:translateY(-100%)}
+  #view-chat .act{font-size:11px;padding:.25rem .5rem;border-radius:10px;background:rgba(20,24,40,.9);border:1px solid rgba(255,255,255,.10);backdrop-filter:blur(8px);cursor:pointer}
+  #view-chat .refinebar{display:none;margin-top:8px;gap:8px}
+  #view-chat .refinebar .chip{font-size:11px;padding:.25rem .6rem;border-radius:999px;background:#0f1426;border:1px solid rgba(255,255,255,.10);cursor:pointer;color:#cfe2ff}
+
+  /* Menu Sheet */
+  .sheet{position:fixed;left:12px;right:12px;bottom:calc(var(--tabsH) + 76px);border-radius:18px;display:none;z-index:59;background:linear-gradient(180deg,rgba(15,16,32,.0),rgba(15,16,32,.88) 30%, rgba(15,16,32,.95));border:1px solid rgba(255,255,255,.08);box-shadow:0 -30px 60px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06);padding:12px}
+  .sheet .row{display:flex;gap:10px;margin:6px 0}
+  .sheet .btn{flex:1;padding:10px;border-radius:12px;background:linear-gradient(180deg,#0f1428,#0b1122);border:1px solid rgba(255,255,255,.08);text-align:center}
+  .sheet .btn:active{transform:translateY(1px)}
+
+  /* BRAIN */
+  #view-brain .wrap{max-width:980px;margin:0 auto;padding:6px}
+  #view-brain .hbar{display:flex;align-items:center;gap:12px;padding:10px 12px}
+  #view-brain .hbar .title{letter-spacing:.12em;font-weight:800;font-size:18px}
+  #view-brain .hbar .dot{width:8px;height:8px;background:#29D3FF;border-radius:99px;box-shadow:0 0 16px #29D3FF}
+  #view-brain .top-right{margin-left:auto;display:flex;gap:10px}
+  #view-brain .round{width:32px;height:32px;border-radius:999px;display:grid;place-items:center;background:#1a1a2a;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.06)}
+  #view-brain .small{width:28px;height:28px}
+  #view-brain .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:6px}
+  @media (min-width:720px){#view-brain .grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  #view-brain .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border-radius:20px;padding:14px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  #view-brain .label{font-weight:800;margin-top:2px}
+  #view-brain .sublabel{color:var(--muted);font-size:12px;margin-top:2px}
+  #view-brain .btn-pill{padding:10px 14px;background:linear-gradient(90deg,#7B61FF,#29D3FF);border:none;color:white;font-weight:800;border-radius:999px;box-shadow:0 8px 24px rgba(60,60,140,.35)}
+  #view-brain .input{background:#121223;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:10px;color:#e9ecff;outline:none}
+  #view-brain .hr{height:1px;background:rgba(255,255,255,.06);margin:8px 0 10px}
+  #view-brain .code{background:#121223;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre-wrap;color:#d7e4ff}
+  #view-brain .kv{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+  #view-brain .kv .key{font-weight:700}
+  #view-brain .panel{position:fixed;right:0;top:0;bottom:0;width:360px;max-width:92vw;background:rgba(15,15,28,.92);backdrop-filter:blur(10px);box-shadow:-8px 0 24px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.06);transform:translateX(105%);transition:transform .28s ease;z-index:70;padding:16px}
+  #view-brain .panel.open{transform:translateX(0)}
+  #view-brain .status{font-size:12px;color:var(--muted);min-height:18px}
+  #view-brain .log{background:#121223;border-radius:12px;padding:10px;margin-top:10px;max-height:180px;overflow:auto;font-size:12px;color:#c7cbe0}
+  #mapper{display:grid;grid-template-columns:1fr;gap:8px}
+  #mapper .row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center}
+  #mapper .row label{font-size:12px;color:var(--muted)}
+  #mapper select,#mapper button{height:36px;border-radius:10px;border:1px solid #ffffff18;background:#0f1326;color:#e9ecff}
+
+  @media (max-width:480px){
+    #view-chat .app-frame{border-radius:0; box-shadow:none; padding-left:8px; padding-right:8px; max-width:100%}
+    #view-chat .composer{left:8px; right:8px; max-width:100%}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="title">DUAL <span class="dot"></span> NEBULA</div>
+    <div class="hdr-actions">
+      <div class="icon-btn" id="btnIntegrator" title="Integrador" aria-label="Integrador">
+        <span class="badge"></span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M5 12a7 7 0 0 1 14 0" stroke="#a77cff" stroke-width="1.6" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="3.2" stroke="#5ed0ff" stroke-width="1.6"/>
+        </svg>
+      </div>
+      <div class="icon-btn" id="btnMenu" title="Opções" aria-label="Opções">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="5" cy="12" r="2" fill="#cfd6ff"/>
+          <circle cx="12" cy="12" r="2" fill="#cfd6ff"/>
+          <circle cx="19" cy="12" r="2" fill="#cfd6ff"/>
+        </svg>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HOME / HUB -->
+    <section class="view active" id="view-home">
+      <div class="grid">
+        <button class="card" data-open="lan" data-icon="lan"><div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M6 7h12v5H6zM10 12v5M14 12v5M8 17h8" stroke="#5ed0ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><h3>LAN Scanner</h3><p>Descobrir dispositivos</p></div></button>
+        <button class="card" data-open="bind" data-icon="bind"><div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M7 7l10 10M7 17L17 7" stroke="#a77cff" stroke-width="1.7" stroke-linecap="round"/><circle cx="7" cy="7" r="3" stroke="#ff5bd4" stroke-width="1.4"/><circle cx="17" cy="17" r="3" stroke="#5ed0ff" stroke-width="1.4"/></svg></div><div><h3>Bind</h3><p>Conectar & parear</p></div></button>
+        <button class="card" data-open="report" data-icon="report"><div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M6 17v-9l6-3 6 3v9l-6 3-6-3z" stroke="#a77cff" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12h6M9 15h4" stroke="#cfd6ff" stroke-width="1.6" stroke-linecap="round"/></svg></div><div><h3>Relatório</h3><p>Métricas e logs</p></div></button>
+        <button class="card" data-open="memory" data-icon="memory"><div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="14" rx="3" stroke="#5ed0ff" stroke-width="1.6"/><path d="M8 9h8M8 13h6" stroke="#cfd6ff" stroke-width="1.6" stroke-linecap="round"/></svg></div><div><h3>Memória</h3><p>Docs & sessões</p></div></button>
+        <button class="card" data-nav="apps" data-icon="apps"><div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="6" height="6" rx="2" stroke="#5ed0ff" stroke-width="1.6"/><rect x="14" y="4" width="6" height="6" rx="2" stroke="#a77cff" stroke-width="1.6"/><rect x="4" y="14" width="6" height="6" rx="2" stroke="#ff5bd4" stroke-width="1.6"/><rect x="14" y="14" width="6" height="6" rx="2" stroke="#cfd6ff" stroke-width="1.6"/></svg></div><div><h3>Apps</h3><p>Atalhos</p></div></button>
+        <button class="card" data-nav="profile" data-icon="user"><div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.2" stroke="#cfd6ff" stroke-width="1.6"/><path d="M5 19c1.5-3.2 4.3-5 7-5s5.5 1.8 7 5" stroke="#5ed0ff" stroke-width="1.6" stroke-linecap="round"/></svg></div><div><h3>Usuário</h3><p>Preferências</p></div></button>
+      </div>
+    </section>
+
+    <!-- CHAT -->
+    <section class="view" id="view-chat">
+      <div class="app-frame">
+        <div class="header">
+          <div class="hbtn" id="chat-btnMore" title="Ações rápidas" aria-label="Ações rápidas">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="2" fill="#cfe9ff"/><circle cx="12" cy="12" r="2" fill="#cfe9ff"/><circle cx="19" cy="12" r="2" fill="#cfe9ff"/></svg>
+          </div>
+          <div class="title">DUAL <span>• CHAT</span></div>
+          <div style="flex:1"></div>
+          <div class="hbtn" id="chat-btnTTS" title="TTS: ligado" aria-label="TTS">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 10v4a1 1 0 001 1h3l5 4V5l-5 4H4a1 1 0 00-1 1z" stroke="#cfe9ff" stroke-width="2"/></svg>
+          </div>
+          <div class="hbtn" id="chat-btnExport" title="Exportar chat" aria-label="Exportar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12l7-7 7 7" stroke="#cfe9ff" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+
+        <div class="page">
+          <div class="scroll" id="chat-list"></div>
+          <div class="readout" id="chat-status">
+<pre class="ascii" id="status-ascii">╭────────── pulso em expansão ──────────╮
+│ ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁        │
+╰───────────────────────────────────────╯</pre>
+          </div>
+        </div>
+
+        <div class="composer">
+          <button class="cbtn" id="chat-btnMic" title="Ditado" aria-label="Ditado">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="9" y="3" width="6" height="10" rx="3" stroke="#cfe9ff" stroke-width="2"/><path d="M12 19v2M7 12v1a5 5 0 0010 0v-1" stroke="#cfe9ff" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+          <input id="chat-input" type="text" inputmode="text" placeholder="Digite uma mensagem…" autocomplete="off"/>
+          <button class="cbtn" id="chat-btnAttach" title="Anexo" aria-label="Anexo">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 11.5V17a5 5 0 01-10 0V8a3 3 0 116 0v7a1 1 0 11-2 0V9" stroke="#cfe9ff" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+          <button class="cbtn" id="chat-btnSend" title="Enviar" aria-label="Enviar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13" stroke="#cfe9ff" stroke-width="2" stroke-linecap="round"/><path d="M22 2l-7 20-4-9-9-4 20-7z" stroke="#cfe9ff" stroke-width="2" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+
+        <!-- Sheets -->
+        <div class="sheet" id="chat-sheet">
+          <div style="text-align:center;opacity:.8">Ações rápidas</div>
+          <div class="row"><div class="btn" data-action="lan">LAN</div><div class="btn" data-action="bind">Bind</div></div>
+          <div class="row"><div class="btn" data-action="report">Relatório</div><div class="btn" data-action="memory">Memória</div></div>
+          <div class="row"><div class="btn" data-action="clear">Limpar</div><div class="btn" data-action="import">Importar</div></div>
+        </div>
+
+        <div class="sheet" id="menu-sheet">
+          <div style="text-align:center;opacity:.8">Opções</div>
+          <div class="row"><div class="btn" data-nav="home">Início</div><div class="btn" data-nav="brain">Brain</div></div>
+          <div class="row"><div class="btn" data-nav="apps">Apps</div><div class="btn" data-nav="profile">Perfil</div></div>
+          <div class="row"><div class="btn" id="close-menu">Fechar</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BRAIN -->
+    <section class="view" id="view-brain">
+      <div class="wrap">
+        <div class='hbar'>
+          <div class='title'>AETHER <span class='dot'></span> BRAIN</div>
+          <div class='top-right'><button class='round small' id="brain-open-integrator" title='Integrador'>◇</button></div>
+        </div>
+
+        <div class="grid">
+          <div class="card" style="grid-column:1/-1">
+            <div class="label">Infodose Brain • Local</div>
+            <div class="sublabel">Chave prefixo: <code>dual.brain.*</code></div>
+            <div class="hr"></div>
+            <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px">
+              <input id="brain-k" class="input" placeholder="chave (ex.: prompt)">
+              <button class="btn-pill" id="brain-save">Salvar</button>
+              <textarea id="brain-v" class="code" style="grid-column:1/-1;min-height:120px" placeholder="valor..."></textarea>
+              <div style="display:flex;gap:8px">
+                <button class="btn-pill" id="brain-del" style="background:linear-gradient(90deg,#ff5a99,#7b61ff)">Excluir</button>
+                <button class="btn-pill" id="brain-copy">Copiar tudo</button>
+                <button class="btn-pill" id="brain-export">Exportar .json</button>
+                <input type="file" id="brain-importFile" hidden accept=".json,application/json">
+                <button class="btn-pill" id="brain-importBtn" style="background:linear-gradient(90deg,#29D3FF,#6CFFB8)">Importar</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="grid-column:1/-1">
+            <div class="label">Vozes por Arquétipo</div>
+            <div class="sublabel">Mapeie as vozes (salva em <code>dual.brain.voice.*</code>)</div>
+            <div class="hr"></div>
+            <div id="mapper"></div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class="btn-pill" id="refreshVoices">Atualizar vozes</button>
+              <button class="btn-pill" id="resetVoices" style="background:linear-gradient(90deg,#ff7a7a,#b86bff)">Reset</button>
+            </div>
+          </div>
+
+          <div class="card" style="grid-column:1/-1">
+            <div class="label">Seeds Rápidos</div>
+            <div class="sublabel">Clique para carregar no editor acima</div>
+            <div class="hr"></div>
+            <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+              <button class="btn-pill" data-seed="system">System Prompt</button>
+              <button class="btn-pill" data-seed="style">Estilo Nebula</button>
+              <button class="btn-pill" data-seed="ritual">Ritual 3•6•9</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="brain-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div class="label" style="font-weight:800">Integrador</div>
+          <button class="round small" id="brain-close">✕</button>
+        </div>
+        <div class="sublabel">Backend salvo no dispositivo (DualStore)</div>
+        <div class="hr"></div>
+        <div class="grid" style="grid-template-columns:1fr;gap:10px">
+          <input id="brain-be" class="input" placeholder="http://192.168.0.x:xxxx">
+          <div style="display:flex;gap:8px">
+            <button class="btn-pill" id="brain-saveBE">Salvar</button>
+            <button class="btn-pill" id="brain-test">Test</button>
+            <button class="btn-pill" id="brain-ping" style="background:linear-gradient(90deg,#29D3FF,#FF5AD9)">Ping</button>
+            <button class="btn-pill" id="brain-health" style="background:linear-gradient(90deg,#6CFFB8,#29D3FF)">Health</button>
+          </div>
+          <div class="status" id="brain-status">—</div>
+          <div class="log" id="brain-log"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- APPS / PROFILE iguais à v4 -->
+    <section class="view" id="view-apps">
+      <div class="grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="card" data-nav="home" data-icon="home"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3l8 6v10a2 2 0 0 1-2 2h-4v-6H10v6H6a2 2 0 0 1-2-2V9z" stroke="#a77cff" stroke-width="1.6" stroke-linejoin="round"/></svg></div><h3>Home</h3><p>Início</p></div>
+        <div class="card" data-nav="chat" data-icon="chat"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 5h16v9H7l-3 3z" stroke="#5ed0ff" stroke-width="1.6" stroke-linejoin="round"/></svg></div><h3>Chat</h3><p>Mensagens</p></div>
+        <div class="card" data-nav="brain" data-icon="brain"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="14" rx="3" stroke="#5ed0ff" stroke-width="1.6"/><path d="M8 9h8M8 13h6" stroke="#cfd6ff" stroke-width="1.6" stroke-linecap="round"/></svg></div><h3>Brain</h3><p>Memória</p></div>
+        <div class="card" data-nav="profile" data-icon="user"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.2" stroke="#cfd6ff" stroke-width="1.6"/><path d="M5 19c1.5-3.2 4.3-5 7-5s5.5 1.8 7 5" stroke="#5ed0ff" stroke-width="1.6" stroke-linecap="round"/></svg></div><h3>Perfil</h3><p>Preferências</p></div>
+      </div>
+    </section>
+    <section class="view" id="view-profile">
+      <div style="display:flex;flex-direction:column;gap:14px;padding-top:4px;">
+        <div style="width:84px;height:84px;border-radius:50%;display:grid;place-items:center;margin:4px auto 8px;background:radial-gradient(120% 120% at 70% 0%,#231a52,#0d122a);border:1px solid #ffffff18;box-shadow:var(--shadow)">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.2" stroke="#cfd6ff" stroke-width="1.6"/><path d="M5 19c1.5-3.2 4.3-5 7-5s5.5 1.8 7 5" stroke="#5ed0ff" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <div class="card"><div style="font-size:11px;color:var(--muted)">Nome</div><div contenteditable="true">trinity</div></div>
+        <div class="card"><div style="font-size:11px;color:var(--muted)">Assinatura</div>
+          <select style="width:100%;background:transparent;border:0;outline:0;color:var(--fg);font-size:14px;padding:6px 0 2px;">
+            <option>Trinity</option><option>Uno</option><option>Dual</option>
+          </select>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-nav="home" title="Início" aria-label="Início">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3l8 6v10a2 2 0 0 1-2 2h-4v-6H10v6H6a2 2 0 0 1-2-2V9z" stroke="#a77cff" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="tab-btn" data-nav="chat" title="Chat" aria-label="Chat">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 5h16v9H7l-3 3z" stroke="#5ed0ff" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="tab-btn" data-nav="brain" title="Brain" aria-label="Brain">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="14" rx="3" stroke="#5ed0ff" stroke-width="1.6"/><path d="M8 9h8M8 13h6" stroke="#cfd6ff" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+    <button class="tab-btn" data-nav="apps" title="Apps" aria-label="Apps">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <rect x="4" y="4" width="6" height="6" rx="2" stroke="#5ed0ff" stroke-width="1.6"/>
+        <rect x="14" y="4" width="6" height="6" rx="2" stroke="#a77cff" stroke-width="1.6"/>
+        <rect x="4" y="14" width="6" height="6" rx="2" stroke="#ff5bd4" stroke-width="1.6"/>
+        <rect x="14" y="14" width="6" height="6" rx="2" stroke="#cfd6ff" stroke-width="1.6"/>
+      </svg>
+    </button>
+    <button class="tab-btn" data-nav="profile" title="Perfil" aria-label="Perfil">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.2" stroke="#cfd6ff" stroke-width="1.6"/><path d="M5 19c1.5-3.2 4.3-5 7-5s5.5 1.8 7 5" stroke="#5ed0ff" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </nav>
+</div>
+
+<script>
+/* ===== Helpers & Router ===== */
+function $(s,root=document){return root.querySelector(s)}
+const views = {home:$('#view-home'), chat:$('#view-chat'), brain:$('#view-brain'), apps:$('#view-apps'), profile:$('#view-profile')};
+function navTo(key){ for(const v in views) views[v].classList.remove('active'); (views[key]||views.home).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.nav===key)); history.replaceState({}, "", "#/"+key); }
+const h = location.hash.replace("#/",""); if(views[h]) navTo(h);
+document.querySelectorAll('[data-nav]').forEach(btn=>btn.addEventListener('click', ()=> navTo(btn.dataset.nav)));
+document.querySelectorAll('[data-open]').forEach(btn=>btn.addEventListener('click', ()=>{ const name=btn.dataset.open; navTo('chat'); setTimeout(()=>{ chatBubble('Abrir '+name+'…','me'); setTimeout(()=> chatBubble('Módulo '+name.toUpperCase()+' pronto. (exemplo)','ai'), 360); }, 150); }));
+
+/* ===== Hub Icon Fallback Loader ===== */
+(async function loadHubIcons(){
+  const cards = document.querySelectorAll('[data-icon] .ico');
+  for(const ico of cards){
+    const key = ico.parentElement.dataset.icon;
+    try{ const res = await fetch(`./icons/${key}.svg`, {method:'GET'}); if(res.ok){ const svg=await res.text(); ico.innerHTML=svg; } }catch(e){}
+  }
+})();
+
+/* ===== Menu btn ===== */
+const menuBtn = document.getElementById('btnMenu');
+const menuSheet = document.getElementById('menu-sheet');
+menuBtn.addEventListener('click', ()=>{ menuSheet.style.display = (menuSheet.style.display==='block'?'none':'block'); });
+document.getElementById('close-menu').addEventListener('click', ()=> menuSheet.style.display='none');
+menuSheet.addEventListener('click', (e)=>{ const btn=e.target.closest('[data-nav]'); if(!btn) return; navTo(btn.dataset.nav); menuSheet.style.display='none'; });
+
+/* ===== ASCII status animation ===== */
+(function(){
+  const el = document.getElementById('status-ascii');
+  const frames = [
+`╭────────── pulso em expansão ──────────╮
+│ ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁        │
+╰───────────────────────────────────────╯`,
+`╭────────── pulso em expansão ──────────╮
+│   ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁      │
+╰───────────────────────────────────────╯`,
+`╭────────── pulso em expansão ──────────╮
+│     ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁    │
+╰───────────────────────────────────────╯`,
+`╭────────── pulso em expansão ──────────╮
+│       ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁  │
+╰───────────────────────────────────────╯`,
+`╭────────── pulso em expansão ──────────╮
+│     ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁    │
+╰───────────────────────────────────────╯`,
+`╭────────── pulso em expansão ──────────╮
+│   ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁      │
+╰───────────────────────────────────────╯`
+  ];
+  let i=0; setInterval(()=>{ el.textContent = frames[i=(i+1)%frames.length]; }, 900);
+})();
+
+/* ===== Chat with refine-in-bubble + ASCII art ===== */
+(function(){
+  const list = $("#chat-list"), input=$("#chat-input"), status=$("#chat-status");
+  const btnSend=$("#chat-btnSend"), btnMic=$("#chat-btnMic"), btnMore=$("#chat-btnMore");
+  const btnTTS=$("#chat-btnTTS"), btnExport=$("#chat-btnExport"), sheet=$("#chat-sheet");
+  const STORAGE_KEY="dual.chat.history";
+  let TTS_ON=true, msgCounter=0;
+
+  const ARCHS = ["Atlas","Nova","Elysha","Kaion","Artemis","Serena","Vitalis","Pulse","Aion","Rhea","Genus","Lumine"];
+
+  let VOICES=[]; function loadVoices(){ VOICES = speechSynthesis.getVoices(); }
+  if('speechSynthesis' in window){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+  const IOS_PREFS=["Luciana","Felipe","Maria","Joana","Vitória","Isabela","Camila","Bianca"];
+  const ARCH_PREFS={"Atlas":["Felipe","João","Daniel"],"Nova":["Luciana","Maria","Camila"],"Elysha":["Joana","Vitória","Isabela"],"Kaion":["Felipe","Rodrigo","Rafael"],
+                    "Artemis":["Luciana","Helena","Beatriz"],"Serena":["Vitória","Camila","Maria"],"Vitalis":["Felipe","Eduardo","Bruno"],"Pulse":["Camila","Vitória","Felipe"],
+                    "Aion":["João","Miguel","Gustavo"],"Rhea":["Maria","Ana","Marina"],"Genus":["André","Marcelo","Luiz"],"Lumine":["Luciana","Sofia","Carolina"]};
+
+  function getLS(k, d){ try{ const v=localStorage.getItem(k); return v===null?d:v; }catch(_){ return d; } }
+  function setLS(k, v){ try{ localStorage.setItem(k, v); }catch(_){} }
+
+  function inferArchFromText(t){
+    t = (t||"").toLowerCase();
+    const rules = [
+      [/rede|lan|mqtt|http|relatório|métric|log|debug|binding|token|api|backend/, "Kaion"],
+      [/código|biblioteca|módulo|algoritmo|dados|vetor|json|schema/, "Genus"],
+      [/luz|lumin|claro|brilho|inspira|ideia|criar|criação|poético|arte/, "Lumine"],
+      [/saúde|vital|respira|energia|corpo|natureza/, "Vitalis"],
+      [/pulso|ritmo|batida|loop|ciclo|3•6•9|369/, "Pulse"],
+      [/tempo|eterno|sempre|agora|ontem|amanhã|ciclo/, "Aion"],
+      [/cuidar|acolh|calma|sereno|paz/, "Serena"],
+      [/força|ação|mover|liderar|construir|montar|atlas|mapa/, "Atlas"],
+      [/explora|caça|foco|alvo|precisão/, "Artemis"],
+      [/origem|fonte|nasc|novidade|futuro|expansão|estalo/, "Nova"],
+      [/sabedoria|guia|orienta|reflex|estudo/, "Elysha"],
+      [/família|relaç|vínculo|casa|cuidado/, "Rhea"]
+    ];
+    for(const [rx, a] of rules){ if(rx.test(t)) return a; }
+    let i = parseInt(getLS('dual.arch.idx',"0"),10) || 0; const a = ARCHS[i%ARCHS.length]; setLS('dual.arch.idx', ((i+1)%ARCHS.length).toString()); return a;
+  }
+
+  function pickVoice(arch){
+    const mapped = getLS('dual.brain.voice.'+arch, null);
+    if(mapped && VOICES.length){ const v = VOICES.find(v=> (v.name||"").toLowerCase()===mapped.toLowerCase()); if(v) return v; }
+    const names = (ARCH_PREFS[arch]||[]).concat(IOS_PREFS);
+    const byName = n => VOICES.find(v => (v.name||"").toLowerCase().includes(n.toLowerCase()));
+    for(const n of names){ const v = byName(n); if(v) return v; }
+    const pt = VOICES.find(v => (v.lang||"").toLowerCase().startsWith('pt')); if(pt) return pt;
+    return VOICES[0];
+  }
+
+  function prosodyFor(text, arch){
+    const t=(text||"").toLowerCase(); let rate=1, pitch=1;
+    if(/urgente|rápido|agora|atenção|alerta|!/.test(t)) rate=1.14;
+    if(/calmo|suave|sereno|respira/.test(t)) { rate=0.9; pitch=0.95; }
+    if(arch==="Pulse") rate=1.08;
+    if(arch==="Serena") { rate=0.92; pitch=0.98; }
+    if(arch==="Artemis"||arch==="Atlas") rate=1.04;
+    if(arch==="Aion") { rate=0.96; pitch=1.02; }
+    return {rate,pitch};
+  }
+
+  function speak(text, arch){
+    try{
+      const u = new SpeechSynthesisUtterance(text);
+      const v = pickVoice(arch);
+      if(v){ u.voice=v; u.lang=v.lang || 'pt-BR'; } else { u.lang='pt-BR'; }
+      const p = prosodyFor(text, arch);
+      u.rate = p.rate; u.pitch = p.pitch; u.volume = 1.0;
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    }catch(e){ console.warn('TTS indisponível', e) }
+  }
+
+  function asciiWaveFrames(){
+    return [
+"▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁",
+"  ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁",
+"    ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁",
+"  ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁"
+    ];
+  }
+
+  // Refine inline menu renderer
+  function renderRefineBar(bubble, text){
+    let bar = bubble.parentElement.querySelector('.refinebar');
+    if(!bar){
+      bar = document.createElement('div'); bar.className='refinebar';
+      bar.innerHTML = `<span class="chip" data-refine="voice">Refinar voz</span>
+                       <span class="chip" data-refine="text">Refinar texto</span>
+                       <span class="chip" data-refine="mapper">Mapper</span>`;
+      bubble.parentElement.appendChild(bar);
+    }
+    bar.style.display = (bar.style.display==='flex'?'none':'flex');
+    bar.onclick = (e)=>{
+      const chip = e.target.closest('.chip'); if(!chip) return;
+      const act = chip.dataset.refine;
+      if(act==='voice'){
+        const arch = inferArchFromText(text);
+        const prefs = ["Luciana","Felipe","Maria","Joana","Vitória","Isabela","Camila","Bianca"];
+        const current = getLS('dual.brain.voice.'+arch, '');
+        let idx = Math.max(0, prefs.findIndex(n=> n===current));
+        const next = prefs[(idx+1)%prefs.length] || '';
+        if(next){ setLS('dual.brain.voice.'+arch, next); chatBubble(`Voz do arquétipo ${arch} refinada → ${next}`, 'ai'); }
+        else { chatBubble(`Sem candidatos pt‑BR detectados; usando automática para ${arch}.`, 'ai'); }
+      }
+      if(act==='text'){
+        chatBubble("Refino textual: "+text.replace(/\s+/g,' ').slice(0,160)+"…", 'ai');
+      }
+      if(act==='mapper'){ navTo('brain'); window.scrollTo(0,0); }
+      bar.style.display='none';
+    };
+  }
+
+  window.chatBubble = function(text, who='ai', meta={}){
+    const id='m'+(++msgCounter);
+    const arch = meta.arch || (who==='ai'? inferArchFromText(text) : 'User');
+    const row=document.createElement('div'); row.className='row '+who; row.dataset.id=id;
+    if(who==='ai'){ const av=document.createElement('div'); av.className='avatar'; av.innerHTML='🔮'; row.appendChild(av); }
+    const b=document.createElement('div'); b.className='bubble '+who; b.textContent=text;
+    // ascii strip
+    const ascii=document.createElement('pre'); ascii.className='ascii'; ascii.textContent=asciiWaveFrames()[0];
+    b.appendChild(ascii);
+    // pulse meta
+    const pulse=document.createElement('div'); pulse.className='pulse';
+    pulse.innerHTML = `Arqué: <b>${arch}</b> • ${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})} • ${text.length} chars`;
+    b.appendChild(pulse);
+    // actions (inclui Refine)
+    const acts=document.createElement('div'); acts.className='actions';
+    acts.innerHTML = `<button class="act" data-act="expand">Expandir</button>
+                      <button class="act" data-act="copy">Copiar</button>
+                      <button class="act" data-act="pulse">Pulso</button>
+                      <button class="act" data-act="refine">Refinar</button>`;
+    row.appendChild(b); row.appendChild(acts);
+    if(who==='me'){ const av=document.createElement('div'); av.className='avatar'; av.innerHTML='⚡'; row.appendChild(av); }
+    list.appendChild(row);
+    const ts=document.createElement('div'); ts.className='timestamp'; ts.textContent=new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    list.appendChild(ts); list.scrollTop=list.scrollHeight; persist();
+    if(TTS_ON && who==='ai') speak(text, arch);
+    // animate ascii subtly
+    const frames = asciiWaveFrames(); let i=0; setInterval(()=>{ ascii.textContent = frames[i=(i+1)%frames.length]; }, 800);
+  }
+
+  function persist(){
+    const msgs=[...list.querySelectorAll('.row')].map(r=>{
+      const who=r.classList.contains('me')?'me':'ai';
+      const text=r.querySelector('.bubble').childNodes[0].textContent;
+      return {who,text};
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs));
+  }
+
+  function restore(){
+    list.innerHTML='';
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw){ intro(); return }
+    try{ JSON.parse(raw).forEach(m=> chatBubble(m.text, m.who)); }
+    catch(e){ console.warn(e); intro(); }
+  }
+
+  function intro(){
+    chatBubble("Olá, eu sou o Dual. Como posso te ajudar hoje?", 'ai');
+    chatBubble("Toque ••• para Ações rápidas. Dentro de cada resposta, use **Refinar** para voz/texto, ou **Pulso** para ver o meta.", 'ai');
+  }
+
+  async function reply(prompt){
+    const p=prompt.trim().toLowerCase(); if(!p) return;
+    if(p.includes('scan')||p.includes('lan')){ await wait(400); chatBubble("🔎 Varredura LAN concluída: \n• 192.168.0.10 — DualHub (HTTP)\n• 192.168.0.21 — MediaBox (DLNA)\n• 192.168.0.45 — ESP32 (MQTT)", 'ai'); return; }
+    if(p.includes('bind')){ await wait(300); const token=Math.random().toString(36).slice(2,10).toUpperCase(); chatBubble("🔗 Bind efetuado: TOKEN-"+token+" (mock).", 'ai'); return; }
+    if(p.includes('relatório')||p.includes('relatorio')||p.includes('report')){ await wait(300);
+      chatBubble("📈 Relatório — Sessão atual\nMensagens: "+ list.querySelectorAll('.row').length +"\nTTS: "+(TTS_ON?'ativado':'desligado')+"\nPersistência: localStorage (‘"+STORAGE_KEY+"’).", 'ai'); return; }
+    if(p.includes('memória')||p.includes('memoria')){ await wait(200); chatBubble("🧠 Memória local: "+(localStorage.getItem(STORAGE_KEY)?.length||0)+" bytes. Use Ações → Limpar para resetar.", 'ai'); return; }
+    await wait(450);
+    const stems=["Entendi o pulso do que disse: ","Recebi sua intenção e expando: ","Posso seguir por aqui: ","Certo! Minha leitura: "];
+    chatBubble(stems[Math.floor(Math.random()*stems.length)] + prompt, 'ai');
+  }
+
+  function wait(ms){return new Promise(r=>setTimeout(r,ms))}
+  function send(){ const txt=input.value.trim(); if(!txt) return; chatBubble(txt,'me'); input.value=''; reply(txt); }
+
+  // STT
+  let recognizing=false, rec;
+  function startSTT(){
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR){ status.querySelector('.ascii').textContent="╭────────── ditado indisponível ─────────╮\n│ …                                      │\n╰────────────────────────────────────────╯"; return }
+    if(recognizing){ rec.stop(); recognizing=false; return }
+    rec=new SR(); rec.lang='pt-BR'; rec.interimResults=false; rec.maxAlternatives=1;
+    rec.onresult=e=>{ input.value=(input.value+' '+e.results[0][0].transcript).trim(); };
+    rec.onend=()=>{ recognizing=false; };
+    rec.onerror=()=>{ recognizing=false; };
+    recognizing=true;
+    rec.start();
+  }
+
+  // Export/Import
+  function exportChat(){ const data=localStorage.getItem(STORAGE_KEY)||'[]'; const blob=new Blob([data],{type:'application/json'});
+    const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='dual_chat_history.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),500); }
+  function importChat(){ const inp=document.createElement('input'); inp.type='file'; inp.accept='application/json';
+    inp.onchange=()=>{ const f=inp.files?.[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ localStorage.setItem(STORAGE_KEY, r.result); restore(); }; r.readAsText(f); }; inp.click(); }
+
+  // Click handlers
+  list.addEventListener('click',(e)=>{
+    const row=e.target.closest('.row'); if(!row) return;
+    const act=e.target.closest('.act'); if(!act) return;
+    const bubble=row.querySelector('.bubble'); const txt=bubble.childNodes[0].textContent;
+    if(act.dataset.act==='expand') reply(txt);
+    if(act.dataset.act==='copy'){ navigator.clipboard.writeText(txt); }
+    if(act.dataset.act==='pulse'){ const p=bubble.querySelector('.pulse'); p.style.display=(p.style.display==='block'?'none':'block'); }
+    if(act.dataset.act==='refine'){ renderRefineBar(bubble, txt); }
+  });
+
+  // Composer UX iOS
+  input.addEventListener('focus',()=>{ document.body.style.height='100dvh'; });
+  input.addEventListener('blur',()=>{ setTimeout(()=>{ window.scrollTo(0,0); document.body.style.height=''; },50); });
+
+  // Events
+  btnSend.addEventListener('click', send);
+  input.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ e.preventDefault(); send(); } });
+  btnMic.addEventListener('click', startSTT);
+  btnMore.addEventListener('click', ()=>{ sheet.style.display = (sheet.style.display==='none'||!sheet.style.display)?'block':'none'; });
+  btnTTS.addEventListener('click', ()=>{ TTS_ON=!TTS_ON; btnTTS.title='TTS: '+(TTS_ON?'ligado':'desligado'); });
+
+  restore();
+})();
+
+/* ===== Brain: mapper/integ (igual v4) ===== */
+(function(){
+  const ARCHS=["Atlas","Nova","Elysha","Kaion","Artemis","Serena","Vitalis","Pulse","Aion","Rhea","Genus","Lumine"];
+  const mapper = document.getElementById('mapper');
+  let VOICES=[];
+  function getVoices(){
+    VOICES = (speechSynthesis.getVoices()||[]).slice();
+    VOICES.sort((a,b)=>{
+      const ap = (a.lang||'').startsWith('pt') ? 0 : 1;
+      const bp = (b.lang||'').startsWith('pt') ? 0 : 1;
+      if(ap!==bp) return ap-bp;
+      return (a.name||'').localeCompare(b.name||'');
+    });
+  }
+  function buildMapper(){
+    mapper.innerHTML='';
+    ARCHS.forEach(arch=>{
+      const row=document.createElement('div'); row.className='row';
+      const label=document.createElement('label'); label.textContent=arch;
+      const sel=document.createElement('select'); sel.dataset.arch=arch;
+      VOICES.forEach(v=>{ const o=document.createElement('option'); o.value=v.name; o.textContent= `${v.name} — ${v.lang}`; sel.appendChild(o); });
+      const saved=localStorage.getItem('dual.brain.voice.'+arch);
+      if(saved){ sel.value=saved; }
+      const test=document.createElement('button'); test.textContent='Testar';
+      test.addEventListener('click',()=>{
+        const u = new SpeechSynthesisUtterance(`Teste de voz para o arquétipo ${arch}.`);
+        const vv = VOICES.find(x=> x.name===sel.value) || VOICES[0];
+        if(vv){ u.voice=vv; u.lang=vv.lang; }
+        speechSynthesis.cancel(); speechSynthesis.speak(u);
+      });
+      sel.addEventListener('change',()=> localStorage.setItem('dual.brain.voice.'+arch, sel.value));
+      row.appendChild(label); row.appendChild(sel); row.appendChild(test);
+      mapper.appendChild(row);
+    });
+  }
+  function initMapper(){ getVoices(); buildMapper(); }
+  initMapper();
+  document.getElementById('refreshVoices').addEventListener('click', initMapper);
+  document.getElementById('resetVoices').addEventListener('click', ()=>{
+    ARCHS.forEach(a=> localStorage.removeItem('dual.brain.voice.'+a));
+    initMapper();
+  });
+
+  // Integrator
+  const panel=$("#brain-panel"), be=$("#brain-be"), log=$("#brain-log"), status=$("#brain-status");
+  const DualStore={ get backend(){ return localStorage.getItem("dual.backend.url")||""; }, set backend(v){ localStorage.setItem("dual.backend.url",(v||"").trim()); } };
+  function addLog(line){ const p=document.createElement('div'); p.textContent=new Date().toLocaleTimeString()+" • "+line; log.prepend(p); }
+  function openPanel(){ panel.classList.add("open"); be.value=DualStore.backend||""; }
+  async function fetchWithTimeout(url,opts={},ms=5000){ const ctrl=new AbortController(); const id=setTimeout(()=>ctrl.abort(),ms);
+    try{ const res=await fetch(url,{...opts,signal:ctrl.signal}); clearTimeout(id); return res; }catch(e){ clearTimeout(id); throw e; } }
+  function doGET(path){ const base=DualStore.backend; if(!base){ status.textContent='Defina o backend.'; return;}
+    const url=path? new URL(path,base).toString(): base; status.textContent='Carregando...';
+    fetchWithTimeout(url,{},5000).then(async(res)=>{ const text=await res.text(); status.textContent=(res.ok?'OK ':'ERRO ')+res.status+' — '+url; addLog((res.ok?'[OK] ':'[ERR] ')+url+' → '+text.slice(0,200)); })
+      .catch(err=>{ status.textContent='Falha na requisição.'; addLog('[ERR] '+(err?.message||err)); }); }
+  document.getElementById("brain-open-integrator").addEventListener('click', openPanel);
+  document.getElementById("brain-close").addEventListener('click', ()=> panel.classList.remove("open"));
+  document.getElementById("brain-saveBE").addEventListener('click', ()=>{ DualStore.backend=be.value; addLog('Salvo: '+DualStore.backend); status.textContent='Backend salvo.'; });
+  document.getElementById("brain-test").addEventListener('click', ()=> doGET(''));
+  document.getElementById("brain-ping").addEventListener('click', ()=> doGET('/ping'));
+  document.getElementById("brain-health").addEventListener('click', ()=> doGET('/health'));
+})();
+
+// Integrator button demo (header)
+document.getElementById('btnIntegrator').addEventListener('click', ()=>{
+  alert('Integrador: conecte LAN, Bind e Relatórios.\n(Protótipo unificado — backend salvo em localStorage)');
+});
+</script>
+</body>
+</html>

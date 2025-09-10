@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>DALL — Mobile DAW UI v10</title>
+<style>
+  :root{
+    --bg: #151028; --bg-2:#1c1636;
+    --panel:#251d46;
+    --tile:#31255f; --tile-2:#392a74;
+    --ink:#e8e4ff; --ink-2:#c9baff; --ink-3:#a896ff;
+    --accent:#7a63ff;
+    --glass: rgba(255,255,255,.06);
+    --shadow: 0 12px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
+    --r-lg: 22px; --r-md: 18px; --r-sm: 14px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    color:var(--ink);
+    background: radial-gradient(120% 120% at 100% 0%, #1e1740 0%, var(--bg) 60%) fixed;
+    font:600 16px/1.25 "SF Pro Display", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+  }
+  .app{
+    min-height:100%;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) calc(18px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+    display:flex; flex-direction:column; gap:14px; max-width:520px; margin:0 auto;
+  }
+
+  /* Topbar */
+  .topbar{display:flex; align-items:center; justify-content:space-between; padding:12px 8px 0}
+  .brand{font-weight:900; letter-spacing:.5px; font-size:clamp(26px,6vw,42px)}
+  .circle-btn{width:40px;height:40px;border-radius:12px;background:linear-gradient(180deg,#3b2d76,#2b2155);
+    display:grid;place-items:center;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.06);transition:.12s transform}
+  .press,.circle-btn:active{transform:translateY(1px) scale(.98)}
+  .icon-gear{width:22px;height:22px;stroke:var(--ink);stroke-width:2;fill:none}
+
+  /* Views host */
+  .views{flex:1; display:grid}
+  .view{display:none; grid-auto-rows:min-content}
+  .view.active{display:block}
+
+  /* Panel (Tracks view) */
+  .panel{background:linear-gradient(180deg,var(--panel),#211a3e);border-radius:clamp(18px,4vw,26px);padding:16px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.05)}
+  .grid{display:grid;grid-template-columns:1.25fr .95fr;gap:12px;margin-bottom:12px}
+  .tile{background:linear-gradient(180deg,var(--tile),var(--tile-2));border:1px solid rgba(255,255,255,.06);border-radius:var(--r-md);box-shadow:var(--shadow);position:relative;overflow:hidden;min-height:62px}
+  .tile:before{content:"";position:absolute;inset:0;background:radial-gradient(120% 120% at 0% 0%,rgba(255,255,255,.08) 0%,transparent 45%);pointer-events:none}
+  .clipgrid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:10px;padding:12px}
+  .clipgrid div{border-radius:10px;background:linear-gradient(180deg,#6a53e8,#5441c9);opacity:.9}
+  .clipgrid div:nth-child(odd){background:linear-gradient(180deg,#5a45c8,#4b38a8)}
+  .wave{padding:0}
+  .wave svg{width:100%;height:100%}
+  .wave path{stroke:var(--ink-2);stroke-width:6;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.95}
+  .wave--mid path{stroke:#b59cff}
+  .wave--low path{stroke:#9a84ff}
+  .row{display:grid;gap:12px}
+  .row--two{grid-template-columns:1.1fr .9fr}
+
+  /* Transport + FX */
+  .transport{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:8px}
+  .btn{height:68px;border-radius:20px;background:linear-gradient(180deg,#3b2d76,#2b2155);
+    box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.06);display:grid;place-items:center;transition:.12s transform, .2s filter}
+  .btn:active{transform:translateY(1px) scale(.98);filter:brightness(1.06)}
+  .btn.is-active{outline:2px solid rgba(122,99,255,.6);box-shadow:0 0 0 6px rgba(122,99,255,.15), var(--shadow)}
+  .icon{width:28px;height:28px;stroke:var(--ink);fill:none;stroke-width:2.5}
+  .icon.play{stroke-width:0;fill:var(--ink)}
+  .rec{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffb2b2 0%,#ff7a7a 45%,#ff4a4a 70%,#ff2d2d 100%);box-shadow:0 0 0 6px rgba(255,77,77,.12), inset 0 2px 6px rgba(0,0,0,.25)}
+  .fx{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:12px}
+  .btn--sm{height:64px;border-radius:18px}
+
+  /* Playhead animation (only when .is-playing on body) */
+  .playhead{position:absolute;top:8px;bottom:8px;width:2px;left:0;background:#e0dcff;opacity:.7;border-radius:2px;transform:translateX(0)}
+  body.is-playing .playhead{animation:sweep 6s linear infinite}
+  @keyframes sweep{from{transform:translateX(0)}to{transform:translateX(100%)}}
+
+  /* Bottom tabs (v10) */
+  .tabs{
+    position:sticky; bottom:0; z-index:10;
+    background:linear-gradient(180deg,#211a3e,#1b1636);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:20px; padding:6px 8px;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-items:center;
+    box-shadow:var(--shadow);
+  }
+  .tab{
+    height:54px;border-radius:14px;background:linear-gradient(180deg,#32265f,#2b2155);
+    border:1px solid rgba(255,255,255,.06);display:grid;grid-template-columns:auto 1fr;place-items:center;gap:8px;padding:0 10px;
+    color:var(--ink);opacity:.9;transition:.15s transform,.2s background,.2s color
+  }
+  .tab:active{transform:translateY(1px) scale(.98)}
+  .tab .ticon{width:22px;height:22px;stroke:var(--ink);fill:none;stroke-width:2.2;opacity:.95}
+  .tab span{font-size:13px;letter-spacing:.2px;opacity:.9}
+  .tab.active{
+    background:linear-gradient(180deg,#4a3ab0,#3a2d8d);
+    color:white; box-shadow:0 8px 24px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.08);
+  }
+  .tab.active .ticon{stroke:white}
+
+  /* Drumpad view */
+  .padgrid{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px
+  }
+  .pad{
+    height:78px;border-radius:16px;background:linear-gradient(180deg,#3c2f74,#2d2360);
+    border:1px solid rgba(255,255,255,.08);box-shadow:var(--shadow);
+    display:grid;place-items:center;position:relative;overflow:hidden;color:#efe9ff
+  }
+  .pad:before{content:"";position:absolute;inset:0;background:radial-gradient(120% 120% at 20% 15%,rgba(255,255,255,.10),transparent 45%);pointer-events:none}
+  .pad:active{transform:translateY(1px) scale(.98);filter:brightness(1.08)}
+  .pad.flash{animation:flash .18s ease}
+  @keyframes flash{from{box-shadow:0 0 0 8px rgba(122,99,255,.0), inset 0 1px 0 rgba(255,255,255,.10)}to{box-shadow:0 0 0 0 rgba(122,99,255,.0)}}
+
+  /* Synth view (knobs) */
+  .synth-wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .knob{
+    height:120px;border-radius:18px;background:linear-gradient(180deg,#3b2e72,#2b2258);
+    border:1px solid rgba(255,255,255,.07);box-shadow:var(--shadow);padding:14px;display:grid;place-items:center;gap:8px
+  }
+  .k-label{font-size:13px;opacity:.85}
+  .dial{appearance:none;width:92px;height:92px;border-radius:50%;
+    background:
+      radial-gradient(transparent 52%, rgba(0,0,0,.35) 53%),
+      conic-gradient(from -90deg, var(--accent) var(--angle,30deg), #2b2258 0);
+    border:1px solid rgba(255,255,255,.08);position:relative}
+  .dial:after{content:"";position:absolute;width:4px;height:30px;background:#fff;border-radius:2px;left:50%;top:6px;transform-origin:50% 40px;transform:rotate(var(--arrow,0deg)) translateX(-50%)}
+  .dial input{position:absolute;inset:0;opacity:0}
+  .k-value{font:700 14px/1.1 system-ui;opacity:.9}
+
+  /* Export view */
+  .export-wrap{display:grid;gap:12px}
+  .x-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .xbtn{height:64px;border-radius:18px;background:linear-gradient(180deg,#3b2d76,#2b2155);border:1px solid rgba(255,255,255,.06);
+    display:grid;place-items:center;box-shadow:var(--shadow);transition:.12s transform}
+  .xbtn:active{transform:translateY(1px) scale(.98)}
+  .hint{font-size:13px;opacity:.7}
+
+  /* Home indicator */
+  .homebar{height:5px;width:118px;margin:12px auto 2px;border-radius:5px;background:rgba(255,255,255,.25);opacity:.85}
+
+  /* Reduce motion */
+  @media (prefers-reduced-motion: reduce){
+    .btn,.tab,.pad{transition:none}
+    body.is-playing .playhead{animation:none}
+  }
+</style>
+</head>
+<body>
+  <main class="app">
+    <!-- Top -->
+    <header class="topbar" aria-label="Topo">
+      <div class="brand">DALL</div>
+      <button class="circle-btn" aria-label="Configurações">
+        <svg class="icon-gear" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/>
+          <path d="M19.4 15a7.86 7.86 0 0 0 .06-6l1.86-1.08-2-3.46-2.15.85a7.9 7.9 0 0 0-5-.06l-.86-2.16H9.6l-.86 2.16a7.9 7.9 0 0 0-5 .06l-2.15-.85-2 3.46L1.45 9a7.86 7.86 0 0 0 0 6l-1.86 1.08 2 3.46 2.15-.85a7.9 7.9 0 0 0 5 .06l.86 2.16h3l.86-2.16a7.9 7.9 0 0 0 5-.06l2.15.85 2-3.46L19.4 15Z"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Views -->
+    <div class="views">
+      <!-- TRACKS -->
+      <section class="view active" id="view-tracks" aria-label="Trilhas">
+        <section class="panel" aria-label="Sessão de trilhas">
+          <div class="grid">
+            <div class="tile clipgrid" aria-label="Grade de clipes">
+              <div></div><div></div><div></div>
+              <div></div><div></div><div></div>
+              <div></div><div></div><div></div>
+            </div>
+            <div class="tile wave" aria-label="Forma de onda">
+              <span class="playhead" aria-hidden="true"></span>
+              <svg viewBox="0 0 600 120" preserveAspectRatio="none">
+                <path d="M0,60 C40,10 80,110 120,60 S200,10 240,60 320,110 360,60 440,10 480,60 560,110 600,60"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="tile wave wave--mid" aria-label="Trilha 1">
+              <span class="playhead" aria-hidden="true"></span>
+              <svg viewBox="0 0 900 120" preserveAspectRatio="none">
+                <path d="M0,60 C50,15 90,105 140,60 190,15 230,105 280,60 330,15 370,105 420,60 470,15 510,105 560,60 610,15 650,105 700,60 750,15 790,105 840,60 880,20 900,60 900,60"/>
+              </svg>
+            </div>
+            <div class="tile wave wave--low" aria-label="Trilha 2">
+              <span class="playhead" aria-hidden="true"></span>
+              <svg viewBox="0 0 900 120" preserveAspectRatio="none">
+                <path d="M0,60 C60,45 120,75 180,60 240,45 300,75 360,60 420,45 480,75 540,60 600,45 660,75 720,60 780,45 840,75 900,60"/>
+              </svg>
+            </div>
+            <div class="tile wave" aria-label="Trilha 3">
+              <span class="playhead" aria-hidden="true"></span>
+              <svg viewBox="0 0 900 120" preserveAspectRatio="none">
+                <path d="M0,60 C30,15 60,105 90,60 120,15 150,105 180,60 210,15 240,105 270,60 300,15 330,105 360,60 390,15 420,105 450,60 480,15 510,105 540,60 570,15 600,105 630,60 660,15 690,105 720,60 750,15 780,105 810,60 840,15 870,105 900,60"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="row row--two" style="margin-top:12px">
+            <div class="tile wave" aria-label="Trilha 4">
+              <span class="playhead" aria-hidden="true"></span>
+              <svg viewBox="0 0 600 120" preserveAspectRatio="none">
+                <path d="M0,60 C40,10 80,110 120,60 160,10 200,110 240,60 280,10 320,110 360,60 400,10 440,110 480,60 520,20 560,90 600,60"/>
+              </svg>
+            </div>
+            <div class="tile" aria-label="Sequenciador por passos">
+              <div style="position:absolute; inset:0; padding:14px; display:grid; grid-template-columns: repeat(4,1fr); grid-template-rows: repeat(3,1fr); gap:10px;">
+                <span style="background:linear-gradient(180deg,#6a53e8,#5441c9);border-radius:10px"></span>
+                <span style="background:linear-gradient(180deg,#6a53e8,#5441c9);border-radius:10px"></span>
+                <span></span>
+                <span style="background:linear-gradient(180deg,#5a45c8,#4b38a8);border-radius:10px"></span>
+
+                <span></span>
+                <span style="background:linear-gradient(180deg,#6a53e8,#5441c9);border-radius:10px"></span>
+                <span></span>
+                <span style="background:linear-gradient(180deg,#5a45c8,#4b38a8);border-radius:10px"></span>
+
+                <span style="background:linear-gradient(180deg,#6a53e8,#5441c9);border-radius:10px"></span>
+                <span></span>
+                <span style="background:linear-gradient(180deg,#6a53e8,#5441c9);border-radius:10px"></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transport -->
+          <div class="transport" aria-label="Controles de transporte">
+            <button class="btn" id="btn-rec" aria-label="Gravar"><div class="rec"></div></button>
+            <button class="btn" id="btn-pause" aria-label="Pausar">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="5" y="4" width="5" height="16" rx="2"></rect>
+                <rect x="14" y="4" width="5" height="16" rx="2"></rect>
+              </svg>
+            </button>
+            <button class="btn" id="btn-play" aria-label="Reproduzir">
+              <svg class="icon play" viewBox="0 0 24 24" aria-hidden="true">
+                <polygon points="6,4 20,12 6,20"></polygon>
+              </svg>
+            </button>
+          </div>
+
+          <div class="fx" aria-label="Efeitos e utilidades">
+            <button class="btn btn--sm" aria-label="Voz">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="3" width="6" height="12" rx="3"></rect><path d="M5 11v1a7 7 0 0 0 14 0v-1"></path><path d="M12 19v3"></path>
+              </svg>
+            </button>
+            <button class="btn btn--sm" aria-label="Equalizador">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <line x1="6" y1="20" x2="6" y2="10"></line><circle cx="6" cy="8" r="2"></circle>
+                <line x1="12" y1="20" x2="12" y2="6"></line><circle cx="12" cy="4" r="2"></circle>
+                <line x1="18" y1="20" x2="18" y2="12"></line><circle cx="18" cy="10" r="2"></circle>
+              </svg>
+            </button>
+            <button class="btn btn--sm" aria-label="Forma de onda">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12c3-8 5 8 8 0s5 8 8 0 4 8 4 8"></path></svg>
+            </button>
+            <button class="btn btn--sm" aria-label="LFO">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3,16 7,16 10,8 14,8 17,14 21,14"></polyline></svg>
+            </button>
+          </div>
+        </section>
+      </section>
+
+      <!-- DRUMPAD -->
+      <section class="view" id="view-drumpad" aria-label="Drumpad">
+        <section class="panel">
+          <div class="padgrid" id="padgrid">
+            <!-- 16 pads -->
+            <button class="pad">KICK</button>
+            <button class="pad">SNARE</button>
+            <button class="pad">CH-HI</button>
+            <button class="pad">OH-HI</button>
+            <button class="pad">TOM1</button>
+            <button class="pad">TOM2</button>
+            <button class="pad">CLAP</button>
+            <button class="pad">RIM</button>
+            <button class="pad">PERC1</button>
+            <button class="pad">PERC2</button>
+            <button class="pad">SHAKE</button>
+            <button class="pad">COWB</button>
+            <button class="pad">FX1</button>
+            <button class="pad">FX2</button>
+            <button class="pad">FX3</button>
+            <button class="pad">FX4</button>
+          </div>
+          <div class="hint" style="margin-top:10px">Pressione os pads — animação dark-haptics confirma o toque.</div>
+        </section>
+      </section>
+
+      <!-- SYNTH -->
+      <section class="view" id="view-synth" aria-label="Synth">
+        <section class="panel">
+          <div class="synth-wrap">
+            <div class="knob">
+              <div class="k-label">Cutoff</div>
+              <div class="dial" id="dial-cutoff" style="--angle:120deg; --arrow:120deg">
+                <input type="range" min="0" max="270" value="120" aria-label="Cutoff">
+              </div>
+              <div class="k-value" id="val-cutoff">120°</div>
+            </div>
+            <div class="knob">
+              <div class="k-label">Resonance</div>
+              <div class="dial" id="dial-res" style="--angle:60deg; --arrow:60deg">
+                <input type="range" min="0" max="270" value="60" aria-label="Resonance">
+              </div>
+              <div class="k-value" id="val-res">60°</div>
+            </div>
+            <div class="knob">
+              <div class="k-label">LFO</div>
+              <div class="dial" id="dial-lfo" style="--angle:180deg; --arrow:180deg">
+                <input type="range" min="0" max="270" value="180" aria-label="LFO">
+              </div>
+              <div class="k-value" id="val-lfo">180°</div>
+            </div>
+          </div>
+          <div class="hint" style="margin-top:10px">Gire os knobs — o arco conic-gradient responde ao valor.</div>
+        </section>
+      </section>
+
+      <!-- EXPORT -->
+      <section class="view" id="view-export" aria-label="Exportar">
+        <section class="panel">
+          <div class="export-wrap">
+            <div class="x-row">
+              <button class="xbtn">Exportar MP3</button>
+              <button class="xbtn">Exportar FLAC</button>
+            </div>
+            <div class="x-row">
+              <button class="xbtn">Stems (Dry)</button>
+              <button class="xbtn">Stems (Wet)</button>
+            </div>
+            <div class="hint">UI de exportação (mock). Encoders podem ser plugados depois (LAME/FLAC WASM).</div>
+          </div>
+        </section>
+      </section>
+    </div>
+
+    <!-- Tabs v10 -->
+    <nav class="tabs" aria-label="Navegação">
+      <button class="tab active" data-view="tracks" aria-label="Tracks">
+        <svg class="ticon" viewBox="0 0 24 24"><rect x="3" y="5" width="4" height="14" rx="1.5"/><rect x="10" y="3" width="4" height="18" rx="1.5"/><rect x="17" y="7" width="4" height="10" rx="1.5"/></svg>
+        <span>Tracks</span>
+      </button>
+      <button class="tab" data-view="drumpad" aria-label="Drumpad">
+        <svg class="ticon" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+        <span>Drumpad</span>
+      </button>
+      <button class="tab" data-view="synth" aria-label="Synth">
+        <svg class="ticon" viewBox="0 0 24 24"><path d="M3 12c2-6 4 6 6 0s4 6 6 0 3 6 6 6"></path></svg>
+        <span>Synth</span>
+      </button>
+      <button class="tab" data-view="export" aria-label="Export">
+        <svg class="ticon" viewBox="0 0 24 24"><path d="M12 3v12"></path><polyline points="7,10 12,15 17,10"></polyline><rect x="4" y="17" width="16" height="4" rx="2"/></svg>
+        <span>Export</span>
+      </button>
+    </nav>
+
+    <div class="homebar" aria-hidden="true"></div>
+  </main>
+
+<script>
+  // ---- Dark-Haptics helper (mobile :active fallback) ----
+  (function(){
+    const add = e => { const t=e.target.closest('button'); if(!t) return; t.classList.add('press'); setTimeout(()=>t.classList.remove('press'),130); };
+    document.addEventListener('touchstart', add, {passive:true});
+  })();
+
+  // ---- Tabs routing ----
+  const tabs = document.querySelectorAll('.tab');
+  const views = {
+    tracks: document.getElementById('view-tracks'),
+    drumpad: document.getElementById('view-drumpad'),
+    synth: document.getElementById('view-synth'),
+    export: document.getElementById('view-export')
+  };
+  tabs.forEach(t=>{
+    t.addEventListener('click', ()=>{
+      tabs.forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      const id = 'view-' + t.dataset.view;
+      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      // Pause playhead when leaving Tracks
+      if(id!=='view-tracks') document.body.classList.remove('is-playing');
+    });
+  });
+
+  // ---- Transport states (playhead animation toggle) ----
+  const btnPlay = document.getElementById('btn-play');
+  const btnPause = document.getElementById('btn-pause');
+  const btnRec = document.getElementById('btn-rec');
+
+  btnPlay.addEventListener('click', ()=>{
+    document.body.classList.add('is-playing');
+    btnPlay.classList.add('is-active');
+    btnPause.classList.remove('is-active');
+  });
+  btnPause.addEventListener('click', ()=>{
+    document.body.classList.remove('is-playing');
+    btnPause.classList.add('is-active');
+    btnPlay.classList.remove('is-active');
+  });
+  btnRec.addEventListener('click', ()=>{
+    btnRec.classList.toggle('is-active');
+  });
+
+  // ---- Drumpad feedback ----
+  document.getElementById('padgrid').addEventListener('click', (e)=>{
+    const pad = e.target.closest('.pad');
+    if(!pad) return;
+    pad.classList.remove('flash');
+    // restart animation
+    void pad.offsetWidth;
+    pad.classList.add('flash');
+  });
+
+  // ---- Synth knobs ----
+  function wireDial(dialId, valId){
+    const dial = document.getElementById(dialId);
+    const input = dial.querySelector('input');
+    const val = document.getElementById(valId);
+    const update = () => {
+      const deg = +input.value;
+      dial.style.setProperty('--angle', deg+'deg');
+      dial.style.setProperty('--arrow', deg+'deg');
+      val.textContent = deg + '°';
+    };
+    input.addEventListener('input', update);
+    update();
+  }
+  wireDial('dial-cutoff','val-cutoff');
+  wireDial('dial-res','val-res');
+  wireDial('dial-lfo','val-lfo');
+</script>
+</body>
+</html>

@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>Hub ASSERT (dinâmico • POWER)</title>
+
+  <!-- PWA / Icons -->
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0d0f14" id="metaThemeColor">
+
+  <style>
+    /* ===== Design tokens ===== */
+    :root{
+      --bg:#0d0f14; --fg:#eaf6ff; --muted:#a7c1cc; --card:#0f141c;
+      --acc:#00d1ff; --gold:#D4AF37;
+      --radius:18px; --radius-lg:22px;
+      --blur:22px; --stroke:rgba(255,255,255,.14);
+      --stroke-soft:rgba(255,255,255,.08);
+      --shadow-1:0 6px 18px rgba(0,0,0,.28);
+      --shadow-2:0 18px 48px rgba(0,0,0,.45);
+      --glow:0 0 0 1px rgba(0,209,255,.18), 0 8px 28px rgba(0,209,255,.10);
+      --safe-top: env(safe-area-inset-top);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--fg);
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      font-family:ui-rounded, system-ui, -apple-system, Inter, Segoe UI, Roboto, Arial;
+      background:
+        radial-gradient(1200px 800px at 50% -10%, rgba(0,209,255,.10), transparent 60%),
+        linear-gradient(180deg,#0a0c12 0%, #0d0f14 40%, #0a0b0f 100%);
+      transition:background .4s ease;
+    }
+    body.theme-lux{
+      --acc:#D4AF37;
+      --stroke: rgba(255,226,150,.22);
+      --stroke-soft: rgba(255,226,150,.12);
+      --glow: 0 0 0 1px rgba(212,175,55,.20), 0 10px 34px rgba(212,175,55,.12);
+      background:
+        radial-gradient(1200px 800px at 50% -10%, rgba(212,175,55,.10), transparent 62%),
+        linear-gradient(180deg,#0a0a0a 0%, #0c0b0a 44%, #0a0a0a 100%);
+    }
+
+    /* ===== Header glass ===== */
+    .header{
+      position:sticky; top:0; z-index:10;
+      backdrop-filter:blur(var(--blur)) saturate(140%);
+      -webkit-backdrop-filter:blur(var(--blur)) saturate(140%);
+      background:linear-gradient(180deg, rgba(15,18,24,.65), rgba(15,18,24,.52));
+      border-bottom:1px solid var(--stroke);
+      box-shadow:0 10px 30px rgba(0,0,0,.35);
+      padding-top:var(--safe-top);
+    }
+    body.theme-lux .header{
+      backdrop-filter: blur(var(--blur)) saturate(150%);
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(150%);
+      background: linear-gradient(180deg, rgba(16,14,10,.54), rgba(18,16,12,.40));
+      border-bottom: 1px solid var(--stroke);
+      box-shadow: 0 12px 34px rgba(0,0,0,.42), inset 0 -1px 0 rgba(255,226,150,.10);
+    }
+    .inner{
+      max-width:980px;
+      margin:0 auto;
+      padding:clamp(10px, 1.4vw, 14px) clamp(14px, 2vw, 20px);
+      display:flex; gap:14px; align-items:center;
+    }
+
+    /* Logo com brilho suave */
+    .logo{
+      width:46px; height:46px; border-radius:50%;
+      background:
+        radial-gradient(circle at 30% 30%, #ffffff66, transparent 60%),
+        conic-gradient(from 0deg, var(--acc), #6ee7ff, var(--acc));
+      position:relative;
+      box-shadow:inset 0 0 18px #000, var(--glow);
+      animation:pulse 2.6s infinite ease-in-out;
+    }
+    .logo::after{
+      content:"A"; display:grid; place-items:center; position:absolute; inset:0;
+      font-weight:900; color:#001218; font-size:22px; text-shadow:0 0 14px #00d1ff88;
+    }
+    @keyframes pulse{
+      0%,100%{transform:scale(1)}
+      50%{transform:scale(1.05)}
+    }
+    @media (prefers-reduced-motion: reduce){
+      .logo{animation:none}
+    }
+
+    /* Títulos e kicker */
+    h1{font-size:1.14rem; margin:.12rem 0 0; font-weight:800; letter-spacing:.2px}
+    .kicker{font-size:.72rem; letter-spacing:.16em; color:var(--muted); text-transform:uppercase}
+
+    /* ===== Segmented topbar ===== */
+    .topbar{
+      display:flex; gap:0; align-items:center;
+      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border:1px solid var(--stroke);
+      border-radius:14px; padding:4px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 8px 24px rgba(0,0,0,.25);
+    }
+    .tbtn{
+      appearance:none; border:0; cursor:pointer; min-height:40px; padding:0 .9rem;
+      border-radius:10px; color:#d8f4ff; background:transparent;
+      font-weight:600; letter-spacing:.2px; transition:all .18s ease;
+    }
+    .tbtn + .tbtn{ margin-left:4px }
+    .tbtn:hover{ background:rgba(255,255,255,.06) }
+    .tbtn:active{ transform:translateY(1px) }
+    .tbtn.active{
+      background:linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.18));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.12), 0 6px 16px rgba(0,0,0,.25);
+      outline:2px solid rgba(212,175,55,.35);
+    }
+    body.theme-lux .tbtn:hover{ background: rgba(255,255,255,.07) }
+    body.theme-lux .tbtn.active{
+      outline: 2px solid rgba(212,175,55,.45);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.12), 0 8px 22px rgba(0,0,0,.28), 0 0 32px rgba(212,175,55,.12);
+    }
+
+    /* ===== Grid & cards ===== */
+    .grid{
+      max-width:980px; margin:18px auto 22px;
+      display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:16px; padding:0 clamp(14px, 2vw, 20px);
+    }
+    @media (max-width:560px){ .grid{ grid-template-columns:1fr } }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--stroke-soft);
+      border-radius:var(--radius-lg);
+      padding:16px; display:flex; gap:14px; align-items:center;
+      box-shadow: var(--shadow-1);
+      position:relative; overflow:hidden;
+    }
+    .card::before{
+      content:""; position:absolute; inset:0; border-radius:inherit;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+      pointer-events:none;
+    }
+
+    .icon{
+      width:58px; height:58px; border-radius:16px;
+      background:linear-gradient(180deg,#0f1320,#0a0f18);
+      border:1px solid rgba(0,209,255,.28);
+      display:grid; place-items:center; font-size:26px; overflow:hidden;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 8px 24px rgba(0,0,0,.35);
+    }
+    body.theme-lux .icon{ border-color: rgba(212,175,55,.30) }
+
+    .title{font-weight:800; font-size:1.02rem; letter-spacing:.2px}
+    .muted{color:var(--muted); font-size:.9rem; line-height:1.35}
+    .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px}
+
+    /* Botões pill */
+    .btn{
+      appearance:none; border:none; cursor:pointer;
+      background:linear-gradient(180deg,#13212e,#0e1924);
+      border:1px solid #163142; color:#e2f8ff;
+      padding:.72rem 1.05rem; border-radius:999px;
+      font-weight:700; letter-spacing:.2px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 8px 22px rgba(0,0,0,.35);
+      transition:transform .12s ease, box-shadow .2s ease, filter .2s ease;
+      min-height:44px;
+    }
+    .btn:hover{ filter:brightness(1.06) }
+    .btn:active{ transform:translateY(1px) }
+    body.theme-lux .btn{
+      background: linear-gradient(180deg,#1a1c21,#13161a);
+      border-color: rgba(212,175,55,.28);
+      color: #f6ecd3;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 10px 26px rgba(0,0,0,.35), 0 0 0 1px rgba(212,175,55,.10);
+    }
+    body.modal-open{ overflow:hidden } /* bloqueia scroll quando viewer abre */
+
+    /* ===== Viewer modal ===== */
+    .viewer{
+      position:fixed; inset:0; background:#0009;
+      backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+      display:none; align-items:center; justify-content:center; padding:10px; z-index:20
+    }
+    .viewer.show{display:flex}
+
+    .frame{
+      width:100%; max-width:1040px; height:86vh;
+      border-radius:20px; border:1px solid var(--stroke);
+      overflow:hidden; background:#0f1117; position:relative;
+      box-shadow: var(--shadow-2), 0 0 0 1px rgba(255,255,255,.04) inset;
+    }
+    .bar{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 12px;
+      border-bottom:1px solid var(--stroke);
+      background:linear-gradient(180deg, rgba(10,15,20,.85), rgba(10,15,20,.65));
+      backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    }
+    .bar .left{display:flex; align-items:center; gap:10px}
+    .dot{
+      width:10px; height:10px; border-radius:50%; background:var(--acc);
+      box-shadow:0 0 0 3px rgba(0,209,255,.18)
+    }
+    .iframe{width:100%; height:calc(86vh - 46px); border:0}
+
+    .loader{
+      position:absolute; inset:46px 0 0 0;
+      display:grid; place-items:center;
+      background:linear-gradient(180deg,#0a0f14f0,#0b0f14e0);
+      backdrop-filter:blur(2px); transition:opacity .25s ease;
+      opacity:0; pointer-events:none;
+    }
+    .loader.show{opacity:1; pointer-events:auto}
+    .spinner{
+      width:48px; height:48px; border-radius:50%;
+      border:3px solid #1f2a37; border-top-color:var(--acc);
+      animation:spin 1s linear infinite
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @media (prefers-reduced-motion: reduce){
+      .spinner{animation:none}
+    }
+
+    /* Footer discreto */
+    footer{color:#9bb4c4; font-size:.8rem; text-align:center; margin:18px 0; opacity:.9}
+
+    /* Skeleton simples */
+    .skeleton{
+      border-radius:16px; height:92px;
+      background:linear-gradient(90deg,#ffffff07 25%, #ffffff10 37%, #ffffff07 63%);
+      background-size:400% 100%; animation:sk 1.2s ease-in-out infinite;
+      border:1px solid var(--stroke-soft);
+    }
+    @keyframes sk{0%{background-position:100% 0}100%{background-position:0 0}}
+
+    /* Pequenos refinamentos responsivos */
+    @media (max-width:420px){
+      .logo{width:44px;height:44px}
+      h1{font-size:1.06rem}
+      .title{font-size:1rem}
+      .icon{width:54px;height:54px}
+    }
+  </style>
+  <style>
+/* ===== Fix: header buttons dentro do plano vertical (mobile) ===== */
+@media (max-width: 480px){
+  .inner{
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    grid-template-areas:
+      "logo  title"
+      "topbar topbar";
+    align-items: center;
+    row-gap: 8px;
+    padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
+  }
+  .inner .logo{ grid-area: logo; }
+  /* O <div style="flex:1"> com kicker + h1 fica como "title" */
+  .inner > div:nth-child(2){ grid-area: title; min-width: 0; }
+  /* Topbar vai para a segunda linha, full width e contida */
+  .inner .topbar{
+    grid-area: topbar;
+    justify-self: stretch;
+    width: 100%;
+    justify-content: space-between;
+    overflow: hidden;         /* evita “vazar” lateral */
+  }
+
+  /* Compacta levemente os botões para caber sem quebrar */
+  .topbar .tbtn{
+    min-height: 36px;
+    padding: 0 .7rem;
+    font-size: .92rem;
+  }
+
+  /* Reduce o tamanho do título no mobile para dar respiro */
+  h1{ font-size: 1.02rem; line-height: 1.2; }
+  .kicker{ font-size: .68rem; }
+}
+
+/* Se a altura do viewport for pequena, também compacta (ex.: teclado aberto) */
+@media (max-height: 650px) and (max-width: 480px){
+  .topbar .tbtn{ min-height: 34px; padding: 0 .6rem; }
+}
+</style>
+</head>
+<body>
+  <header class="header" role="banner">
+    <div class="inner">
+      <div class="logo" aria-hidden="true"></div>
+      <div style="flex:1">
+        <div class="kicker">JHBarros.Dual.Infodose • ASSERT</div>
+        <h1>Hub • Home (dinâmico • POWER)</h1>
+      </div>
+      <nav class="topbar" aria-label="Alternar tema e instalar">
+        <button class="tbtn" id="themeCyan" type="button" aria-pressed="true">ASSERT</button>
+        <button class="tbtn" id="themeLux" type="button" aria-pressed="false">Luxara</button>
+        <button class="tbtn" id="btnInstall" type="button">⬇️ Instalar</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="grid" id="cards" aria-live="polite">
+    <!-- skeletons -->
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+  </main>
+
+  <footer>Hub ASSERT • “Central de apps Dual.Infodose”</footer>
+
+  <!-- Viewer -->
+  <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-labelledby="barTitle">
+    <div class="frame">
+      <div class="bar">
+        <div class="left"><div class="dot" aria-hidden="true"></div><strong id="barTitle">App</strong></div>
+        <div class="row" role="toolbar" aria-label="Ações do app">
+          <button class="btn" id="btnHome" type="button">🏠 Home</button>
+          <a class="btn" id="btnExternal" href="#" target="_blank" rel="noopener" aria-label="Abrir em nova aba">↗️ Abrir em aba</a>
+        </div>
+      </div>
+      <div class="loader" id="loader"><div class="spinner" aria-hidden="true"></div></div>
+      <iframe class="iframe" id="appFrame" src="about:blank" title="Aplicativo embutido"></iframe>
+    </div>
+  </div>
+
+<script>
+/* ===== Util ===== */
+const $ = (q,root=document)=>root.querySelector(q);
+const $$ = (q,root=document)=>[...root.querySelectorAll(q)];
+const metaTheme = $('#metaThemeColor');
+
+/* ===== Render ===== */
+async function loadApps(){
+  try{
+    const res = await fetch('./apps/apps.json', {cache:'no-store'});
+    const data = await res.json();
+    renderCards(data.apps||[]);
+  }catch(e){
+    const cards = $('#cards');
+    cards.innerHTML = '<div class="card"><div class="icon">⚠️</div><div><div class="title">Falha ao carregar</div><div class="muted">Não foi possível carregar a lista de apps (apps/apps.json).</div></div></div>';
+  }
+}
+function renderCards(apps){
+  const root = $('#cards');
+  root.innerHTML = '';
+  apps.forEach(app => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    const iconSrc = app.icon || '/icons/icon-192.png';
+    card.innerHTML = `
+      <div class="icon" aria-hidden="true">
+        <img src="${iconSrc}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:12px"/>
+      </div>
+      <div style="flex:1">
+        <div class="title">${app.title || app.key}</div>
+        <div class="muted">${app.desc || ''}</div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn" type="button" data-open="${app.key}">Abrir no Hub</button>
+          <button class="btn" type="button" data-open="${app.key}" data-newtab="1">Abrir em aba</button>
+        </div>
+      </div>`;
+    root.appendChild(card);
+  });
+  $$('[data-open]').forEach(b=>{
+    b.onclick = ()=>{
+      const key = b.getAttribute('data-open');
+      const newtab = b.hasAttribute('data-newtab');
+      openByKey(key, newtab, apps);
+    };
+    // prefetch leve ao focar/hover (sugere ao navegador)
+    b.addEventListener('mouseenter', ()=> {
+      const key = b.getAttribute('data-open');
+      const app = apps.find(x=>x.key===key);
+      if(app && !document.querySelector(`link[data-prefetch="${app.url}"]`)){
+        const l = document.createElement('link');
+        l.rel = 'prefetch'; l.href = app.url; l.as = 'document'; l.setAttribute('data-prefetch', app.url);
+        document.head.appendChild(l);
+      }
+    }, {passive:true});
+  });
+}
+
+/* ===== Viewer control ===== */
+const viewer = $('#viewer');
+const frame  = $('#appFrame');
+const barTitle = $('#barTitle');
+const btnExternal = $('#btnExternal');
+const loader = $('#loader');
+let lastFocus = null;
+
+function openApp(app, newtab=false){
+  if(newtab){ window.open(app.url, '_blank', 'noopener'); return; }
+  lastFocus = document.activeElement;
+  barTitle.textContent = app.title||app.key;
+  btnExternal.href = app.url;
+  loader.classList.add('show');
+  frame.onload = ()=> setTimeout(()=> loader.classList.remove('show'), 120);
+  frame.src = app.url;
+  viewer.classList.add('show');
+  document.body.classList.add('modal-open');
+  $('#btnHome').focus();
+  localStorage.setItem('hub.last', app.key);
+  location.hash = '#app=' + app.key;
+}
+function closeViewer(){
+  frame.src = 'about:blank';
+  viewer.classList.remove('show');
+  document.body.classList.remove('modal-open');
+  history.pushState('', document.title, window.location.pathname + window.location.search);
+  if(lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+}
+
+function openByKey(key, newtab, apps){
+  const app = (apps||[]).find(x=>x.key===key);
+  if(app) openApp(app, newtab);
+}
+
+$('#btnHome').onclick = closeViewer;
+
+/* Fecha com ESC e clique fora */
+window.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape' && viewer.classList.contains('show')) closeViewer();
+});
+viewer.addEventListener('click', (e)=>{
+  if(e.target === viewer) closeViewer();
+});
+
+/* ===== Hash & resume ===== */
+async function checkHash(){
+  const res = await fetch('./apps/apps.json', {cache:'no-store'});
+  const data = await res.json();
+  const apps = data.apps||[];
+  const h = new URLSearchParams(location.hash.slice(1));
+  if(h.has('resume')){
+    const last = localStorage.getItem('hub.last');
+    const app = apps.find(x=>x.key===last);
+    if(app) openApp(app,false);
+    return;
+  }
+  const key = h.get('app');
+  if(key){ openByKey(key,false,apps); }
+}
+window.addEventListener('hashchange', checkHash);
+
+/* ===== Theme switch ===== */
+const root = document.body;
+const btnC = $('#themeCyan');
+const btnL = $('#themeLux');
+
+function setThemeColor(t){
+  // ajusta theme-color p/ PWA/navigation bar
+  metaTheme.setAttribute('content', t==='lux' ? '#0b0b0b' : '#0d0f14');
+}
+
+function applyTheme(t){
+  const isLux = t==='lux';
+  root.classList.toggle('theme-lux', isLux);
+  localStorage.setItem('hub.theme', t);
+  btnC.classList.toggle('active', !isLux);
+  btnL.classList.toggle('active', isLux);
+  btnC.setAttribute('aria-pressed', String(!isLux));
+  btnL.setAttribute('aria-pressed', String(isLux));
+  setThemeColor(t);
+}
+const saved = localStorage.getItem('hub.theme') || 'assert';
+applyTheme(saved);
+btnC.onclick=()=>applyTheme('assert');
+btnL.onclick=()=>applyTheme('lux');
+
+/* ===== PWA install ===== */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=> navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; });
+$('#btnInstall').onclick = async()=>{
+  if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; }
+  else alert('Se o prompt não aparecer, use “Adicionar à Tela de Início”.');
+};
+
+/* ===== Boot ===== */
+loadApps(); checkHash();
+</script>
+</body>
+</html>

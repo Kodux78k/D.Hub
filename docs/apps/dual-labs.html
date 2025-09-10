@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Dual HTML Lab — Editor • Visualizador • Analisador</title>
+<meta name="theme-color" content="#0b0e14">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+  :root{
+    --bg:#0b0e14; --panel:#101626; --glass:rgba(255,255,255,.06); --stroke:rgba(255,255,255,.12);
+    --txt:#EAF2FF; --muted:#9fb1cc; --a:#29d3ff; --b:#8a5cff; --ok:#2fe66a; --warn:#ffd166; --err:#ff4d6d;
+    --r:16px; --shadow:0 16px 60px rgba(0,0,0,.4); --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "JetBrains Mono", "Liberation Mono", monospace;
+  }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;background:
+      radial-gradient(1100px 600px at 70% -10%, #17203a 0%, transparent 60%),
+      radial-gradient(1200px 700px at -10% 110%, #0f1426 0%, transparent 60%),
+      var(--bg);
+    color:var(--txt); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; }
+  .wrap{min-height:100%; display:grid; grid-template-rows:auto auto 1fr auto; gap:12px; padding:14px}
+  header{display:flex; align-items:center; justify-content:space-between; gap:10px}
+  .brand{display:flex; align-items:center; gap:10px}
+  .logo{width:36px;height:36px;border-radius:12px;background:conic-gradient(from 0deg, var(--a), var(--b), var(--a));
+        box-shadow:0 0 0 2px var(--stroke) inset, 0 6px 18px rgba(0,0,0,.45)}
+  .title{font-weight:800;letter-spacing:.2px}
+  .gear{border:1px solid var(--stroke);border-radius:12px;padding:8px 10px;background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));cursor:pointer}
+  .tabs{display:flex; gap:8px; overflow:auto; padding-bottom:2px}
+  .tab{display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--stroke); border-radius:999px;
+       background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); cursor:pointer; white-space:nowrap}
+  .tab.sel{outline:2px solid var(--a)}
+  .btn{appearance:none;border:1px solid var(--stroke);background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+       padding:10px 12px;border-radius:14px;color:var(--txt);font-weight:700;letter-spacing:.2px;transition:.2s;cursor:pointer}
+  .btn:active{transform:translateY(1px)}
+  .btn.ok{border-color:rgba(47,230,106,.25)}
+  .grid{display:grid; gap:10px}
+  .cols-2{grid-template-columns:1fr 1fr}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); border:1px solid var(--stroke); border-radius:var(--r); box-shadow:var(--shadow)}
+  .hd{padding:12px 14px; border-bottom:1px solid var(--stroke); display:flex; align-items:center; justify-content:space-between}
+  .bd{padding:12px 14px}
+  /* Editor/Preview split */
+  .split{display:grid; gap:10px; grid-template-columns:1fr; }
+  @media(min-width:860px){ .split{grid-template-columns:1fr 1fr} }
+  #editor{height:52vh; border:1px solid var(--stroke); border-radius:12px; overflow:hidden}
+  #previewWrap{height:52vh; border:1px solid var(--stroke); border-radius:12px; overflow:hidden; position:relative}
+  #preview{width:100%; height:100%; border:0; background:#0a111f}
+  .toolbar{display:flex; gap:8px; flex-wrap:wrap}
+  .console{background:#0a111f;border:1px solid #0b1d38;border-radius:14px;padding:10px; font-family: var(--mono); font-size:12px; max-height:200px; overflow:auto}
+  .line{display:flex; gap:8px; margin:2px 0}
+  .tag{padding:2px 8px;border-radius:8px;border:1px solid var(--stroke);font-size:11px;color:#a3b7d9;background:rgba(255,255,255,.03)}
+  .val{white-space:pre-wrap; word-wrap:break-word}
+  footer{opacity:.7; font-size:12px; text-align:center; padding-bottom:8px}
+  .badge{border:1px dashed var(--stroke);padding:4px 8px;border-radius:999px;font-size:12px;color:var(--muted)}
+  .side{display:grid; gap:8px}
+  .pill{display:inline-grid; place-items:center; width:44px;height:44px;border-radius:999px;border:1px solid var(--stroke);
+        background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); font-weight:800}
+  .fullbtn{position:absolute; right:8px; top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <div class="title">Dual HTML Lab</div>
+        <div style="opacity:.7;font-size:12px">Editor • Visualizador • Analisador (PWA)</div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button class="gear" id="btnInstall">➕ Instalar</button>
+      <button class="gear" id="btnTheme">🌈 Tema</button>
+      <button class="gear" id="btnPro">⚙︎ Pro</button>
+    </div>
+  </header>
+
+  <div class="tabs" id="tabs"></div>
+
+  <section class="card">
+    <div class="hd">
+      <b>Editor</b>
+      <div class="toolbar">
+        <input type="file" id="fileInput" accept=".html,.htm" multiple style="display:none" />
+        <button class="btn" id="btnNew">＋ Página</button>
+        <button class="btn" id="btnUpload">⬆️ Upload</button>
+        <button class="btn" id="btnFetch">🔗 Buscar URL</button>
+        <button class="btn" id="btnSave">💾 Salvar</button>
+        <button class="btn" id="btnExport">⇪ Exportar .html</button>
+        <button class="btn" id="btnZip">🗜 Exportar ZIP</button>
+        <span class="badge" id="badgeMode">Live Preview: scripts ON</span>
+        <button class="btn" id="btnSafe">🛡 Safe (sem scripts)</button>
+      </div>
+    </div>
+    <div class="bd split">
+      <div id="editor"></div>
+      <div id="previewWrap">
+        <iframe id="preview" sandbox="allow-scripts allow-same-origin"></iframe>
+        <button class="btn fullbtn" id="btnFull">⛶ Tela Cheia</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="hd"><b>Analisador</b><div class="toolbar"><button class="btn" id="btnAnalyze">🔍 Analisar</button></div></div>
+    <div class="bd grid cols-2">
+      <div class="side">
+        <div><b>IDs</b> <span class="badge" id="countIds">0</span><div id="listIds" style="max-height:120px;overflow:auto;font-family:var(--mono);font-size:12px"></div></div>
+        <div><b>Classes</b> <span class="badge" id="countClasses">0</span><div id="listClasses" style="max-height:120px;overflow:auto;font-family:var(--mono);font-size:12px"></div></div>
+      </div>
+      <div class="side">
+        <div><b>Stylesheets / Styles</b> <span class="badge" id="countStyles">0</span><div id="listStyles" style="max-height:120px;overflow:auto;font-family:var(--mono);font-size:12px"></div></div>
+        <div><b>Scripts</b> <span class="badge" id="countScripts">0</span><div id="listScripts" style="max-height:120px;overflow:auto;font-family:var(--mono);font-size:12px"></div></div>
+        <div><b>Custom Elements</b> <span class="badge" id="countCustom">0</span><div id="listCustom" style="max-height:120px;overflow:auto;font-family:var(--mono);font-size:12px"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="hd"><b>Console</b><small class="badge">logs</small></div>
+    <div class="bd console" id="console"></div>
+  </section>
+
+  <footer>Do seu jeito. Sempre único, sempre seu.</footer>
+</div>
+
+<!-- PRO Modal -->
+<div id="modal" style="position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center">
+  <div class="card" style="width:min(720px,92vw)">
+    <div class="hd"><b>Opções Pro</b><button class="btn" id="btnClose">✕</button></div>
+    <div class="bd grid cols-2">
+      <div class="side">
+        <div class="toolbar"><button class="btn pill" id="btnClearLS">LS</button><span class="badge">Limpar armazenamento</span></div>
+        <div class="toolbar"><button class="btn pill" id="btnImportPages">⇩</button><span class="badge">Importar páginas (.zip/.json)</span><input id="inputImport" type="file" accept=".zip,.json" style="display:none"/></div>
+        <div class="toolbar"><button class="btn pill" id="btnExportPages">⇪</button><span class="badge">Exportar todas as páginas</span></div>
+      </div>
+      <div class="side">
+        <div><b>Raw HTML atual</b><textarea id="raw" style="width:100%;height:140px;background:#0a111f;border:1px solid #0b1d38;border-radius:12px;color:#cde0ff;font-family:var(--mono);font-size:12px"></textarea></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CodeMirror 6 (ESM via esm.sh) -->
+<script type="module">
+  import {EditorState} from "https://esm.sh/@codemirror/state@6";
+  import {EditorView, keymap, highlightActiveLine} from "https://esm.sh/@codemirror/view@6";
+  import {defaultKeymap, history, historyKeymap} from "https://esm.sh/@codemirror/commands@6";
+  import {html} from "https://esm.sh/@codemirror/lang-html@6";
+  import {oneDark} from "https://esm.sh/@codemirror/theme-one-dark@6";
+
+  const $ = (s, c=document)=>c.querySelector(s);
+  const consoleEl = $("#console");
+  const tabsEl = $("#tabs");
+  const preview = $("#preview");
+  const editorParent = $("#editor");
+  const rawTa = $("#raw");
+
+  const state = {
+    pages: JSON.parse(localStorage.getItem("dual.pages")||"[]"),
+    current: null,
+    safe: false, // safe preview (no scripts) toggle
+    theme: localStorage.getItem("dual.theme")||"dark"
+  };
+  document.documentElement.dataset.theme = state.theme;
+
+  let editor, view;
+
+  function log(tag, val){
+    const line = document.createElement("div");
+    line.className = "line";
+    line.innerHTML = `<span class="tag">${tag}</span><span class="val">${typeof val==="string"?val:JSON.stringify(val,null,2)}</span>`;
+    consoleEl.appendChild(line);
+    consoleEl.scrollTop = consoleEl.scrollHeight;
+  }
+
+  function newPage(name="untitled-"+(state.pages.length+1)+".html", content="<!doctype html>\n<html lang=\"pt-br\">\n<head>\n<meta charset=\"utf-8\" />\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n<title>"+name+"</title>\n</head>\n<body>\n<h1>"+name+"</h1>\n<p>Edite aqui…</p>\n</body>\n</html>"){
+    const id = crypto.randomUUID();
+    const page = {id, name, content, ts: Date.now()};
+    state.pages.push(page);
+    savePages();
+    selectPage(id);
+  }
+
+  function savePages(){
+    localStorage.setItem("dual.pages", JSON.stringify(state.pages));
+  }
+
+  function selectPage(id){
+    state.current = id;
+    renderTabs();
+    const page = state.pages.find(p=>p.id===id);
+    if(!page) return;
+    loadEditor(page.content);
+    renderPreview();
+  }
+
+  function renderTabs(){
+    tabsEl.innerHTML = "";
+    state.pages.forEach(p=>{
+      const el = document.createElement("div");
+      el.className = "tab"+(p.id===state.current?" sel":"");
+      el.innerHTML = `<span>📄 ${p.name}</span> <button class="btn" data-act="ren" data-id="${p.id}">✎</button> <button class="btn" data-act="del" data-id="${p.id}">✕</button>`;
+      el.onclick = (e)=>{ if(e.target.dataset.act) return; selectPage(p.id); };
+      tabsEl.appendChild(el);
+    });
+  }
+
+  function loadEditor(text){
+    if(view){ view.destroy(); }
+    const startState = EditorState.create({
+      doc: text,
+      extensions: [
+        keymap.of([...defaultKeymap, ...historyKeymap]),
+        history(),
+        highlightActiveLine(),
+        html(),
+        oneDark,
+        EditorView.updateListener.of((v)=>{
+          if(v.docChanged){
+            const page = state.pages.find(p=>p.id===state.current);
+            page.content = v.state.doc.toString();
+            page.ts = Date.now();
+            rawTa.value = page.content;
+            savePages();
+            schedulePreview();
+          }
+        })
+      ]
+    });
+    view = new EditorView({state:startState, parent: editorParent});
+    rawTa.value = text;
+  }
+
+  let previewTimer;
+  function schedulePreview(){
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(renderPreview, 400);
+  }
+
+  function stripScripts(html){
+    try{
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      doc.querySelectorAll("script").forEach(s=>s.remove());
+      // also drop inline handlers
+      doc.querySelectorAll("*").forEach(el=>{
+        [...el.attributes].forEach(a=>{ if(/^on/i.test(a.name)) el.removeAttribute(a.name); });
+      });
+      return "<!doctype html>\n"+doc.documentElement.outerHTML;
+    }catch(e){ return html; }
+  }
+
+  function renderPreview(){
+    const page = state.pages.find(p=>p.id===state.current);
+    if(!page) return;
+    const html = state.safe ? stripScripts(page.content) : page.content;
+    const doc = preview.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+  }
+
+  function analyze(){
+    const page = state.pages.find(p=>p.id===state.current);
+    if(!page) return;
+    const doc = new DOMParser().parseFromString(page.content, "text/html");
+    // IDs
+    const ids = [...doc.querySelectorAll("[id]")].map(el=>el.id).filter(Boolean);
+    $("#countIds").textContent = ids.length;
+    $("#listIds").textContent = [...new Set(ids)].sort().join("\n");
+    // Classes
+    const classes = [];
+    doc.querySelectorAll("[class]").forEach(el=>el.className.split(/\s+/).filter(Boolean).forEach(c=>classes.push(c)));
+    $("#countClasses").textContent = classes.length;
+    $("#listClasses").textContent = [...new Set(classes)].sort().join("\n");
+    // Stylesheets/Styles
+    const styles = [];
+    doc.querySelectorAll("link[rel~='stylesheet']").forEach(l=>styles.append?styles.append:l);
+    const links = [...doc.querySelectorAll("link[rel~='stylesheet']")].map(l=>l.getAttribute("href")||"(inline link)");
+    const styleTags = [...doc.querySelectorAll("style")].map((s,i)=>`<style>[${(s.textContent||'').length} chars] #${i}`);
+    const stylesList = [...links, ...styleTags];
+    $("#countStyles").textContent = stylesList.length;
+    $("#listStyles").textContent = stylesList.join("\n");
+    // Scripts
+    const scr = [...doc.querySelectorAll("script")];
+    const scriptsList = scr.map(s=> s.src ? s.src : `(inline ${ (s.type||'js') } ${ (s.textContent||'').length } chars)`);
+    $("#countScripts").textContent = scriptsList.length;
+    $("#listScripts").textContent = scriptsList.join("\n");
+    // Custom elements (tags com "-")
+    const custom = [...doc.querySelectorAll("*")].map(el=>el.tagName.toLowerCase()).filter(t=>t.includes("-"));
+    $("#countCustom").textContent = custom.length;
+    $("#listCustom").textContent = [...new Set(custom)].sort().join("\n");
+    log("ANALYZE","ok");
+  }
+
+  // UI events
+  $("#btnNew").onclick = ()=> newPage();
+  $("#btnUpload").onclick = ()=> $("#fileInput").click();
+  $("#fileInput").onchange = async (e)=>{
+    const files = [...e.target.files];
+    for(const f of files){
+      const text = await f.readAsText?.() || await f.text();
+      newPage(f.name, text);
+    }
+    e.target.value = "";
+  };
+  $("#btnFetch").onclick = async()=>{
+    const url = prompt("Cole a URL: (suporta GitHub raw)");
+    if(!url) return;
+    let fetchUrl = url.trim();
+    // GitHub shorthand: user/repo/path@branch
+    if(/^[^\/\s]+\/[^\/\s]+\/.+@[^\/\s]+$/.test(fetchUrl)){
+      const [user, repo, rest] = fetchUrl.split("/",3);
+      const [path, branch] = rest.split("@");
+      fetchUrl = `https://raw.githubusercontent.com/${user}/${repo}/${path}?plain=1#${branch}`;
+    }
+    try{
+      const res = await fetch(fetchUrl);
+      const text = await res.text();
+      const name = (url.split("/").pop()||"remote.html").split("?")[0];
+      newPage(name, text);
+      log("FETCH","ok");
+    }catch(e){ log("FETCH","falhou"); alert("Falha ao obter URL."); }
+  };
+  $("#btnSave").onclick = ()=>{
+    savePages(); log("SAVE","ok");
+  };
+  $("#btnExport").onclick = ()=>{
+    const page = state.pages.find(p=>p.id===state.current);
+    if(!page) return;
+    const blob = new Blob([page.content], {type:"text/html"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = page.name; a.click();
+  };
+  $("#btnZip").onclick = ()=>{
+    // naive zip via JSZip? Para manter single-file, exportamos JSON das páginas (o zip completo requer lib).
+    const blob = new Blob([JSON.stringify(state.pages, null, 2)], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "dual_pages.json"; a.click();
+  };
+  $("#btnSafe").onclick = ()=>{
+    state.safe = !state.safe;
+    $("#badgeMode").textContent = state.safe ? "Safe Preview: scripts OFF" : "Live Preview: scripts ON";
+    renderPreview();
+  };
+  $("#btnFull").onclick = ()=>{
+    const wrap = $("#previewWrap");
+    if(wrap.requestFullscreen) wrap.requestFullscreen();
+  };
+  $("#btnAnalyze").onclick = analyze;
+  $("#btnPro").onclick = ()=> $("#modal").style.display="flex";
+  $("#btnClose").onclick = ()=> $("#modal").style.display="none";
+  $("#btnClearLS").onclick = ()=>{ localStorage.removeItem("dual.pages"); state.pages=[]; tabsEl.innerHTML=""; log("LS","limpo"); };
+  $("#btnImportPages").onclick = ()=> $("#inputImport").click();
+  $("#inputImport").onchange = async (e)=>{
+    try{
+      const f = e.target.files[0];
+      const text = await f.text();
+      const arr = JSON.parse(text);
+      if(Array.isArray(arr)){
+        state.pages = arr; savePages(); renderTabs();
+        if(state.pages[0]) selectPage(state.pages[0].id);
+        log("IMPORT","ok");
+      }else{ throw new Error("Formato inválido"); }
+    }catch(err){ log("IMPORT","falhou"); alert("Falha ao importar .json"); }
+  };
+  $("#btnExportPages").onclick = ()=>{
+    const blob = new Blob([JSON.stringify(state.pages, null, 2)], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "dual_pages.json"; a.click();
+  };
+  $("#btnTheme").onclick = ()=>{
+    state.theme = (document.documentElement.dataset.theme === "dark") ? "purple" : "dark";
+    document.documentElement.dataset.theme = state.theme;
+    localStorage.setItem("dual.theme", state.theme);
+  };
+
+  // PWA install
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt = e; });
+  $("#btnInstall").onclick = async()=>{
+    if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt = null; }
+    else alert("Se o botão não abrir, use o menu 'Adicionar à Tela de Início' do navegador.");
+  };
+
+  // Initialize
+  if(state.pages.length===0){
+    newPage("exemplo.html");
+  }else{
+    renderTabs(); selectPage(state.pages[0].id);
+  }
+
+  // Register SW
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  }
+</script>
+</html>

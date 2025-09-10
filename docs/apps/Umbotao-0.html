@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Dual Finder · Cérebro Local</title>
+<style>
+  :root{--bg:#0b0b0b;--ink:#eaeaf7;--mut:#b7b7c9;--acc:#8a5cff;--ok:#2ecc71;--bad:#ff6b6b;}
+  body{margin:0;background:var(--bg);color:var(--ink);font:500 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto}
+  .wrap{max-width:920px;margin:0 auto;padding:24px}
+  h1{font-size:20px;margin:0 0 8px} p{color:var(--mut);margin:0 0 16px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+  input,button,textarea{background:#12121a;color:var(--ink);border:1px solid #1e1e29;border-radius:12px;padding:12px}
+  button{cursor:pointer}
+  .pill{border-radius:999px;padding:10px 14px;border:1px solid #242437}
+  .mut{color:var(--mut)}
+  .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid #242437;border-radius:999px;padding:8px 12px;margin:4px 8px 4px 0}
+  .ok{border-color:rgba(46,204,113,.4)}
+  .bad{border-color:rgba(255,107,107,.4)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:8px}
+  .card{border:1px solid #1f1f2e;border-radius:16px;padding:14px}
+  .small{font-size:13px}
+  .warn{background:#1b1422;border:1px solid #332244;border-radius:12px;padding:12px;margin:10px 0}
+  .okmsg{background:#13231a;border:1px solid #1d3b27;border-radius:12px;padding:12px;margin:10px 0}
+  .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;font-size:13px;background:#0f0f15;border:1px solid #242437;border-radius:6px;padding:2px 6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔘 Dual Finder — Cérebro Local</h1>
+  <p class="mut">Encontre e conecte ao cérebro (Android/Termux) na mesma rede Wi-Fi. Depois, o Hub usa esse backend automaticamente.</p>
+
+  <div id="httpsWarn" class="warn" style="display:none">
+    <b>Aviso HTTPS/HTTP:</b> seu Hub está em <span id="proto"></span>. Scans para <span class="kbd">http://IP:PORTA</span> podem ser bloqueados no iOS.
+    Em dev, abra o Hub em HTTP ou use túnel HTTPS para o backend.
+  </div>
+
+  <div class="row">
+    <button class="pill" id="btnScan">🔎 Procurar cérebros na rede</button>
+    <button class="pill" id="btnStop">⏹️ Parar varredura</button>
+    <span class="mut small" id="scanState">—</span>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <input id="ipManual" placeholder="http://192.168.0.23:8000" style="flex:1" />
+      <button id="btnTest">✅ Testar</button>
+      <button id="btnUse">⚡ Usar como backend</button>
+    </div>
+    <div id="testOut" class="small mut">—</div>
+  </div>
+
+  <div class="okmsg" id="current" style="display:none"></div>
+
+  <h3 style="margin-top:20px">Resultados da varredura</h3>
+  <div id="hosts" class="grid"></div>
+
+  <h3 style="margin-top:20px">Memória (exportar/importar)</h3>
+  <div class="row">
+    <button id="btnExport" class="pill">⬇️ Exportar memória</button>
+    <label class="pill" style="cursor:pointer">
+      ⬆️ Importar memória <input id="fileImport" type="file" accept=".json,.jsonl" hidden>
+    </label>
+  </div>
+  <p class="small mut">A memória é salva no <span class="kbd">localStorage</span> do seu Hub. Isso não substitui seus JSONs do /brain no Android, mas ajuda a trocar presets e notas com o Blue.</p>
+</div>
+
+<script>
+(function(){
+  const $ = s=>document.querySelector(s); const $$=s=>Array.from(document.querySelectorAll(s));
+  const hostsEl = $('#hosts'), outEl = $('#testOut'), stateEl = $('#scanState');
+  const ipManual = $('#ipManual'); const current = $('#current');
+
+  // Aviso de HTTPS vs HTTP
+  const proto = location.protocol.replace(':','');
+  $('#proto').textContent = proto.toUpperCase();
+  if (proto === 'https') $('#httpsWarn').style.display = '';
+
+  // Mostra backend atual
+  const cur = localStorage.getItem('DUAL_BACKEND');
+  if (cur){
+    current.style.display='block';
+    current.innerHTML = `<b>Backend atual:</b> <span class="kbd">${cur}</span> 
+    <button class="pill" id="btnCloud">☁️ Voltar para nuvem</button>`;
+    current.querySelector('#btnCloud').onclick = ()=>{
+      localStorage.removeItem('DUAL_BACKEND');
+      location.reload();
+    };
+  }
+
+  // util: fetch com timeout
+  async function fjson(url, ms=2000){
+    const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(), ms);
+    try{
+      const r = await fetch(url, {signal:ctrl.signal, cache:'no-store'});
+      clearTimeout(t);
+      if(!r.ok) throw new Error(r.status+' '+r.statusText);
+      return await r.json();
+    }catch(e){ clearTimeout(t); throw e;}
+  }
+
+  // testar manual
+  $('#btnTest').onclick = async ()=>{
+    const base = ipManual.value.trim().replace(/\/$/,'');
+    if(!base) return;
+    outEl.textContent='testando…';
+    try{
+      const j = await fjson(`${base}/health`, 2500);
+      outEl.textContent = `OK: ${JSON.stringify(j)}`;
+    }catch(e){
+      outEl.textContent = 'Falhou: '+e;
+    }
+  };
+
+  // usar backend
+  $('#btnUse').onclick = ()=>{
+    const base = ipManual.value.trim().replace(/\/$/,'');
+    if(!base) return alert('Informe http://IP:PORTA');
+    localStorage.setItem('DUAL_BACKEND', base);
+    alert('Backend definido! Abra qualquer app do Hub para usar este cérebro.');
+    location.reload();
+  };
+
+  // varredura leve (último octeto comum)
+  let stop=false;
+  $('#btnStop').onclick=()=>{stop=true; stateEl.textContent='parado';};
+
+  $('#btnScan').onclick = async ()=>{
+    stop=false;
+    hostsEl.innerHTML=''; stateEl.textContent='varrendo…';
+    // tenta deduzir range a partir do próprio IP do iPhone (não temos via browser), então tentamos os ranges mais comuns
+    const ports = [8000, 3000, 5173]; // adicione portas que você usa
+    const bases = [];
+    // ranges padrão
+    for(const a of [0,1]){
+      for(let i=1;i<=254;i++){
+        bases.push(`http://192.168.${a}.${i}`);
+      }
+    }
+    // 10.0.0.x (alguns roteadores)
+    for(let i=1;i<=254;i++){ bases.push(`http://10.0.0.${i}`); }
+
+    let found = 0, tried = 0;
+    for(const base of bases){
+      if(stop) break;
+      for(const p of ports){
+        if(stop) break;
+        const url = `${base}:${p}/health`;
+        try{
+          tried++;
+          const j = await fjson(url, 800);
+          found++;
+          addHost(`${base}:${p}`, j);
+        }catch(e){
+          // silencioso
+        }
+        if(tried%50===0) stateEl.textContent=`varrendo… ${tried} testes, ${found} encontrados`;
+      }
+    }
+    stateEl.textContent=`feito. ${tried} testes, ${found} encontrados`;
+  };
+
+  function addHost(base, info){
+    const card = document.createElement('div');
+    card.className='card';
+    card.innerHTML = `
+      <div class="chip ok">🧠 ${base}</div>
+      <div class="small mut">health: ${JSON.stringify(info)}</div>
+      <div class="row" style="margin-top:8px">
+        <button class="pill" data-act="use">⚡ Usar</button>
+        <button class="pill" data-act="apps">📜 Abrir apps.json</button>
+      </div>`;
+    card.onclick = (e)=>{
+      const act = e.target?.dataset?.act;
+      if(!act) return;
+      if(act==='use'){
+        localStorage.setItem('DUAL_BACKEND', base);
+        alert('Backend definido: '+base);
+        location.reload();
+      }
+      if(act==='apps'){
+        window.open(`${base}/brain/apps.json`, '_blank');
+      }
+    };
+    hostsEl.appendChild(card);
+  }
+
+  // Export/Import memória (exemplo simples)
+  $('#btnExport').onclick = ()=>{
+    const dump = {};
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(!k) continue;
+      if(k.startsWith('DUAL_') || k.startsWith('dual_') || k.includes('memory'))
+        dump[k]=localStorage.getItem(k);
+    }
+    const blob = new Blob([JSON.stringify(dump,null,2)],{type:'application/json'});
+    const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='dual-memory-export.json'; a.click();
+  };
+  $('#fileImport').onchange = async (e)=>{
+    const f = e.target.files?.[0]; if(!f) return;
+    const text = await f.text();
+    try{
+      const j = JSON.parse(text);
+      Object.entries(j).forEach(([k,v])=> localStorage.setItem(k, String(v)));
+      alert('Memória importada. Recarregando.');
+      location.reload();
+    }catch(err){ alert('Arquivo inválido: '+err); }
+  };
+})();
+</script>
+</body>
+</html>

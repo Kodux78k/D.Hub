@@ -1,0 +1,1038 @@
+{
+  "defaultIcons": {
+    "base": "/icons/uno/icon-192.png",
+    "chats": "/icons/uno/icon-192-chats.png",
+    "editors": "/icons/uno/icon-192-editors.png",
+    "indexrs": "/icons/uno/icon-192-indexrs.png",
+    "jhb": "/icons/uno/icon-192-jhb.png"
+  },
+  "groups": {
+    "index_hubs": [
+      {
+        "key": "index-finder",
+        "title": "Interface Inicial",
+        "desc": "Interface Nebula inicial.",
+        "url": "./apps/dual-finder-pro+Image2CSS.html",
+        "icon": "/icons/uno/icon-192-FND.png",
+        "tags": [
+          "hub",
+          "index",
+          "nebula"
+        ]
+      },
+      {
+        "key": "index-nebula-unified",
+        "title": "HUB NEBULA PRO ",
+        "desc": "Interface Nebula unificada.",
+        "url": "./apps/DUAL_HUB_NebulaPro.html",
+        "icon": "/icons/uno/icon-192-HUB.png",
+        "tags": [
+          "hub",
+          "index",
+          "nebula",
+          "unified"
+        ]
+      },
+      {
+        "key": "dual-chat-nebulapro-v2",
+        "title": "Dual Chat NebulaPro v2",
+        "desc": "Interface de chat no tema NebulaPro v2.",
+        "url": "./apps/Dual_Chat_NebulaPro-v2.html",
+        "icon": "/icons/uno/icon-192-chats.png",
+        "tags": [
+          "chat",
+          "nebula",
+          "dual"
+        ]
+      },
+      {
+        "key": "dual-81-onefile",
+        "title": "DUAL 81 OneFile",
+        "desc": "Versão unificada em um único arquivo (81 telas).",
+        "url": "./apps/DUAL_81_OneFile.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "hub",
+          "dual",
+          "onefile",
+          "81"
+        ]
+      },
+      {
+        "key": "dual-hub-nebulapro",
+        "title": "DUAL HUB NebulaPro",
+        "desc": "Hub principal no tema NebulaPro.",
+        "url": "./apps/DUAL_HUB_NebulaPro.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "hub",
+          "nebula",
+          "dual"
+        ]
+      },
+      {
+        "key": "apps-dualchat-nebulapro",
+        "title": "Apps DualChat NebulaPro",
+        "desc": "Atalho para apps.dualchat NebulaPro.",
+        "url": "./apps/apps.dualchat.nebulapro.html",
+        "icon": "/icons/uno/icon-192-chats.png",
+        "tags": [
+          "chat",
+          "apps",
+          "nebula"
+        ]
+      },
+      {
+        "key": "dual-hub-integrator",
+        "title": "Dual • Hub Finder (LAN/Cloud)",
+        "desc": "Scanner, backend, memória, relatórios",
+        "url": "./apps/dual-finder-pro.html",
+        "icon": "/icons/uno/icon-192-LAN.png",
+        "tags": [
+          "setup",
+          "lan",
+          "tools"
+        ]
+      },
+      {
+        "key": "index-barrao",
+        "title": "ASSERT - JHB Eng.",
+        "desc": "Versão barrão.",
+        "url": "./apps/index-JHBarros.html",
+        "icon": "/icons/uno/icon-192-jhb.png",
+        "tags": [
+          "hub",
+          "index",
+          "barrao"
+        ]
+      },
+      {
+        "key": "index-hub",
+        "title": "Hub",
+        "desc": "Hub principal.",
+        "url": "./apps/indexhub.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "hub",
+          "index",
+          "principal"
+        ]
+      },
+      {
+        "key": "index-luxara",
+        "title": " MetaLux",
+        "desc": "Interface MetaLux.",
+        "url": "./apps/indexhub.SAFEv3.NebulaPro+Image2CSS.html",
+        "icon": "/icons/uno/icon-192-IDX.png",
+        "tags": [
+          "hub",
+          "index",
+          "metalux"
+        ]
+      },
+      {
+        "key": "index-sumbus-3",
+        "title": "IMG PROMPT",
+        "desc": "IMG PROMPT Sümbüs.",
+        "url": "./apps/Dual_Image2CSS_Studio.html",
+        "icon": "/icons/uno/icon-192-IMG.png",
+        "tags": [
+          "hub",
+          "index",
+          "sumbus"
+        ]
+      },
+      {
+        "key": "dual-infodose-nebulapro-mobile",
+        "title": "DualPro Mobile",
+        "desc": "Versão NebulaPro otimizada para mobile.",
+        "url": "./apps/Dual_Infodose_NebulaPro_Mobile.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "dual",
+          "infodose",
+          "nebula",
+          "mobile"
+        ]
+      },
+      {
+        "key": "dual-infodose-min-mobile",
+        "title": "Dual Infodose Min Mobile",
+        "desc": "Versão minimalista Infodose para mobile.",
+        "url": "./apps/Dual_Infodose_Min_Mobile.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "dual",
+          "infodose",
+          "mobile",
+          "minimal"
+        ]
+      },
+      {
+        "key": "dual-2e-clean-2",
+        "title": "Dual 2E Clean 2",
+        "desc": "Interface Dual limpa versão 2.",
+        "url": "./apps/Dual_2E-clean-2.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "dual",
+          "clean",
+          "2e"
+        ]
+      },
+      {
+        "key": "dual-infodose-nebulapro-flutter-archemap-presetstudio",
+        "title": "Dual Infodose NebulaPro Flutter ArcheMap PresetStudio",
+        "desc": "NebulaPro com Flutter, ArcheMap e Preset Studio.",
+        "url": "./apps/Dual_Infodose_NebulaPro_Flutter_ArcheMap_PresetStudio.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "dual",
+          "infodose",
+          "nebula",
+          "flutter",
+          "archemap",
+          "preset"
+        ]
+      },
+      {
+        "key": "dual-infodose-nebulapro-moodspalettes-queue-asciistudio",
+        "title": "Dual Infodose NebulaPro MoodsPalettes Queue ASCIIStudio",
+        "desc": "NebulaPro com moods, paletas, fila e ASCII Studio.",
+        "url": "./apps/Dual_Infodose_NebulaPro_MoodsPalettes_Queue_ASCIIStudio.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "dual",
+          "infodose",
+          "nebula",
+          "moods",
+          "palettes",
+          "queue",
+          "ascii",
+          "studio"
+        ]
+      },
+      {
+        "key": "dual-infodose-min-mobile-v2",
+        "title": "Dual Infodose Min Mobile v2",
+        "desc": "Versão minimalista Infodose para mobile v2.",
+        "url": "./apps/Dual_Infodose_Min_Mobile_v2.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "dual",
+          "infodose",
+          "mobile",
+          "minimal",
+          "v2"
+        ]
+      },
+      {
+        "key": "dual-infodose-nebulapro-orbits-sound-palettes-asciidsl",
+        "title": "Dual Infodose NebulaPro Orbits Sound Palettes ASCII DSL",
+        "desc": "NebulaPro com orbits, sound palettes e ASCII DSL.",
+        "url": "./apps/Dual_Infodose_NebulaPro_Orbits_Sound_Palettes_ASCIIDSL.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "dual",
+          "infodose",
+          "nebula",
+          "sound",
+          "palettes",
+          "ascii",
+          "dsl"
+        ]
+      },
+      {
+        "key": "dual-infodose-nebulapro-reactiveface",
+        "title": "Dual Infodose NebulaPro ReactiveFace",
+        "desc": "NebulaPro com ReactiveFace.",
+        "url": "./apps/Dual_Infodose_NebulaPro_ReactiveFace.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "dual",
+          "infodose",
+          "nebula",
+          "reactiveface"
+        ]
+      },
+      {
+        "key": "dual-infodose-cleanmobile-configpalettesmenu",
+        "title": "Dual Infodose CleanMobile Config Palettes Menu",
+        "desc": "Versão Clean Mobile com menu de paletas.",
+        "url": "./apps/Dual_Infodose_CleanMobile_ConfigPalettesMenu.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "dual",
+          "infodose",
+          "mobile",
+          "clean",
+          "palettes"
+        ]
+      },
+      {
+        "key": "dual-infodose-nebulapro-moodsync-tts-trilha",
+        "title": "Dual Infodose NebulaPro MoodSync TTS Trilha",
+        "desc": "NebulaPro com sincronização de humor, TTS e trilha.",
+        "url": "./apps/Dual_Infodose_NebulaPro_MoodSync_TTS_Trilha.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "dual",
+          "infodose",
+          "nebula",
+          "mood",
+          "tts",
+          "trilha"
+        ]
+      },
+      {
+        "key": "dual-infodose-min-mobile-v2-tts-live",
+        "title": "Dual Infodose Min Mobile v2 TTS Live",
+        "desc": "Versão Min Mobile v2 com TTS Live.",
+        "url": "./apps/Dual_Infodose_Min_Mobile_v2_TTS_Live.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "dual",
+          "infodose",
+          "mobile",
+          "tts",
+          "live",
+          "v2"
+        ]
+      },
+      {
+        "key": "dual-infodose-nebulapro-archemood-quickmodel-presets",
+        "title": "Dual Infodose NebulaPro ArcheMood QuickModel Presets",
+        "desc": "NebulaPro com ArcheMood e QuickModel Presets.",
+        "url": "./apps/Dual_Infodose_NebulaPro_ArcheMood_QuickModel_Presets.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "dual",
+          "infodose",
+          "nebula",
+          "archemood",
+          "presets"
+        ]
+      },
+      {
+        "key": "dual-infodose-min-mobile-v2-tts-booster",
+        "title": "Dual Infodose Min Mobile v2 TTS Booster",
+        "desc": "Versão Min Mobile v2 com TTS Booster.",
+        "url": "./apps/Dual_Infodose_Min_Mobile_v2_TTS_Booster.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "dual",
+          "infodose",
+          "mobile",
+          "tts",
+          "booster",
+          "v2"
+        ]
+      },
+      {
+        "key": "dual-infodose-min-mobile-v2-tts-live-default",
+        "title": "Dual Infodose Min Mobile v2 TTS Live Default",
+        "desc": "Versão Min Mobile v2 TTS Live Default.",
+        "url": "./apps/Dual_Infodose_Min_Mobile_v2_TTS_Live_Default.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "dual",
+          "infodose",
+          "mobile",
+          "tts",
+          "live",
+          "default",
+          "v2"
+        ]
+      },
+      {
+        "key": "dual-infodose-nebulapro-streaming-ascii",
+        "title": "Dual Infodose NebulaPro Streaming ASCII",
+        "desc": "NebulaPro com streaming ASCII.",
+        "url": "./apps/Dual_Infodose_NebulaPro_Streaming_ASCII.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "dual",
+          "infodose",
+          "nebula",
+          "ascii",
+          "streaming"
+        ]
+      },
+      {
+        "key": "dual-monolith-nebulapro-hubchatbrain-v3",
+        "title": "DUAL Monolith NebulaPro HubChatBrain v3",
+        "desc": "Versão monolítica v3 com Hub, Chat e Brain.",
+        "url": "./apps/DUAL_Monolith_NebulaPro_HubChatBrain_v3.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "hub",
+          "chat",
+          "brain",
+          "monolith",
+          "nebula"
+        ]
+      },
+      {
+        "key": "dual-procedural-pixel-film-nebulapro-luxara-v4",
+        "title": "Procedural Pixel Film NebulaPro Luxara v4",
+        "desc": "Versão procedural v4 sob comando da Luxara.",
+        "url": "./apps/Dual_Procedural_Pixel_Film_NebulaPro_LUXARA-v4.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "procedural",
+          "pixel",
+          "film",
+          "luxara",
+          "nebula"
+        ]
+      },
+      {
+        "key": "dual-procedural-pixel-film-nebulapro-br-icons-fix",
+        "title": "Procedural Pixel Film NebulaPro BR Icons Fix",
+        "desc": "Correção de ícones brasileiros para o Pixel Film.",
+        "url": "./apps/Dual_Procedural_Pixel_Film_NebulaPro_BR_Icons_Fix.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "procedural",
+          "pixel",
+          "film",
+          "nebula",
+          "icons"
+        ]
+      },
+      {
+        "key": "dual-monolith-nebulapro-hubchatbrain-v5",
+        "title": "DUAL Monolith NebulaPro HubChatBrain v5",
+        "desc": "Versão monolítica v5 com refine in-bubble e ASCII.",
+        "url": "./apps/DUAL_Monolith_NebulaPro_HubChatBrain_v5_refine_inbubble_ASCII.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "hub",
+          "chat",
+          "brain",
+          "ascii",
+          "monolith",
+          "nebula"
+        ]
+      },
+      {
+        "key": "procedural-pixel-film-nebulapro-final-one",
+        "title": "Procedural Pixel Film NebulaPro FINAL ONE",
+        "desc": "Versão final ONE do Pixel Film.",
+        "url": "./apps/Procedural_Pixel_Film_NebulaPro_FINAL_ONE.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "procedural",
+          "pixel",
+          "film",
+          "nebula",
+          "final"
+        ]
+      },
+      {
+        "key": "dual-monolith-nebulapro-hubchatbrain",
+        "title": "DUAL Monolith NebulaPro HubChatBrain",
+        "desc": "Versão base HubChatBrain Monolith NebulaPro.",
+        "url": "./apps/DUAL_Monolith_NebulaPro_HubChatBrain.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "hub",
+          "chat",
+          "brain",
+          "monolith",
+          "nebula"
+        ]
+      },
+      {
+        "key": "procedural-pixel-film-nebulapro-final-pro",
+        "title": "Procedural Pixel Film NebulaPro FINAL PRO",
+        "desc": "Versão FINAL PRO do Pixel Film.",
+        "url": "./apps/Procedural_Pixel_Film_NebulaPro_FINAL_PRO.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "procedural",
+          "pixel",
+          "film",
+          "nebula",
+          "pro"
+        ]
+      },
+      {
+        "key": "dual-chat-nebulapro",
+        "title": "Dual Chat NebulaPro",
+        "desc": "Interface clássica do chat NebulaPro.",
+        "url": "./apps/Dual_Chat_NebulaPro.html",
+        "icon": "/icons/uno/icon-192-chats.png",
+        "tags": [
+          "chat",
+          "nebula",
+          "dual"
+        ]
+      },
+      {
+        "key": "dual-hub-nebulapro",
+        "title": "DUAL HUB NebulaPro",
+        "desc": "Hub principal no tema NebulaPro.",
+        "url": "./apps/DUAL_HUB_NebulaPro.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "hub",
+          "nebula",
+          "dual"
+        ]
+      },
+      {
+        "key": "dual-chat-pulsar",
+        "title": "Dual Chat Pulsar",
+        "desc": "Versão Pulsar do chat Dual.",
+        "url": "./apps/dual_chat_pulsar.html",
+        "icon": "/icons/uno/icon-192-chats.png",
+        "tags": [
+          "chat",
+          "dual",
+          "pulsar"
+        ]
+      },
+      {
+        "key": "dual-chat-nebulapro-v2-luxara-neon-v2",
+        "title": "Dual Chat NebulaPro v2 Luxara Neon",
+        "desc": "Versão v2 com Luxara Neon aplicada.",
+        "url": "./apps/Dual_Chat_NebulaPro-v2_luxara_neon_v2.html",
+        "icon": "/icons/uno/icon-192-chats.png",
+        "tags": [
+          "chat",
+          "nebula",
+          "luxara",
+          "neon"
+        ]
+      },
+      {
+        "key": "dual-unificado-nebula-pro-radial-haptics-openrouter",
+        "title": "Dual Unificado Nebula Pro Radial Haptics",
+        "desc": "Versão unificada com radial, haptics e OpenRouter.",
+        "url": "./apps/dual_unificado_nebula_pro_radial_haptics_open_router.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "dual",
+          "nebula",
+          "radial",
+          "haptics",
+          "openrouter"
+        ]
+      },
+      {
+        "key": "dual-procedural-pixel-film-v2",
+        "title": "Dual Procedural Pixel Film v2",
+        "desc": "Segunda versão do Procedural Pixel Film.",
+        "url": "./apps/Dual_Procedural_Pixel_Film-v2.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "procedural",
+          "pixel",
+          "film",
+          "dual",
+          "nebula"
+        ]
+      },
+      {
+        "key": "dual-chat-nebulapro-v2",
+        "title": "Dual Chat NebulaPro v2",
+        "desc": "Segunda versão do chat NebulaPro.",
+        "url": "./apps/Dual_Chat_NebulaPro-v2.html",
+        "icon": "/icons/uno/icon-192-chats.png",
+        "tags": [
+          "chat",
+          "nebula",
+          "dual",
+          "v2"
+        ]
+      },
+      {
+        "key": "indexhub-safev3-1-nebulapro",
+        "title": "IndexHub Safe v3.1 NebulaPro",
+        "desc": "IndexHub versão Safe v3.1 NebulaPro.",
+        "url": "./apps/indexhub.SAFEv3.1.NebulaPro.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "index",
+          "hub",
+          "nebula",
+          "safe"
+        ]
+      },
+      {
+        "key": "procedural-pixel-film-nebulapro0",
+        "title": "Procedural Pixel Film NebulaPro 0",
+        "desc": "Versão inicial do Procedural Pixel Film.",
+        "url": "./apps/procedural_pixel_film_nebula_pro0.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "procedural",
+          "pixel",
+          "film",
+          "nebula"
+        ]
+      },
+      {
+        "key": "dual-procedural-pixel-film-nebulapro-br-ousado-fix",
+        "title": "Procedural Pixel Film NebulaPro BR Ousado Fix",
+        "desc": "Fix ousado BR para o Pixel Film.",
+        "url": "./apps/Dual_Procedural_Pixel_Film_NebulaPro_BR_Ousado_Fix.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "procedural",
+          "pixel",
+          "film",
+          "nebula",
+          "br",
+          "ousado"
+        ]
+      },
+      {
+        "key": "dual-brain-aether",
+        "title": "Dual Brain Aether",
+        "desc": "Versão Aether do Dual Brain.",
+        "url": "./apps/dual_brain_aether.html",
+        "icon": "/icons/uno/icon-192-indexrs.png",
+        "tags": [
+          "brain",
+          "dual",
+          "aether"
+        ]
+      }
+    ],
+    "chats": [
+      {
+        "key": "dual-chat",
+        "title": "Dual Chat",
+        "desc": "Conversas e IA simbólica.",
+        "url": "./apps/Dual_Infodose_Min_Mobile_v2_TTS_Live_Default-v3.html",
+        "icon": "/icons/uno/icon-192-chats.png",
+        "tags": [
+          "chat",
+          "ai",
+          "dual"
+        ]
+      },
+      {
+        "key": "dual-chat-trix",
+        "title": "Dual Chat 0.94.15 Fix",
+        "desc": "Versão rixtrix do Dual Chat.",
+        "url": "./apps/Dual_Infodose_Min_Mobile_v2_TTS_Live-v3.html",
+        "icon": "/icons/uno/icon-192-chats.png",
+        "tags": [
+          "chat",
+          "fix",
+          "release"
+        ]
+      },
+      {
+        "key": "Chat-response-autoload",
+        "title": "Render Response Autoload",
+        "desc": "Carregamento automático de respostas.",
+        "url": "./apps/Dual_Infodose_Min_Mobile_v2_TTS_Live_Default-R0.html",
+        "icon": "/icons/uno/icon-192-chats.png",
+        "tags": [
+          "render",
+          "response",
+          "autoload",
+          "chat"
+        ]
+      },
+      {
+        "key": "renderresponse-kobllux",
+        "title": "Chat- render Response Kobllux",
+        "desc": "Renderização Kobllux.",
+        "url": "./apps/Dual_Infodose_Min_Mobile_v2_TTS_Live-R0.html",
+        "icon": "/icons/uno/icon-192-chats.png",
+        "tags": [
+          "render",
+          "kobllux",
+          "chat"
+        ]
+      },
+      {
+        "key": "dual-monolith-nebulapro-hubchatbrain-v6-0",
+        "title": "DUAL Monolith NebulaPro HubChatBrain v6-0",
+        "desc": "Monólito v6-0 do Hub+Chat+Brain NebulaPro.",
+        "url": "./apps/DUAL_Monolith_NebulaPro_HubChatBrain_v6-0.html",
+        "icon": "/icons/uno/icon-192-NEB.png",
+        "tags": [
+          "hub",
+          "chat",
+          "brain",
+          "nebula",
+          "dual",
+          "monolith"
+        ]
+      },
+      {
+        "key": "dual-procedural-pixel-film-merged",
+        "title": "Dual Procedural Pixel Film Merged",
+        "desc": "Filme procedural pixelado versão mergeada.",
+        "url": "./apps/Dual_Procedural_Pixel_Film_Merged.html",
+        "icon": "/icons/uno/icon-192-IMG.png",
+        "tags": [
+          "film",
+          "procedural",
+          "pixel",
+          "dual",
+          "nebula"
+        ]
+      },
+      {
+        "key": "dual-monolith-nebulapro-hubchatbrain-v6",
+        "title": "DUAL Monolith NebulaPro HubChatBrain v6",
+        "desc": "Monólito v6 do Hub+Chat+Brain NebulaPro.",
+        "url": "./apps/DUAL_Monolith_NebulaPro_HubChatBrain_v6.html",
+        "icon": "/icons/uno/icon-192-NEB.png",
+        "tags": [
+          "hub",
+          "chat",
+          "brain",
+          "nebula",
+          "dual",
+          "monolith"
+        ]
+      },
+      {
+        "key": "dual-monolith-nebulapro-hubchatbrain",
+        "title": "DUAL Monolith NebulaPro HubChatBrain",
+        "desc": "Versão base do Monólito Hub+Chat+Brain NebulaPro.",
+        "url": "./apps/DUAL_Monolith_NebulaPro_HubChatBrain.html",
+        "icon": "/icons/uno/icon-192-NEB.png",
+        "tags": [
+          "hub",
+          "chat",
+          "brain",
+          "nebula",
+          "dual",
+          "monolith"
+        ]
+      }
+    ],
+    "editors_tools": [
+      {
+        "key": "dual-labs",
+        "title": "Dual Labs",
+        "desc": "Experimentos e patches.",
+        "url": "./apps/dual-labs.html",
+        "icon": "/icons/uno/icon-192-editors.png",
+        "tags": [
+          "labs",
+          "tools",
+          "experiments"
+        ]
+      },
+      {
+        "key": "sigma-trinity-editor-2",
+        "title": "Sigma Trinity Editor 2",
+        "desc": "Editor simbólico Trinity.",
+        "url": "./apps/sigma-trinity-editor-2.html",
+        "icon": "/icons/uno/icon-192-editors.png",
+        "tags": [
+          "editor",
+          "sigma",
+          "trinity",
+          "tools"
+        ]
+      },
+      {
+        "key": "xml-app-conv-8",
+        "title": "XML App Conv 8 Online",
+        "desc": "Conversor app XML online.",
+        "url": "./apps/xml-app-conv-8-online.html",
+        "icon": "/icons/uno/icon-192-editors.png",
+        "tags": [
+          "xml",
+          "converter",
+          "tools"
+        ]
+      },
+      {
+        "key": "apps-json",
+        "title": "Apps JSON",
+        "desc": "Definições de apps.",
+        "url": "./apps/apps.json",
+        "icon": "/icons/uno/icon-192-editors.png",
+        "tags": [
+          "config",
+          "json",
+          "tools"
+        ]
+      },
+      {
+        "key": "kblx-html",
+        "title": "KBLX HTML v4.1",
+        "desc": "Versão fullscreen separador.",
+        "url": "./apps/KBLX-HTML-v4.1-FULLSCREEN-SEPARADOR.html",
+        "icon": "/icons/uno/icon-192-editors.png",
+        "tags": [
+          "kblx",
+          "html",
+          "editor"
+        ]
+      },
+      {
+        "key": "kobllux-metalux",
+        "title": "KOBLLUX MetaLux",
+        "desc": "Expandido final ultrafoda.",
+        "url": "./apps/KOBLLUX_MetaLux_Expandido_Final_ultrafoda.html",
+        "icon": "/icons/uno/icon-192-editors.png",
+        "tags": [
+          "kobllux",
+          "metalux",
+          "tools"
+        ]
+      },
+      {
+        "key": "dual-html-editor-full-split-v1",
+        "title": "Dual HTML Editor Full Split v1",
+        "desc": "Editor HTML completo com split view v1.",
+        "url": "./apps/Dual_HTML_Editor_Full_Split_v1.html",
+        "icon": "/icons/uno/icon-192-editors.png",
+        "tags": [
+          "editor",
+          "html",
+          "dual"
+        ]
+      },
+      {
+        "key": "kobllux-app-1",
+        "title": "KOBLLUX App 1",
+        "desc": "Primeira versão do app KOBLLUX.",
+        "url": "./apps/KOBLLUX_app_1.html",
+        "icon": "/icons/uno/icon-192-editors.png",
+        "tags": [
+          "kobllux",
+          "dual",
+          "app"
+        ]
+      },
+      {
+        "key": "dual-app-export-2",
+        "title": "Dual App Export 2",
+        "desc": "Exportação de app Dual v2.",
+        "url": "./apps/dual-app-export-2.html",
+        "icon": "/icons/uno/icon-192-editors.png",
+        "tags": [
+          "dual",
+          "export",
+          "v2"
+        ]
+      }
+    ],
+    "menus": [
+      {
+        "key": "menu-x-1-e-12",
+        "title": "Menu X 1-E-12",
+        "desc": "Menu simbólico X.",
+        "url": "./apps/menu-x-1-E-12.html",
+        "icon": "/icons/uno/icon-192-editors.png",
+        "tags": [
+          "menu",
+          "ui"
+        ]
+      },
+      {
+        "key": "menu-x-1-e-19",
+        "title": "Menu X 1-E-19",
+        "desc": "Menu simbólico X v19.",
+        "url": "./apps/menu-x-1-E-19.html",
+        "icon": "/icons/uno/icon-192-editors.png",
+        "tags": [
+          "menu",
+          "ui",
+          "v19"
+        ]
+      },
+      {
+        "key": "menu-merged-final",
+        "title": "Menu Merged Final Corrigido",
+        "desc": "Menu final corrigido.",
+        "url": "./apps/menu-merged-final-corrigido.html",
+        "icon": "/icons/uno/icon-192-editors.png",
+        "tags": [
+          "menu",
+          "final",
+          "ui"
+        ]
+      }
+    ],
+    "tutorials": [
+      {
+        "key": "dual-app-tutorial-v7",
+        "title": "Dual App Tutorial V7",
+        "desc": "Versão tutorial com ativações longas.",
+        "url": "./apps/dual-app-com-tutorial-ativacoes-10-4-2-3-0-v7-0-ONe7-0ee8-7-0eRE-ONRe-RRRe0ON-EA-eNB-ET-0Ar18eeR-Re-6R-4e-0r-1e35-3NU-2-3.html",
+        "icon": "/icons/uno/icon-192.png",
+        "tags": [
+          "tutorial",
+          "ativacoes",
+          "v7"
+        ]
+      },
+      {
+        "key": "dual-app-tutorial-v7b",
+        "title": "Dual App Tutorial V7b",
+        "desc": "Outra variante do tutorial v7.",
+        "url": "./apps/dual-app-com-tutorial-ativacoes-10-4-2-3-0-v7-0-ONe7-0ee8-7-0eRE-ONRe-RRRe0ON-EA-eNB-ET-0Ar18eeR-Re-6R-4e-0r-1e35-3NU-0.html",
+        "icon": "/icons/uno/icon-192.png",
+        "tags": [
+          "tutorial",
+          "ativacoes",
+          "v7"
+        ]
+      },
+      {
+        "key": "dual-app-tutorial-v7c",
+        "title": "Dual App Tutorial V7c",
+        "desc": "Mais uma variante do tutorial v7.",
+        "url": "./apps/dual-app-com-tutorial-ativacoes-10-4-2-3-0-v7-0-ONe7-0ee8-7-0eRE-ONRe-RRRe0ON-EA-eNB-ET-0Ar18eeR-Re-6R-4e-0r-1e35-5AV-0.html",
+        "icon": "/icons/uno/icon-192.png",
+        "tags": [
+          "tutorial",
+          "ativacoes",
+          "v7"
+        ]
+      }
+    ],
+    "visual_splash": [
+      {
+        "key": "procedural-splash-v2",
+        "title": "Procedural Live Splash v2",
+        "desc": "Tela splash procedural Infodose.",
+        "url": "./apps/Infodose_ProceduralLive_Splash_v2.html",
+        "icon": "/icons/uno/icon-192.png",
+        "tags": [
+          "splash",
+          "visual",
+          "live"
+        ]
+      },
+      {
+        "key": "splash-2",
+        "title": "Splash 2",
+        "desc": "Splash alternativa.",
+        "url": "./apps/Splash 2.html",
+        "icon": "/icons/uno/icon-192.png",
+        "tags": [
+          "splash",
+          "visual"
+        ]
+      },
+      {
+        "key": "splash-mani",
+        "title": "Splash MANI",
+        "desc": "Splash simbólico MANI.",
+        "url": "./apps/Splash_MANI.html",
+        "icon": "/icons/uno/icon-192.png",
+        "tags": [
+          "splash",
+          "visual",
+          "mani"
+        ]
+      }
+    ],
+    "docs": [
+      {
+        "key": "oidual",
+        "title": "Oidual",
+        "desc": "Notas e fluxo textual.",
+        "url": "./apps/Oidual.txt",
+        "icon": "/icons/uno/icon-192.png",
+        "tags": [
+          "doc",
+          "texto",
+          "oidual"
+        ]
+      },
+      {
+        "key": "smbs-book-2",
+        "title": "SmbS Book 2",
+        "desc": "Estrutura simbólica book.",
+        "url": "./apps/SmbS-book-2.html",
+        "icon": "/icons/uno/icon-192.png",
+        "tags": [
+          "doc",
+          "book",
+          "smbs"
+        ]
+      }
+    ],
+    "players": [
+      {
+        "key": "dual-Tube",
+        "title": "Dual Player",
+        "desc": "Seu dual tube ensina , Toca faixas e TTS.",
+        "url": "./apps/dual-tube-25-0.html",
+        "icon": "/icons/uno/icon-192-tube.png",
+        "tags": [
+          "player",
+          "audio",
+          "tts"
+        ]
+      },
+      {
+        "key": "dual-playarq-0",
+        "title": "Dual PlayArq 0",
+        "desc": "Player arquetípico versão 0.",
+        "url": "./apps/Dual_PlayArq_0.html",
+        "icon": "/icons/uno/icon-192.png",
+        "tags": [
+          "player",
+          "arquetipo",
+          "dual"
+        ]
+      },
+      {
+        "key": "dual-playarq-2",
+        "title": "Dual PlayArq 2",
+        "desc": "Player arquetípico versão 2.",
+        "url": "./apps/Dual_PlayArq_2.html",
+        "icon": "/icons/uno/icon-192.png",
+        "tags": [
+          "player",
+          "arquetipo",
+          "dual"
+        ]
+      },
+      {
+        "key": "dual-daw-1",
+        "title": "Dual DAW",
+        "desc": "Primeira versão do DAW simbólico.",
+        "url": "./apps/DALL_DAW_v11_superlite.html",
+        "icon": "/icons/uno/icon-192-DAW.png",
+        "tags": [
+          "dual",
+          "daw",
+          "audio"
+        ]
+      },
+      {
+        "key": "dual-daww2-1",
+        "title": "Dual DAW0",
+        "desc": " versão do DAW simbólico.",
+        "url": "./apps/DUAL_PULSE_v14_superlight.html",
+        "icon": "/icons/uno/icon-192-DAW.png",
+        "tags": [
+          "dual",
+          "daw",
+          "audio"
+        ]
+      },
+      {
+        "key": "dual-surgeon-mobile-single",
+        "title": "Dual Surgeon Mobile Single",
+        "desc": "Interface cirúrgica simplificada mobile.",
+        "url": "./apps/Dual_Surgeon_Mobile_Single.html",
+        "icon": "/icons/uno/icon-192.png",
+        "tags": [
+          "dual",
+          "surgeon",
+          "mobile"
+        ]
+      }
+    ]
+  }
+}

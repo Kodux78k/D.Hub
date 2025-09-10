@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+  <title>Dual.Infodose — Minimal Mobile</title>
+  <meta name="theme-color" content="#0b0b0f"/>
+  <style>
+    :root{
+      --bg:#0b0b0f;
+      --panel:#121218;
+      --ink:#e9ecff;
+      --muted:#aab1cc;
+      --acc:#c7d2ff;
+      --glow:0 0 32px rgba(255,255,255,.18),0 0 64px rgba(255,255,255,.08);
+      --radius:18px;
+      --safe: env(safe-area-inset-bottom, 16px);
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color: transparent}
+    html,body{height:100%}
+    body{
+      margin:0;background:
+        radial-gradient(1200px 700px at 50% -20%, rgba(255,255,255,.08), transparent 60%),
+        radial-gradient(900px 900px at 50% 120%, rgba(255,255,255,.06), transparent 60%),
+        #0b0b0f;
+      color:var(--ink); font: 400 16px/1.4 ui-rounded, system-ui, -apple-system, Inter, Segoe UI, Roboto, Arial;
+      display:flex; flex-direction:column; gap:0;
+    }
+    header{
+      position:sticky; top:0; z-index:5;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 16px calc(10px + var(--safe)) 16px;
+      background:linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,.16) 70%, transparent);
+      backdrop-filter: blur(14px);
+    }
+    .brand{
+      display:flex; gap:10px; align-items:center;
+    }
+    .pill{
+      width:86px; height:38px; border-radius:22px;
+      background:#0a0a0e; position:relative; display:grid; place-items:center;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.08), var(--glow);
+      overflow:hidden;
+    }
+    .pill::before{
+      content:""; position:absolute; inset:-1px; border-radius:22px;
+      background: radial-gradient(120px 40px at 50% -40%, rgba(255,255,255,.18), transparent 70%);
+      filter: blur(6px); opacity:.8;
+    }
+    .menuBtn{
+      width:42px; height:42px; border-radius:14px; background:rgba(255,255,255,.04);
+      display:grid; place-items:center; border:1px solid rgba(255,255,255,.08);
+      box-shadow: var(--glow);
+    }
+    .menuBtn:active{transform:scale(.98)}
+    main{flex:1; display:flex; flex-direction:column; padding:12px 14px 0 14px; gap:12px;}
+    .card{background:var(--panel); border:1px solid rgba(255,255,255,.08); border-radius:var(--radius); padding:12px; box-shadow:var(--glow)}
+    .center{
+      margin-top:4px;
+      display:grid; place-items:center;
+    }
+    .symbolPad{
+      width:min(86vw, 440px);
+      aspect-ratio: 2.2 / 1;
+      background:#07070b; border-radius:28px; position:relative; display:grid; place-items:center;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.10), 0 0 0 4px rgba(255,255,255,.02), var(--glow);
+      overflow:hidden;
+    }
+    .symbolPad .ring{position:absolute; inset:0; border-radius:28px;
+      box-shadow:inset 0 0 0 2px rgba(255,255,255,.06);
+      animation: pulse 3.5s ease-in-out infinite;
+    }
+    @keyframes pulse{
+      0%,100%{box-shadow:inset 0 0 0 2px rgba(255,255,255,.06), 0 0 40px rgba(255,255,255,.10)}
+      50%{box-shadow:inset 0 0 0 2px rgba(255,255,255,.12), 0 0 80px rgba(255,255,255,.18)}
+    }
+    .row{display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap}
+    .chip{
+      flex:1 1 auto; min-width:120px;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      padding:12px 14px; border-radius:16px; border:1px solid rgba(255,255,255,.10);
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+    }
+    .chip:active{transform:translateY(1px); filter:brightness(.98)}
+    /* Chat */
+    #chat{display:flex; flex-direction:column; gap:8px; height:48vh}
+    .log{flex:1; overflow:auto; padding:10px 6px; display:flex; flex-direction:column; gap:8px; scroll-behavior:smooth}
+    .msg{max-width:86%; padding:10px 12px; border-radius:14px; border:1px solid rgba(255,255,255,.10); box-shadow: var(--glow)}
+    .you{align-self:flex-end; background:rgba(255,255,255,.06)}
+    .ai{align-self:flex-start; background:rgba(255,255,255,.03)}
+    .bar{display:flex; gap:8px; align-items:center}
+    input[type="text"], input[type="password"], select, textarea{
+      background:#0b0b12; color:var(--ink); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:12px 12px; width:100%;
+    }
+    textarea{min-height:84px; resize:none}
+    button{
+      background:#0e0e16; color:var(--ink); border:1px solid rgba(255,255,255,.18); border-radius:12px; padding:12px 16px;
+      font-weight:600;
+    }
+    button:active{transform:scale(.98)}
+    small{color:var(--muted)}
+    /* Bottom sheet menu */
+    .sheet{
+      position:fixed; left:0; right:0; bottom:0; z-index:10; translate:0 110%;
+      background:linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,.75));
+      border-top-left-radius:16px; border-top-right-radius:16px;
+      border-top:1px solid rgba(255,255,255,.12);
+      padding:14px 14px calc(12px + var(--safe));
+      transition:translate .28s ease;
+      backdrop-filter: blur(16px);
+    }
+    .sheet.open{translate:0 0}
+    .sheet .grab{height:5px; width:46px; background:rgba(255,255,255,.2); margin:0 auto 8px; border-radius:6px}
+    .sheet h3{margin:6px 0 10px; font:700 16px/1.2 ui-rounded, system-ui}
+    .grid{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+    .muted{color:var(--muted)}
+    .sp{height:10px}
+    .hidden{display:none !important}
+    .tiny{font-size:12px}
+    .switch{display:inline-flex; gap:8px; align-items:center}
+    .switch input{accent-color:#9bb4ff}
+    .footerPad{height:max(20px, var(--safe))}
+    /* SVG icons always white */
+    svg{fill:none; stroke:white; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="pill" id="homePill" title="Dual Symbol">
+        <!-- Symbol: WAVES (inspirado na sua imagem) -->
+        <svg id="svgWaves" viewBox="0 0 120 40" width="74" height="26" aria-hidden="true">
+          <path d="M10 24c12-12 22-12 34 0s22 12 34 0" stroke-width="4"/>
+          <path d="M10 28c12-12 22-12 34 0s22 12 34 0" stroke-width="3" opacity=".9"/>
+          <circle cx="45" cy="21" r="2.2" fill="white" stroke="none"/>
+          <path d="M89 19l6 3-6 3z" fill="white" stroke="none"/>
+        </svg>
+      </div>
+      <div>
+        <div style="font-weight:800; letter-spacing:.4px">Dual.Infodose</div>
+        <small class="muted">mobile • touch‑first</small>
+      </div>
+    </div>
+    <button class="menuBtn" id="menuBtn" aria-label="Abrir menu">
+      <svg viewBox="0 0 24 24" width="22" height="22">
+        <path d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+  </header>
+
+  <main>
+    <section class="center">
+      <div class="symbolPad" id="symbolPad" role="button" aria-label="Ativar símbolo">
+        <div class="ring"></div>
+        <!-- Symbol FACE (inspirado na segunda imagem) -->
+        <svg id="svgFace" viewBox="0 0 120 120" width="84" height="84">
+          <circle cx="60" cy="60" r="44" stroke-width="10"/>
+          <ellipse cx="46" cy="56" rx="7" ry="11" fill="white" stroke="none"/>
+          <ellipse cx="74" cy="56" rx="7" ry="11" fill="white" stroke="none"/>
+          <rect x="50" y="78" width="20" height="12" rx="3" fill="white" stroke="none"/>
+          <path d="M16 60a44 44 0 0 1 88 0" stroke-width="10" opacity=".25"/>
+        </svg>
+      </div>
+    </section>
+
+    <section id="chat" class="card">
+      <div class="row" style="justify-content:space-between">
+        <strong>Conversas</strong>
+        <div class="switch tiny">
+          <label><input type="checkbox" id="autoTTS"> TTS</label>
+          <label><input type="checkbox" id="persistHistory" checked> Salvar histórico</label>
+        </div>
+      </div>
+      <div class="log" id="log" aria-live="polite"></div>
+      <div class="bar">
+        <input id="prompt" type="text" placeholder="Toque e fale com a AA…"/>
+        <button id="send">Enviar</button>
+      </div>
+      <small class="muted">Dica: toque no símbolo para abrir o Menu Rápido.</small>
+    </section>
+
+    <section class="row">
+      <button class="chip" id="chipClear">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M3 6h18M19 6l-2 14H7L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        Limpar
+      </button>
+      <button class="chip" id="chipModel">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/></svg>
+        Modelo
+      </button>
+      <button class="chip" id="chipSystem">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 20v-8m0 0V4m0 8h8M12 12H4"/></svg>
+        System
+      </button>
+    </section>
+    <div class="footerPad"></div>
+  </main>
+
+  <!-- Bottom Sheet -->
+  <div class="sheet" id="sheet">
+    <div class="grab"></div>
+    <h3>Menu Rápido</h3>
+    <div class="grid">
+      <button class="chip" id="btnSettings">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06A2 2 0 1 1 3.2 17.9l.06-.06c.46-.46.6-1.14.33-1.74a1.65 1.65 0 0 0-1.51-1H2a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1c.27-.6.13-1.28-.33-1.74l-.06-.06A2 2 0 1 1 5.04 3.4l.06.06c.46.46 1.14.6 1.74.33.6-.27 1-.86 1-1.51V2a2 2 0 1 1 4 0v.09c0 .65.4 1.24 1 1.51.6.27 1.28.13 1.74-.33l.06-.06A2 2 0 1 1 20.8 6.1l-.06.06c-.46.46-.6 1.14-.33 1.74.27.6.86 1 1.51 1H22a2 2 0 1 1 0 4h-.09c-.65 0-1.24.4-1.51 1Z"/></svg>
+        Configurações
+      </button>
+      <button class="chip" id="btnExport">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 17V3m0 0L7 8m5-5 5 5"/><path d="M5 21h14"/></svg>
+        Exportar JSON
+      </button>
+      <button class="chip" id="btnImport">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 7v14m0 0 5-5m-5 5-5-5"/><path d="M19 3H5"/></svg>
+        Importar JSON
+      </button>
+      <button class="chip" id="btnAbout">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 8v6"/><circle cx="12" cy="7" r="1"/></svg>
+        Sobre
+      </button>
+    </div>
+    <div class="sp"></div>
+    <div id="settings" class="hidden">
+      <h3>Configurações</h3>
+      <div class="card" style="padding:10px">
+        <label class="tiny">OpenRouter API Key</label>
+        <input id="apiKey" type="password" placeholder="sk-or-v1-..."/>
+        <div class="sp"></div>
+        <label class="tiny">Modelo (ex: openrouter/auto, perplexity/llama-3.1-sonar-small-chat, anthropic/claude-3.5-sonnet)</label>
+        <input id="model" type="text" value="openrouter/auto"/>
+        <div class="sp"></div>
+        <label class="tiny">System prompt</label>
+        <textarea id="system" placeholder="personalize a AA aqui">Você é a AA Dual.Infodose. Responda curto, útil, amigável, em pt‑BR, com foco mobile.</textarea>
+        <div class="sp"></div>
+        <button id="saveCfg">Salvar</button>
+      </div>
+    </div>
+    <div class="footerPad"></div>
+  </div>
+
+  <input id="filePick" type="file" accept="application/json" class="hidden"/>
+
+  <script>
+    const $ = (q)=>document.querySelector(q);
+    const logEl = $('#log');
+    const promptEl = $('#prompt');
+    const sendBtn = $('#send');
+    const sheet = $('#sheet');
+    const menuBtn = $('#menuBtn');
+    const homePill = $('#homePill');
+    const symbolPad = $('#symbolPad');
+    const apiKeyEl = $('#apiKey'), modelEl = $('#model'), systemEl = $('#system');
+    const persistHistoryEl = $('#persistHistory');
+    const autoTTSEl = $('#autoTTS');
+
+    const store = {
+      get k(){ try{return JSON.parse(localStorage.getItem('dual_cfg')||'{}');}catch(e){return{};}},
+      set k(v){ localStorage.setItem('dual_cfg', JSON.stringify(v)); },
+      get hist(){ try{return JSON.parse(localStorage.getItem('dual_hist')||'[]');}catch(e){return[];}},
+      set hist(v){ localStorage.setItem('dual_hist', JSON.stringify(v));}
+    };
+
+    function speak(text){
+      try{
+        if(!autoTTSEl.checked) return;
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'pt-BR'; u.rate=1; u.pitch=1; u.volume=1;
+        speechSynthesis.cancel(); speechSynthesis.speak(u);
+      }catch(e){console.warn(e)}
+    }
+
+    function addMsg(role, content){
+      const div = document.createElement('div');
+      div.className = 'msg ' + (role==='user'?'you':'ai');
+      div.textContent = content;
+      logEl.appendChild(div);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function loadFromLS(){
+      const {apiKey, model, system, persist=true, autoTTS=false} = store.k;
+      apiKeyEl.value = apiKey||'';
+      modelEl.value = model||'openrouter/auto';
+      systemEl.value = system||systemEl.value;
+      persistHistoryEl.checked = !!persist;
+      autoTTSEl.checked = !!autoTTS;
+      // restore history
+      const hist = store.hist;
+      hist.forEach(m=> addMsg(m.role, m.content));
+    }
+    loadFromLS();
+
+    function toggleSheet(open){ sheet.classList[open?'add':'remove']('open'); }
+    menuBtn.addEventListener('click', ()=> toggleSheet(true));
+    homePill.addEventListener('click', ()=> toggleSheet(true));
+    sheet.addEventListener('click', (e)=>{
+      if(e.target===sheet) toggleSheet(false);
+    });
+    symbolPad.addEventListener('click', ()=> toggleSheet(true));
+
+    $('#btnSettings').addEventListener('click', ()=> $('#settings').classList.toggle('hidden'));
+    $('#btnAbout').addEventListener('click', ()=>{
+      alert('Dual.Infodose — Minimal Mobile\nRenderResponse + OpenRouter + LocalStorage\nFeito para 100% celular, toque primeiro.');
+    });
+    $('#btnExport').addEventListener('click', ()=>{
+      const data = {cfg: store.k, hist: store.hist};
+      const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = 'dual_infodose_export.json'; a.click();
+      URL.revokeObjectURL(a.href);
+    });
+    $('#btnImport').addEventListener('click', ()=> $('#filePick').click());
+    $('#filePick').addEventListener('change', (e)=>{
+      const f = e.target.files[0]; if(!f) return;
+      const r = new FileReader();
+      r.onload = ()=>{
+        try{
+          const data = JSON.parse(r.result);
+          if(data.cfg) store.k = data.cfg; if(data.hist) store.hist = data.hist;
+          logEl.innerHTML=''; loadFromLS(); alert('Importado.');
+        }catch(err){ alert('Arquivo inválido.');}
+      };
+      r.readAsText(f);
+    });
+
+    $('#saveCfg').addEventListener('click', ()=>{
+      store.k = {
+        apiKey: apiKeyEl.value.trim(),
+        model: modelEl.value.trim(),
+        system: systemEl.value,
+        persist: persistHistoryEl.checked,
+        autoTTS: autoTTSEl.checked
+      };
+      alert('Configurações salvas.');
+    });
+
+    $('#chipClear').addEventListener('click', ()=>{
+      logEl.innerHTML='';
+      if(persistHistoryEl.checked) store.hist = [];
+    });
+    $('#chipModel').addEventListener('click', ()=>{
+      toggleSheet(true); $('#settings').classList.remove('hidden'); modelEl.focus();
+    });
+    $('#chipSystem').addEventListener('click', ()=>{
+      toggleSheet(true); $('#settings').classList.remove('hidden'); systemEl.focus();
+    });
+
+    async function callOpenRouter(messages){
+      const {apiKey, model='openrouter/auto'} = store.k;
+      if(!apiKey){ alert('Informe a OpenRouter API Key nas Configurações.'); toggleSheet(true); $('#settings').classList.remove('hidden'); return null; }
+      try{
+        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json',
+            'Authorization': 'Bearer ' + apiKey,
+            'HTTP-Referer': location.href,
+            'X-Title': 'Dual.Infodose Minimal Mobile'
+          },
+          body: JSON.stringify({ model, messages, temperature:0.7 })
+        });
+        const data = await res.json();
+        if(data.error){ throw new Error(data.error.message || 'Erro na API'); }
+        const text = data.choices?.[0]?.message?.content?.trim() || '(sem resposta)';
+        return text;
+      }catch(err){
+        console.error(err);
+        alert('Falha ao conectar ao OpenRouter: ' + err.message);
+        return null;
+      }
+    }
+
+    function historyPush(role, content){
+      if(!persistHistoryEl.checked) return;
+      const hist = store.hist; hist.push({role, content}); store.hist = hist.slice(-64);
+    }
+
+    async function send(){
+      const q = promptEl.value.trim(); if(!q) return;
+      promptEl.value='';
+      addMsg('user', q); historyPush('user', q);
+
+      const base = [
+        {role:'system', content: store.k.system || 'Você é a AA Dual.Infodose. Responda curto e claro, pt-BR.'}
+      ];
+      const hist = persistHistoryEl.checked ? store.hist.filter(m=>m.role!=='system').slice(-10) : [];
+      const messages = base.concat(hist).concat([{role:'user', content:q}]);
+
+      sendBtn.disabled = true; sendBtn.textContent='…';
+      const r = await callOpenRouter(messages);
+      sendBtn.disabled = false; sendBtn.textContent='Enviar';
+      if(r!=null){
+        addMsg('assistant', r); historyPush('assistant', r); speak(r);
+      }
+    }
+
+    sendBtn.addEventListener('click', send);
+    promptEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); send(); }});
+
+    // gesture: swipe down to close sheet
+    let startY = null;
+    sheet.addEventListener('touchstart', e=>{ startY = e.touches[0].clientY; }, {passive:true});
+    sheet.addEventListener('touchmove', e=>{
+      if(startY==null) return;
+      const dy = e.touches[0].clientY - startY;
+      if(dy>40) toggleSheet(false);
+    }, {passive:true});
+  </script>
+</body>
+</html>

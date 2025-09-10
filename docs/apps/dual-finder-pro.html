@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Dual Finder Pro · Cérebro Local</title>
+<style>
+  /* ====== Dual UI · Level A ====== */
+  :root{
+    --bg:#0b0b0f; --panel:#12121a; --ink:#eaeaf7; --mut:#aeb0c7; --acc:#8a5cff;
+    --ok:#29d3a0; --bad:#ff6b6b; --line:#1f2030; --glow:#8a5cff33; --ring:#29d3ff44;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:
+      radial-gradient(60vw 60vh at 80% 0%, #121224 0%, transparent 60%),
+      radial-gradient(80vw 80vh at 0% 100%, #0f0f1a 0%, transparent 60%),
+      var(--bg);
+    color:var(--ink); font:500 16px/1.55 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    letter-spacing:.2px;
+  }
+  .wrap{max-width:1040px; margin:0 auto; padding:20px clamp(14px,4vw,28px) 60px}
+  .hdr{display:flex;align-items:center;gap:16px;margin:8px 0 16px}
+  .pill{
+    display:inline-flex;align-items:center;gap:10px;
+    background:linear-gradient(180deg,#171727,#12121a);
+    border:1px solid var(--line); color:var(--ink);
+    padding:10px 14px; border-radius:999px; box-shadow:0 0 0 1px #000 inset, 0 8px 20px #0008;
+    cursor:pointer; user-select:none; transition:.2s transform;
+  }
+  .pill:active{transform:translateY(1px)}
+  .mut{color:var(--mut)}
+  h1{font-size:20px;margin:0 0 2px}
+  .sub{font-size:13px;color:var(--mut);margin:0}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+  .col-8{grid-column: span 8}
+  .col-4{grid-column: span 4}
+  @media (max-width:920px){ .col-8,.col-4{grid-column:1/-1} }
+
+  .card{
+    background:linear-gradient(180deg,#141424,#101018);
+    border:1px solid var(--line); border-radius:18px; padding:14px;
+    box-shadow:0 8px 40px #0009, 0 0 0 1px #000 inset;
+  }
+  .title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .title h3{margin:0;font-size:16px}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  input,button,textarea{
+    background:#0f0f18; color:var(--ink);
+    border:1px solid #202038; border-radius:12px; padding:12px;
+  }
+  input,textarea{outline:none; width:100%}
+  button{cursor:pointer}
+  .btn{background:#17172a;border:1px solid #272746}
+  .btn-acc{background:linear-gradient(180deg,#6a4cff,#8a5cff); border:none; color:white;
+           box-shadow:0 8px 24px var(--glow), 0 0 0 1px #000 inset}
+  .btn-ok{background:#13231a;border:1px solid #1d3b27}
+  .btn-bad{background:#2a1414;border:1px solid #3e1e1e}
+  .kbd{font:600 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:#0c0c12; border:1px solid #202038; border-radius:6px; padding:3px 6px}
+  .tag{display:inline-flex;align-items:center;gap:8px;border:1px solid #2a2a44;border-radius:999px;padding:6px 10px;font-size:13px;color:var(--mut)}
+  .chip{display:inline-flex;align-items:center;gap:10px;border:1px solid #2a2a44;border-radius:12px;padding:8px 10px;margin:6px 6px 0 0}
+  .ok{border-color:#1d3b27}
+  .bad{border-color:#3e1e1e}
+  .warn{background:#1b1422;border:1px solid #332244;border-radius:12px;padding:10px;margin:10px 0}
+  .okmsg{background:#13231a;border:1px solid #1d3b27;border-radius:12px;padding:10px;margin:10px 0}
+  .mut2{opacity:.75}
+  .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+
+  /* floating footer */
+  .footer{
+    position:fixed; left:50%; transform:translateX(-50%);
+    bottom:14px; display:flex; gap:10px; flex-wrap:wrap;
+    background:linear-gradient(180deg,#131322,#0f0f18);
+    border:1px solid var(--line); border-radius:16px; padding:8px 12px;
+    box-shadow:0 8px 40px #000a, 0 0 0 1px #000 inset;
+    backdrop-filter:blur(8px);
+  }
+
+  /* log panel */
+  .log{
+    position:fixed; right:14px; bottom:74px; width:min(92vw,520px); max-height:45vh; overflow:auto;
+    background:linear-gradient(180deg,#0f0f18,#0c0c12); border:1px solid #24243a; border-radius:14px; padding:10px;
+    box-shadow:0 8px 40px #000a, 0 0 0 1px #000 inset; display:none;
+  }
+  .log pre{margin:0; white-space:pre-wrap}
+  .log .hdr{display:flex;align-items:center;gap:8px;justify-content:space-between;margin:0 0 8px}
+  .dot{width:8px;height:8px;border-radius:50%;background:#444}
+  .dot.ok{background:var(--ok)} .dot.bad{background:var(--bad)}
+  .hint{font-size:12px;color:var(--mut)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hdr">
+      <button class="pill" id="btnLogo">🔘</button>
+      <div>
+        <h1>Dual Finder Pro — <span class="mut">Cérebro Local</span></h1>
+        <p class="sub">Scan de LAN, teste de porta, bind do backend, memória e logs — tudo por aqui.</p>
+      </div>
+    </div>
+
+    <div id="httpsWarn" class="warn" style="display:none">
+      <b>Aviso HTTPS/HTTP:</b> Seu Hub está em <span id="proto"></span>. Requisições para <span class="kbd">http://IP:PORTA</span> podem ser bloqueadas no iOS.
+      Para dev, abra o Hub em HTTP ou use túnel HTTPS para o backend do Android.
+    </div>
+
+    <div class="grid" style="margin-top:10px">
+      <div class="col-8">
+        <div class="card">
+          <div class="title"><h3>🔎 Varredura rápida</h3><span class="hint">Wi-Fi /24 comum + portas padrão</span></div>
+          <div class="row" style="margin-bottom:8px">
+            <button class="btn pill" id="btnScan">Procurar cérebros</button>
+            <button class="btn pill" id="btnStop">Parar</button>
+            <span class="mut" id="scanState">—</span>
+          </div>
+          <div id="hosts" class="row"></div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <div class="title"><h3>🧪 Teste manual</h3><span class="hint">Informe <span class="kbd">http://IP:PORTA</span></span></div>
+          <div class="row">
+            <input id="ipManual" placeholder="http://192.168.0.23:8000"/>
+            <button class="btn-ok pill" id="btnTest">Testar</button>
+            <button class="btn-acc pill" id="btnUse">⚡ Usar como backend</button>
+          </div>
+          <div id="testOut" class="mut mono" style="margin-top:8px">—</div>
+          <div class="row" style="margin-top:8px">
+            <button class="btn pill" id="btnOpenApps">📜 Abrir apps.json</button>
+            <button class="btn pill" id="btnDownloadApps">⬇️ Baixar apps.json</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-4">
+        <div class="card">
+          <div class="title"><h3>⚙️ Backend atual</h3><span class="hint">preferência do Hub</span></div>
+          <div id="current" class="okmsg" style="display:none"></div>
+          <div class="mut small">O Hub usa <span class="kbd">localStorage.DUAL_BACKEND</span>. Se vazio, cai para a nuvem (seu backend padrão).</div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <div class="title"><h3>💾 Memória</h3><span class="hint">exportar/importar</span></div>
+          <div class="row">
+            <button class="btn pill" id="btnExport">⬇️ Exportar</button>
+            <label class="pill" style="cursor:pointer">
+              ⬆️ Importar <input id="fileImport" type="file" accept=".json,.jsonl" hidden>
+            </label>
+          </div>
+          <p class="mut small" style="margin-top:8px">
+            Exporta apenas chaves locais do Hub (ex.: <span class="kbd">DUAL_*</span>, <span class="kbd">dual_*</span>, <span class="kbd">*memory*</span>).
+            Para trocar estrutura do cérebro, use o <span class="kbd">/brain/apps.json</span> do Android.
+          </p>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <div class="title"><h3>🧪 Modo Dev</h3><span class="hint">logs e rede</span></div>
+          <div class="row">
+            <button class="btn pill" id="btnLog">Ver log</button>
+            <button class="btn pill" id="btnClearLog">Limpar</button>
+          </div>
+          <ul class="mut small" style="margin:10px 0 0 18px">
+            <li>Captura <span class="kbd">console.log/error</span> e chamadas <span class="kbd">fetch</span> dessa página</li>
+            <li>Mostra falhas de CORS/mixed content direto no celular</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- floating quick actions -->
+  <div class="footer">
+    <button class="pill" id="quickLAN">LAN</button>
+    <button class="pill" id="quickCloud">Cloud</button>
+    <button class="pill" id="quickApps">apps.json</button>
+    <button class="pill" id="quickHealth">health</button>
+  </div>
+
+  <!-- log panel -->
+  <div class="log" id="logPanel">
+    <div class="hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="dot" id="netDot"></div>
+        <strong>Logs</strong>
+      </div>
+      <div class="hint" id="logHint">—</div>
+    </div>
+    <pre id="logOut">[log pronto]</pre>
+  </div>
+
+<script>
+(function(){
+  const $ = s=>document.querySelector(s);
+  const hostsEl = $('#hosts'), outEl = $('#testOut'), stateEl = $('#scanState');
+  const ipManual = $('#ipManual'), current = $('#current');
+
+  // HTTPS notice
+  const proto = location.protocol.replace(':','');
+  $('#proto').textContent = proto.toUpperCase();
+  if (proto === 'https') $('#httpsWarn').style.display='';
+
+  // backend atual
+  function refreshCurrent(){
+    const cur = localStorage.getItem('DUAL_BACKEND');
+    if (cur){
+      current.style.display='block';
+      current.innerHTML = `<div><b>Backend:</b> <span class="kbd">${cur}</span></div>
+      <div class="row" style="margin-top:8px">
+        <button class="pill btn" id="btnCloud">☁️ Voltar p/ Cloud</button>
+        <button class="pill btn" id="btnOpenHealth">🚑 Abrir /health</button>
+        <button class="pill btn" id="btnOpenApps2">📜 Abrir apps.json</button>
+      </div>`;
+      $('#btnCloud').onclick = ()=>{ localStorage.removeItem('DUAL_BACKEND'); location.reload(); };
+      $('#btnOpenHealth').onclick = ()=> window.open(cur.replace(/\/$/,'')+'/health','_blank');
+      $('#btnOpenApps2').onclick = ()=> window.open(cur.replace(/\/$/,'')+'/brain/apps.json','_blank');
+    } else {
+      current.style.display='none';
+    }
+  }
+  refreshCurrent();
+
+  // fetch com timeout + log
+  async function fjson(url, ms=2000){
+    const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(), ms);
+    log(`[fetch] ${url}`);
+    try{
+      const r = await fetch(url, {signal:ctrl.signal, cache:'no-store'});
+      clearTimeout(t);
+      if(!r.ok) throw new Error(r.status+' '+r.statusText);
+      const j = await r.json();
+      log(`[ok] ${url}`);
+      net(true);
+      return j;
+    }catch(e){
+      clearTimeout(t);
+      log(`[fail] ${url} :: ${e}`, true);
+      net(false);
+      throw e;
+    }
+  }
+
+  // Testar manual
+  $('#btnTest').onclick = async ()=>{
+    const base = ipManual.value.trim().replace(/\/$/,'');
+    if(!base) return;
+    outEl.textContent='testando…';
+    try{
+      const j = await fjson(`${base}/health`, 2500);
+      outEl.textContent = 'OK: '+JSON.stringify(j);
+    }catch(e){ outEl.textContent = 'Falhou: '+e; }
+  };
+  $('#btnUse').onclick = ()=>{
+    const base = ipManual.value.trim().replace(/\/$/,'');
+    if(!base) return alert('Informe http://IP:PORTA');
+    localStorage.setItem('DUAL_BACKEND', base);
+    alert('Backend definido! Abra qualquer app do Hub para usar este cérebro.');
+    location.reload();
+  };
+  $('#btnOpenApps').onclick = ()=>{
+    const base = ipManual.value.trim().replace(/\/$/,'');
+    if(!base) return alert('Informe http://IP:PORTA');
+    window.open(`${base}/brain/apps.json`,'_blank');
+  };
+  $('#btnDownloadApps').onclick = async ()=>{
+    const base = ipManual.value.trim().replace(/\/$/,'');
+    if(!base) return alert('Informe http://IP:PORTA');
+    try{
+      const r = await fetch(`${base}/brain/apps.json`, {cache:'no-store'});
+      if(!r.ok) throw new Error(r.status);
+      const blob = await r.blob();
+      const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='apps.json'; a.click();
+    }catch(e){ alert('Falhou: '+e); }
+  };
+
+  // Varredura leve
+  let stop=false;
+  $('#btnStop').onclick=()=>{ stop=true; stateEl.textContent='parado'; };
+  $('#btnScan').onclick = async ()=>{
+    stop=false; hostsEl.innerHTML=''; stateEl.textContent='varrendo…';
+    const ports=[8000,3000,5173]; const bases=[];
+    for(const a of [0,1]) for(let i=1;i<=254;i++) bases.push(`http://192.168.${a}.${i}`);
+    for(let i=1;i<=254;i++) bases.push(`http://10.0.0.${i}`);
+    let found=0,tried=0;
+    for(const base of bases){
+      if(stop) break;
+      for(const p of ports){
+        if(stop) break;
+        const url = `${base}:${p}/health`;
+        try{
+          tried++;
+          const j = await fjson(url, 700);
+          addHost(`${base}:${p}`, j); found++;
+        }catch(e){ /*silêncio*/ }
+        if(tried%60===0) stateEl.textContent=`varrendo… ${tried} testes, ${found} encontrados`;
+      }
+    }
+    stateEl.textContent=`feito. ${tried} testes, ${found} encontrados`;
+  };
+  function addHost(base, info){
+    const box = document.createElement('div');
+    box.className='chip ok';
+    box.innerHTML = `🧠 <span class="mono">${base}</span>
+    <button class="pill btn" data-act="use">⚡</button>
+    <button class="pill btn" data-act="apps">📜</button>`;
+    box.onclick = (e)=>{
+      const act = e.target?.dataset?.act; if(!act) return;
+      if(act==='use'){ localStorage.setItem('DUAL_BACKEND', base); alert('Backend definido: '+base); location.reload(); }
+      if(act==='apps'){ window.open(`${base}/brain/apps.json`, '_blank'); }
+    };
+    hostsEl.appendChild(box);
+  }
+
+  // Export/Import memória local
+  $('#btnExport').onclick = ()=>{
+    const dump={};
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i); if(!k) continue;
+      if(k.startsWith('DUAL_')||k.startsWith('dual_')||k.includes('memory')) dump[k]=localStorage.getItem(k);
+    }
+    const blob=new Blob([JSON.stringify(dump,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='dual-memory-export.json'; a.click();
+  };
+  $('#fileImport').onchange = async (e)=>{
+    const f=e.target.files?.[0]; if(!f) return;
+    try{
+      const j=JSON.parse(await f.text());
+      Object.entries(j).forEach(([k,v])=> localStorage.setItem(k, String(v)));
+      alert('Memória importada. Recarregando.'); location.reload();
+    }catch(err){ alert('Arquivo inválido: '+err); }
+  };
+
+  // Ações rápidas (footer)
+  $('#quickLAN').onclick = ()=> ipManual.value = 'http://192.168.0.23:8000';
+  $('#quickCloud').onclick = ()=> { localStorage.removeItem('DUAL_BACKEND'); refreshCurrent(); alert('Cloud preferida.'); };
+  $('#quickApps').onclick = ()=> {
+    const cur = localStorage.getItem('DUAL_BACKEND');
+    if(!cur) return alert('Defina um backend primeiro.');
+    window.open(cur.replace(/\/$/,'')+'/brain/apps.json','_blank');
+  };
+  $('#quickHealth').onclick = ()=> {
+    const cur = localStorage.getItem('DUAL_BACKEND');
+    if(!cur) return alert('Defina um backend primeiro.');
+    window.open(cur.replace(/\/$/,'')+'/health','_blank');
+  };
+
+  // Log dev
+  const logPanel = $('#logPanel'), logOut = $('#logOut'), logHint = $('#logHint'), netDot = $('#netDot');
+  let logBuf = [];
+  const push = (s, err=false)=>{
+    const line = (err?'[ERR] ':'')+s;
+    logBuf.push(line);
+    if(logBuf.length>400) logBuf.shift();
+    logOut.textContent = logBuf.join('\n');
+  };
+  function log(s,err=false){ push(s,err); try{err?console.error(s):console.log(s);}catch(_){} }
+  function net(ok){ netDot.className = 'dot '+(ok?'ok':'bad'); }
+  $('#btnLog').onclick = ()=>{ logPanel.style.display = (logPanel.style.display==='none'||!logPanel.style.display)?'block':'none'; };
+  $('#btnClearLog').onclick = ()=>{ logBuf=[]; logOut.textContent='[limpo]'; };
+  // intercepta console
+  const _cl = console.log.bind(console), _ce = console.error.bind(console);
+  console.log = (...a)=>{push(a.join(' ')); _cl(...a);};
+  console.error = (...a)=>{push(a.join(' '), true); _ce(...a);};
+  // fetch wrapper (somente dessa página)
+  const _fetch = window.fetch.bind(window);
+  window.fetch = async (...args)=>{ try{ const r=await _fetch(...args); return r; }catch(e){ push('[fetch err] '+e,true); throw e; } };
+
+})();
+</script>
+</body>
+</html>

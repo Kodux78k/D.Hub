@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+  <title>Dual.Infodose — Nebula Pro (Streaming + ASCII)</title>
+  <meta name="theme-color" content="#0b0b0f"/>
+  <style>
+    :root{
+      --ink:#eef2ff; --muted:#aeb7d6; --border:rgba(255,255,255,.16);
+      --panel:rgba(0,0,0,.45); --radius:18px; --safe: env(safe-area-inset-bottom, 16px);
+      --glow:0 0 28px rgba(255,255,255,.14), 0 0 64px rgba(255,255,255,.10);
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--ink);
+      background:
+        radial-gradient(1200px 700px at 50% -20%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(900px 900px at 50% 120%, rgba(255,255,255,.05), transparent 60%),
+        linear-gradient(42deg,#f0f,#0ff);
+      background-attachment: fixed;
+      font: 400 16px/1.38 ui-rounded, system-ui, -apple-system, Inter, Segoe UI, Roboto, Arial;
+      display:flex; flex-direction:column;
+    }
+    header{position:sticky; top:0; z-index:5; display:flex; justify-content:space-between; align-items:center;
+      padding:14px 16px calc(10px + var(--safe)) 16px; background:linear-gradient(to bottom, rgba(0,0,0,.55), rgba(0,0,0,.25) 70%, transparent);
+      backdrop-filter: blur(14px); border-bottom:1px solid var(--border)}
+    .brand{display:flex; gap:10px; align-items:center}
+    .pill{width:90px;height:40px;border-radius:24px;overflow:hidden;display:grid;place-items:center;background:#07070a;box-shadow:inset 0 0 0 1px rgba(255,255,255,.10), var(--glow)}
+    .menuBtn{width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.08);display:grid;place-items:center;border:1px solid var(--border);box-shadow:var(--glow)}
+    main{flex:1; display:flex; flex-direction:column; padding:12px 14px 0 14px; gap:12px;}
+    .card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:12px; box-shadow:var(--glow); backdrop-filter: blur(8px)}
+    .center{display:grid; place-items:center}
+    .symbolPad{width:min(86vw, 440px); aspect-ratio: 2.2 / 1; position:relative; display:grid; place-items:center; border-radius:30px; background:#07070a; overflow:hidden; box-shadow:inset 0 0 0 2px rgba(255,255,255,.12), var(--glow)}
+    .symbolPad .ring{position:absolute; inset:0; border-radius:30px; box-shadow:inset 0 0 0 2px rgba(255,255,255,.10)}
+    .symbolPad .ring.r2{inset:8px; animation:pulse 3.4s ease-in-out infinite}
+    .symbolPad .ring.r3{inset:16px; animation:pulse 3.4s ease-in-out .9s infinite}
+    @keyframes pulse{0%,100%{box-shadow:inset 0 0 0 2px rgba(255,255,255,.10)}50%{box-shadow:inset 0 0 0 2px rgba(255,255,255,.26)}}
+    .row{display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+    .chip{flex:1 1 auto; min-width:120px; display:flex; align-items:center; justify-content:center; gap:8px; padding:12px 14px; border-radius:16px; border:1px solid var(--border); background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04))}
+    #chat{display:flex; flex-direction:column; gap:8px; height:48vh}
+    .log{flex:1; overflow:auto; padding:10px 6px; display:flex; flex-direction:column; gap:8px; scroll-behavior:smooth}
+    .msg{max-width:86%; padding:10px 12px; border-radius:14px; border:1px solid var(--border); box-shadow:var(--glow); white-space:pre-wrap}
+    .you{align-self:flex-end; background:rgba(255,255,255,.10)}
+    .ai{align-self:flex-start; background:rgba(0,0,0,.25)}
+    .bar{display:flex; gap:8px; align-items:center}
+    input, textarea{background:#0b0b12; color:var(--ink); border:1px solid var(--border); border-radius:12px; padding:12px 12px; width:100%}
+    button{background:#0e0e16; color:var(--ink); border:1px solid rgba(255,255,255,.22); border-radius:12px; padding:12px 16px; font-weight:700}
+    small{color:var(--muted)}
+    .toggles{display:flex; gap:8px; align-items:center}
+    .toggleBtn{display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius:14px; border:1px solid var(--border); background:rgba(255,255,255,.08); box-shadow:var(--glow); font-weight:700}
+    .toggleBtn .dot{width:10px;height:10px;border-radius:50%;background:#aaa}
+    .toggleBtn.on{background:rgba(255,255,255,.16)}
+    .toggleBtn.on .dot{background:#5ef3ff; box-shadow:0 0 12px #5ef3ffaa}
+    /* face moods */
+    .mood{filter: drop-shadow(0 0 16px rgba(255,255,255,.22)); transition: filter .2s ease}
+    .m-thinking{filter: drop-shadow(0 0 16px rgba(255,255,0,.35))}
+    .m-speaking{filter: drop-shadow(0 0 16px rgba(0,255,255,.35))}
+    .m-saved{filter: drop-shadow(0 0 16px rgba(0,255,128,.45))}
+    .m-error{filter: drop-shadow(0 0 16px rgba(255,64,64,.45))}
+    .m-surprise{filter: drop-shadow(0 0 16px rgba(255,128,0,.5))}
+    .m-excited{filter: drop-shadow(0 0 20px rgba(255,0,255,.5))}
+    .m-sleep{filter: drop-shadow(0 0 20px rgba(128,128,255,.45))}
+    /* ASCII overlay */
+    .ascii{
+      position:fixed; left:10px; right:10px; top:64px; z-index:6;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      color:#eaffff; white-space:pre; text-align:center; pointer-events:none;
+      text-shadow:0 0 14px rgba(0,255,255,.4);
+      opacity:0; transform:translateY(-8px); transition:opacity .18s ease, transform .18s ease;
+    }
+    .ascii.show{opacity:1; transform:translateY(0)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="pill" id="homePill">
+        <svg viewBox="0 0 120 40" width="76" height="26" aria-hidden="true">
+          <path d="M10 24c12-12 22-12 34 0s22 12 34 0" stroke="white" stroke-width="4" fill="none"/>
+          <path d="M10 28c12-12 22-12 34 0s22 12 34 0" stroke="white" stroke-width="3" opacity=".9" fill="none"/>
+          <circle cx="45" cy="21" r="2.4" fill="white"/>
+          <path d="M89 19l6 3-6 3z" fill="white"/>
+        </svg>
+      </div>
+      <div>
+        <div style="font-weight:900; letter-spacing:.4px">Dual.Infodose</div>
+        <small>Nebula Pro • streaming + ASCII</small>
+      </div>
+    </div>
+    <button class="menuBtn" id="menuBtn" aria-label="Menu">
+      <svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 6h16M4 12h16M4 18h16" stroke="white"/></svg>
+    </button>
+  </header>
+
+  <div class="ascii" id="ascii"></div>
+
+  <main>
+    <section class="center">
+      <div class="symbolPad" id="pad">
+        <div class="ring"></div><div class="ring r2"></div><div class="ring r3"></div>
+        <svg id="face" class="mood" viewBox="0 0 120 120" width="90" height="90">
+          <circle cx="60" cy="60" r="44" stroke="white" stroke-width="8" fill="none" opacity=".9"/>
+          <g id="eyes">
+            <ellipse id="eyeL" cx="46" cy="56" rx="13" ry="10" fill="white" opacity=".95"/>
+            <ellipse id="eyeR" cx="74" cy="56" rx="13" ry="10" fill="white" opacity=".95"/>
+            <circle id="pupilL" cx="46" cy="56" r="4" fill="#090a10"/>
+            <circle id="pupilR" cx="74" cy="56" r="4" fill="#090a10"/>
+          </g>
+          <path id="mouth" d="M45 84q15 10 30 0" stroke="white" stroke-width="6" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </section>
+
+    <section id="chat" class="card">
+      <div class="row">
+        <strong>Conversas</strong>
+        <div class="toggles">
+          <button id="btnTTS" class="toggleBtn" aria-pressed="false"><span class="dot"></span>🔊 TTS</button>
+          <button id="btnSave" class="toggleBtn on" aria-pressed="true"><span class="dot"></span>💾 Salvar</button>
+        </div>
+      </div>
+      <div class="log" id="log" aria-live="polite"></div>
+      <div class="bar">
+        <input id="prompt" type="text" placeholder="Toque e fale com a AA…"/>
+        <button id="send">Enviar</button>
+      </div>
+      <small>ASCII de eventos aparece no topo (ex.: ⊙ ⊙ carregando docs).</small>
+    </section>
+
+    <section class="row" style="justify-content:center">
+      <button class="chip" id="chipClear">🧹 Limpar</button>
+      <button class="chip" id="chipLoad">📄 Simular Docs</button>
+      <button class="chip" id="chipSleep">💤 Dormir</button>
+      <button class="chip" id="chipExcited">⚡ Empolgado</button>
+      <button class="chip" id="chipSurprise">😮 Surpresa</button>
+    </section>
+    <div style="height:max(20px,var(--safe))"></div>
+  </main>
+
+  <script>
+    const $ = (q)=>document.querySelector(q);
+    const logEl=$('#log'), promptEl=$('#prompt'), sendBtn=$('#send'), ascii=$('#ascii');
+    const face=$('#face'), mouth=$('#mouth'), pupilL=$('#pupilL'), pupilR=$('#pupilR'), eyeL=$('#eyeL'), eyeR=$('#eyeR'), pad=$('#pad');
+    const btnTTS=$('#btnTTS'), btnSave=$('#btnSave');
+    const cfgKey='dual_cfg', histKey='dual_hist';
+    const store={ get cfg(){try{return JSON.parse(localStorage.getItem(cfgKey)||'{}')}catch(_){return{}}}, set cfg(v){localStorage.setItem(cfgKey, JSON.stringify(v))},
+                  get hist(){try{return JSON.parse(localStorage.getItem(histKey)||'[]')}catch(_){return[]}}, set hist(v){localStorage.setItem(histKey, JSON.stringify(v))} }
+    // toggles
+    function setToggle(el,on){ el.classList.toggle('on', !!on); el.setAttribute('aria-pressed', on?'true':'false'); }
+    function loadToggles(){ const {autoTTS=false, persist=true}=store.cfg; setToggle(btnTTS, autoTTS); setToggle(btnSave, persist!==false); }
+    loadToggles();
+    btnTTS.onclick=()=>{ const c=store.cfg; c.autoTTS=!(c.autoTTS); store.cfg=c; setToggle(btnTTS,c.autoTTS); wink(); };
+    btnSave.onclick=()=>{ const c=store.cfg; c.persist=!(c.persist!==false); store.cfg=c; setToggle(btnSave,c.persist!==false); cheer(); };
+
+    // face utils
+    const center={x:60,y:56}, maxOffset=5;
+    function lookAtPoint(px,py){ const rect=pad.getBoundingClientRect(); const x=(px-rect.left)/rect.width*120, y=(py-rect.top)/rect.height*120; const dx=Math.max(-maxOffset,Math.min(maxOffset,(x-center.x)/6)), dy=Math.max(-maxOffset,Math.min(maxOffset,(y-center.y)/6)); pupilL.setAttribute('cx',46+dx);pupilL.setAttribute('cy',56+dy);pupilR.setAttribute('cx',74+dx);pupilR.setAttribute('cy',56+dy); }
+    function mouthShape(s){ const M={neutral:"M45 84q15 10 30 0", speak:"M52 86q8 -6 16 0", flat:"M45 86H75", grin:"M42 82q18 16 36 0", o:"M58 86a6 6 0 1 0 4 0", wow:"M56 84a8 8 0 1 0 8 0"}; mouth.setAttribute('d', M[s]||M.neutral); }
+    function blink(){ eyeL.setAttribute('ry',2); eyeR.setAttribute('ry',2); setTimeout(()=>{eyeL.setAttribute('ry',10); eyeR.setAttribute('ry',10);},120); }
+    setInterval(()=>{ if(Math.random()<0.22) blink(); },1800);
+    function setMood(m){ face.className='mood'; // reset
+      const map={thinking:'m-thinking', speaking:'m-speaking', saved:'m-saved', error:'m-error', surprise:'m-surprise', excited:'m-excited', sleep:'m-sleep',
+        atlas:'m-excited', nova:'m-speaking', vitalis:'m-saved', pulse:'m-excited', artemis:'m-surprise', serena:'', kaos:'m-error', genus:'m-thinking', lumine:'', aion:'', rhea:'', horus:'m-excited'};
+      if(map[m]) face.classList.add(map[m]);
+      // mouth presets
+      if(m==='thinking') mouthShape('flat');
+      else if(m==='speaking') mouthShape('speak');
+      else if(m==='saved') mouthShape('grin');
+      else if(m==='error') mouthShape('o');
+      else if(m==='surprise') mouthShape('wow');
+      else if(m==='sleep') mouthShape('flat');
+      else mouthShape('neutral');
+    }
+    function wink(){ blink(); mouthShape('grin'); setTimeout(()=>mouthShape('neutral'),500); }
+    function cheer(){ setMood('saved'); setTimeout(()=>setMood(''),900); }
+    document.addEventListener('click', e=>{ if(!pad.contains(e.target)) lookAtPoint(e.clientX,e.clientY); });
+    pad.addEventListener('click', e=>{ lookAtPoint(e.clientX,e.clientY); wink(); });
+
+    // ASCII overlays for events
+    const asciiFrames={
+      loadingDocs: [
+        "carregando docs…\\n\\n  ⊙   ⊙\\n    —    ",
+        "carregando docs…\\n\\n   ⊙ ⊙ \\n   —  — ",
+        "carregando docs…\\n\\n    ⊙⊙  \\n     —— ",
+        "carregando docs…\\n\\n   ⊙ ⊙ \\n   —  — "
+      ],
+      saving: ["salvando…\\n\\n[==      ]","salvando…\\n\\n[====    ]","salvando…\\n\\n[======  ]","salvando…\\n\\n[========]"],
+      wake: ["ativando… \\n\\n ( •̀ ω •́ ) ✧","ativando… \\n\\n (•̀◡•́ )✧"]
+    };
+    let asciiTimer=null, asciiIndex=0;
+    function showASCII(sequenceKey, duration=1600){
+      const frames=asciiFrames[sequenceKey]||[sequenceKey];
+      clearInterval(asciiTimer); asciiIndex=0;
+      ascii.classList.add('show'); ascii.textContent=frames[0];
+      asciiTimer=setInterval(()=>{ asciiIndex=(asciiIndex+1)%frames.length; ascii.textContent=frames[asciiIndex]; }, 220);
+      setTimeout(()=>{ ascii.classList.remove('show'); clearInterval(asciiTimer); }, duration);
+    }
+
+    // speak
+    function speak(text){ try{ if(!store.cfg.autoTTS) return; const u=new SpeechSynthesisUtterance(text); u.lang='pt-BR'; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch(_){} }
+
+    // messages
+    function addMsg(role, content, streamingId){
+      let el=document.createElement('div'); el.className='msg '+(role==='user'?'you':'ai'); if(streamingId) el.id=streamingId; el.textContent=content; logEl.appendChild(el); logEl.scrollTop=logEl.scrollHeight; return el;
+    }
+    function pushHist(role, content){ if(store.cfg.persist!==false){ const h=store.hist; h.push({role, content}); store.hist=h.slice(-64);} }
+
+    // streaming to OpenRouter (SSE)
+    async function callOpenRouterStream(messages){
+      const {apiKey, model='openrouter/auto'}=store.cfg;
+      if(!apiKey){ setMood('error'); alert('Configure sua OpenRouter API Key.'); return null; }
+      try{
+        const res=await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey,'HTTP-Referer':location.href,'X-Title':'Dual Nebula Pro'},
+          body: JSON.stringify({model, messages, temperature:0.7, stream:true})
+        });
+        if(!res.ok){ throw new Error('HTTP '+res.status); }
+        return res.body;
+      }catch(err){ setMood('error'); showASCII('Erro API'); console.error(err); return null; }
+    }
+
+    // streaming mouth animation
+    let talkTimer=null;
+    function startTalking(){ clearInterval(talkTimer); talkTimer=setInterval(()=>{ mouthShape(Math.random()<.5?'speak':'neutral'); }, 90); }
+    function stopTalking(){ clearInterval(talkTimer); mouthShape('neutral'); }
+
+    async function send(){
+      const q=promptEl.value.trim(); if(!q) return;
+      promptEl.value=''; addMsg('user', q); pushHist('user', q);
+      setMood('thinking'); showASCII('wake', 800);
+
+      const base=[{role:'system', content: store.cfg.system || 'Você é a AA Dual.Infodose. Curta e útil.'}];
+      const messages=base.concat([{role:'user',content:q}]);
+
+      sendBtn.disabled=true; sendBtn.textContent='…';
+      const stream=await callOpenRouterStream(messages);
+      if(!stream){ sendBtn.disabled=false; sendBtn.textContent='Enviar'; return; }
+
+      setMood('speaking'); startTalking();
+      const id='ai_'+Date.now();
+      const outEl=addMsg('assistant','',id);
+
+      const reader=stream.getReader(); const decoder=new TextDecoder();
+      let buffer='';
+      while(true){
+        const {value, done}=await reader.read();
+        if(done) break;
+        buffer+=decoder.decode(value, {stream:true});
+        // parse SSE lines
+        const parts=buffer.split("\\n\\n");
+        for(let i=0;i<parts.length-1;i++){
+          const chunk=parts[i];
+          if(chunk.startsWith("data: ")){
+            const jsonStr=chunk.slice(6);
+            if(jsonStr==="[DONE]") continue;
+            try{
+              const data=JSON.parse(jsonStr);
+              const delta=data.choices?.[0]?.delta?.content || "";
+              if(delta){
+                outEl.textContent += delta;
+                logEl.scrollTop=logEl.scrollHeight;
+              }
+            }catch(_){/* ignore */}
+          }
+        }
+        buffer=parts[parts.length-1];
+      }
+      stopTalking(); setMood(''); sendBtn.disabled=false; sendBtn.textContent='Enviar';
+      pushHist('assistant', outEl.textContent); speak(outEl.textContent);
+    }
+
+    // buttons
+    $('#chipClear').onclick=()=>{ logEl.innerHTML=''; if(store.cfg.persist!==false) store.hist=[]; cheer(); };
+    $('#chipLoad').onclick=()=>{ setMood('thinking'); showASCII('loadingDocs', 1800); };
+    $('#chipSleep').onclick=()=>{ setMood('sleep'); showASCII('Z z z…', 1000); };
+    $('#chipExcited').onclick=()=>{ setMood('excited'); showASCII('(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧', 1000); };
+    $('#chipSurprise').onclick=()=>{ setMood('surprise'); showASCII('(⊙_⊙)', 1000); };
+
+    // expose moods to window for fácil controle
+    window.setMood=setMood; window.showASCII=showASCII;
+
+    // init listeners
+    sendBtn.onclick=send; promptEl.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); send(); }});
+  </script>
+</body>
+</html>

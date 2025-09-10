@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"/>
+<title>Dual • Procedural Pixel Film — Nebula Pro (BR Ousado)</title>
+<meta name="theme-color" content="#0a0a10"/>
+<style>
+  /* =====================
+     TEMA NEBULA PRO • BR
+     ===================== */
+  :root{
+    --grad-a:#ff00ff; /* magenta */
+    --grad-b:#00ffff; /* ciano  */
+    --grad-angle:42deg;
+    --bg:#0a0a10; --fg:#eaf9ff; --muted:#b8c3d1;
+    --glass:#0e0f22cc; --glass-2:#0c0d1acc; --stroke:rgba(255,255,255,.09);
+    --a1:#ff42ff; --a2:#29d3ff; /* acentos base */
+    --agua1:#29d3ff; --agua2:#7bd3ff;
+    --fogo1:#ff3366; --fogo2:#ff7a00;
+    --terra1:#e7c65a; --terra2:#b58e3f;
+    --ar1:#2fe3e0; --ar2:#5ff1c6;
+  }
+  html,body{height:100%}
+  body{
+    margin:0;color:var(--fg);background:linear-gradient(var(--grad-angle),var(--grad-a),var(--grad-b)) fixed;
+    font:400 16px/1.55 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    -webkit-font-smoothing:antialiased;letter-spacing:.2px;
+  }
+  .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:26px}
+  .phone{width:min(430px,96vw);border-radius:34px;background:
+    radial-gradient(140% 120% at 10% -10%, rgba(255,0,255,.14), transparent 60%),
+    radial-gradient(140% 140% at 110% 20%, rgba(0,255,255,.18), transparent 60%),
+    var(--glass);
+    border:1px solid var(--stroke);backdrop-filter:blur(16px) saturate(1.05);
+    box-shadow:0 30px 120px rgba(0,0,0,.55), 0 0 180px rgba(255,0,255,.2), 0 0 220px rgba(0,255,255,.18);
+    padding:18px 18px 22px;
+  }
+  header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 4px 12px}
+  h1{margin:0;font-weight:900;font-size:22px;letter-spacing:.45px}
+  .small{font-size:12px;color:var(--muted)}
+  .screen{position:relative;border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#0b0b18,#0b0b0f);
+    border:1.4px solid var(--stroke);height:260px;margin:6px 2px 14px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+  #film{display:block;width:100%;height:100%;image-rendering:pixelated}
+  #bg{position:fixed;inset:0;z-index:-1;image-rendering:pixelated;opacity:.42;display:none}
+
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 2px}
+  .row-els{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:8px 2px}
+  .pill{appearance:none;border:none;border-radius:999px;padding:12px 16px;background:linear-gradient(180deg,#2a2a56,#1f1f44);color:var(--fg);
+    font-weight:800;letter-spacing:.3px;box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 -2px 0 rgba(255,255,255,.06);
+    cursor:pointer;transition:.2s transform,.2s filter,.2s background;outline:2px solid transparent;outline-offset:2px}
+  .pill:hover{transform:translateY(-1px)}
+  .pill:focus-visible{outline-color:var(--a2)}
+  .pill.primary{background:linear-gradient(180deg,#3a3a78,#292965)}
+  .dotbtn{display:flex;flex-direction:column;align-items:center;gap:8px;background:transparent;border:none;cursor:pointer}
+  .dotbtn .dot{width:26px;height:26px;border-radius:50%;box-shadow:inset 0 -2px 0 rgba(255,255,255,.07)}
+  .dotbtn span{font-weight:800;color:var(--fg);font-size:12px;opacity:.95}
+  .dotbtn.active .dot{outline:2px solid var(--a2)}
+  .dot.agua{background:var(--agua1)} .dot.fogo{background:var(--fogo1)} .dot.terra{background:var(--terra1)} .dot.ar{background:var(--ar1)}
+
+  dialog{border:none;border-radius:18px;max-width:520px;width:92vw;background:var(--glass);color:var(--fg);padding:16px 16px 20px;border:1px solid var(--stroke);
+    box-shadow:0 30px 120px rgba(0,0,0,.6)}
+  dialog::backdrop{background:radial-gradient(60% 60% at 50% 40%, rgba(0,0,0,.25), rgba(0,0,0,.65))}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  textarea{width:100%;min-height:110px;border-radius:12px;border:1px solid var(--stroke);background:#0b0b14;color:var(--fg);padding:10px;font-size:14px}
+  .book{margin-top:10px;border-radius:18px;background:var(--glass-2);border:1px solid var(--stroke);padding:12px}
+  .progress{height:6px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
+  .progress>i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--a1),var(--a2))}
+  .footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+  <canvas id="bg" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="phone" role="application">
+      <header>
+        <h1>Procedural Pixel Film ⚡</h1>
+        <div class="small"><label><input id="toggleBg" type="checkbox"> Plano de Fundo</label></div>
+      </header>
+
+      <div class="screen"><canvas id="film"></canvas></div>
+
+      <div class="row">
+        <button class="pill primary" id="btnPlay">Respirar Pulso</button>
+        <button class="pill" id="btnPause">Silenciar Pulso</button>
+      </div>
+
+      <div class="row-els">
+        <button class="dotbtn active" data-el="agua"><i class="dot agua"></i><span>Água</span></button>
+        <button class="dotbtn" data-el="fogo"><i class="dot fogo"></i><span>Fogo</span></button>
+        <button class="dotbtn" data-el="terra"><i class="dot terra"></i><span>Terra</span></button>
+        <button class="dotbtn" data-el="ar"><i class="dot ar"></i><span>Ar</span></button>
+      </div>
+
+      <div class="row">
+        <button class="pill" id="btnMic">Escutar o Mundo</button>
+        <button class="pill" id="btnBreeze">Soprar o Vento</button>
+      </div>
+
+      <div class="row">
+        <button class="pill" id="btnExport">Guardar Rastro</button>
+        <button class="pill" id="btnImport">Reinvocar Filme</button>
+      </div>
+
+      <div class="row">
+        <button class="pill" id="btnFreeze">Espiral Congelada</button>
+        <button class="pill" id="btnRecord">Gravar Pulso</button>
+      </div>
+
+      <div class="book" id="livro">
+        <h3>📖 Livro Vivo</h3>
+        <p class="small">Narre o texto abaixo e acompanhe o progresso. (Som precisa de interação do usuário no iOS)</p>
+        <textarea id="story">No princípio do Pulso, a água lembrava caminhos que ainda não tinham nome. Cada pixel era uma gota, cada gota, um planeta. Respire, e o filme te respira de volta.</textarea>
+        <div class="grid-2" style="margin-top:8px">
+          <div><label class="small">Voz</label><select id="voiceSel"></select></div>
+          <div><label class="small">Volume</label><input id="ttsVol" type="range" min="0" max="1" step="0.01" value="1"></div>
+        </div>
+        <div class="row" style="margin-top:8px"><button class="pill" id="ttsSpeak">Narrar</button><button class="pill" id="ttsStop">Parar</button></div>
+        <div class="progress" aria-label="Progresso"><i id="ttsProg"></i></div>
+      </div>
+
+      <div class="footer">
+        <span>Nebula Pro • BR ousado</span>
+        <span id="status">▶️ Rodando</span>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const els = {
+    film: document.getElementById('film'),
+    bg: document.getElementById('bg'),
+    status: document.getElementById('status'),
+    btnPlay: document.getElementById('btnPlay'),
+    btnPause: document.getElementById('btnPause'),
+    btnFreeze: document.getElementById('btnFreeze'),
+    btnMic: document.getElementById('btnMic'),
+    btnBreeze: document.getElementById('btnBreeze'),
+    btnExport: document.getElementById('btnExport'),
+    btnImport: document.getElementById('btnImport'),
+    btnRecord: document.getElementById('btnRecord'),
+    toggleBg: document.getElementById('toggleBg'),
+    story: document.getElementById('story'),
+    voiceSel: document.getElementById('voiceSel'),
+    ttsVol: document.getElementById('ttsVol'),
+    ttsSpeak: document.getElementById('ttsSpeak'),
+    ttsStop: document.getElementById('ttsStop'),
+    ttsProg: document.getElementById('ttsProg'),
+  };
+
+  // Ajusta tamanho do canvas
+  function fit(){ const r = els.film.parentElement.getBoundingClientRect(); els.film.width = Math.floor(r.width); els.film.height = Math.floor(r.height); els.bg.width = window.innerWidth; els.bg.height = window.innerHeight; }
+  window.addEventListener('resize', fit, {passive:true});
+  fit();
+
+  // ===== Motor do Filme (WebGL2 -> fallback 2D) =====
+  let gl, progAdvect, progRender, quad, fb=[], tex=[]; let intW=320, intH=180, scale=4; let running=true, frozen=false; let dt=1.1, diffuse=0.36, drift=0.03; let seed=Math.random()*1000; let fftL=0, fftM=0, fftH=0; let activeEl='agua';
+
+  const VS = `#version 300 es\nlayout(location=0) in vec2 a; out vec2 v; void main(){v=(a+1.)*.5; gl_Position=vec4(a,0,1);}`;
+  const FS_A = `#version 300 es\nprecision highp float; in vec2 v; out vec4 o; uniform sampler2D uSrc; uniform vec2 uPx; uniform float uDt; uniform float uDiff; uniform vec2 uTilt; uniform vec3 uFFT; uniform float uSeed; float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7))+uSeed)*43758.5453);} void main(){ vec4 c=texture(uSrc,v); vec2 g=vec2(sin(v.y*30.+uSeed+uFFT.x*4.)+uTilt.x*2., cos(v.x*24.+uSeed*1.3+uFFT.z*4.)+uTilt.y*2.); vec2 uv=v+uDt*0.005*g; vec4 n=texture(uSrc,uv); vec4 lap=(texture(uSrc,v+vec2(uPx.x,0.))+texture(uSrc,v-vec2(uPx.x,0.))+texture(uSrc,v+vec2(0.,uPx.y))+texture(uSrc,v-vec2(0.,uPx.y))-4.0*c); vec4 outc=mix(n,c+uDiff*lap,0.5); outc+=0.002*vec4(h(v*120.),h(v*110.),h(v*95.),0.); o=outc; }`;
+  const FS_R = `#version 300 es\nprecision highp float; in vec2 v; out vec4 o; uniform sampler2D uTex; uniform vec3 uC1; uniform vec3 uC2; void main(){ vec4 t=texture(uTex,v); float m=t.r*0.6+t.g*0.3+t.b*0.1; vec3 c=mix(uC1,uC2,smoothstep(0.2,0.9,m)); o=vec4(c,1.); }`;
+
+  function make(gl, type, src){ const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s); if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
+  function prog(gl, vs, fs){ const p=gl.createProgram(); gl.attachShader(p, make(gl, gl.VERTEX_SHADER, vs)); gl.attachShader(p, make(gl, gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p); if(!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return p; }
+
+  function initGL(){ try{ gl = els.film.getContext('webgl2', {alpha:false, antialias:false, preserveDrawingBuffer:true}); if(!gl) return false; quad = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quad); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW); progAdvect = prog(gl, VS, FS_A); progRender = prog(gl, VS, FS_R); resizeGL(); return true; }catch{ return false; } }
+
+  function resizeGL(){ if(!gl) return; intW = Math.max(80, Math.floor(els.film.width/scale)); intH = Math.max(60, Math.floor(els.film.height/scale)); tex.forEach(t=>gl.deleteTexture(t)); fb.forEach(f=>gl.deleteFramebuffer(f)); tex=[]; fb=[]; for(let i=0;i<2;i++){ const t=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,t); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA32F,intW,intH,0,gl.RGBA,gl.FLOAT,null); tex.push(t); const f=gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER,f); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0); fb.push(f);} gl.bindFramebuffer(gl.FRAMEBUFFER, fb[0]); gl.viewport(0,0,intW,intH); gl.clearColor(Math.random(),Math.random(),Math.random(),1); gl.clear(gl.COLOR_BUFFER_BIT); }
+
+  function hexToRgb(hex){ const s=hex.replace('#',''); const v=s.length===3?s.split('').map(c=>c+c).join(''):s; const n=parseInt(v,16); return {r:(n>>16)&255,g:(n>>8)&255,b:n&255}; }
+  function css(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  function render(){ if(!gl) return; gl.bindBuffer(gl.ARRAY_BUFFER, quad); gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0); gl.enableVertexAttribArray(0); const px=[1/intW,1/intH]; gl.useProgram(progAdvect); gl.uniform1i(gl.getUniformLocation(progAdvect,'uSrc'),0); gl.uniform2f(gl.getUniformLocation(progAdvect,'uPx'),px[0],px[1]); gl.uniform1f(gl.getUniformLocation(progAdvect,'uDt'),dt); gl.uniform1f(gl.getUniformLocation(progAdvect,'uDiff'),diffuse); gl.uniform2f(gl.getUniformLocation(progAdvect,'uTilt'),0,0); gl.uniform3f(gl.getUniformLocation(progAdvect,'uFFT'),fftL,fftM,fftH); gl.uniform1f(gl.getUniformLocation(progAdvect,'uSeed'),seed%97/97); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex[0]); gl.bindFramebuffer(gl.FRAMEBUFFER, fb[1]); gl.drawArrays(gl.TRIANGLE_STRIP,0,4); [tex[0],tex[1]]=[tex[1],tex[0]]; [fb[0],fb[1]]=[fb[1],fb[0]]; gl.useProgram(progRender); const c1=hexToRgb(css('--a1')), c2=hexToRgb(css('--a2')); gl.uniform1i(gl.getUniformLocation(progRender,'uTex'),0); gl.uniform3f(gl.getUniformLocation(progRender,'uC1'),c1.r/255,c1.g/255,c1.b/255); gl.uniform3f(gl.getUniformLocation(progRender,'uC2'),c2.r/255,c2.g/255,c2.b/255); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex[0]); gl.bindFramebuffer(gl.FRAMEBUFFER,null); gl.viewport(0,0,els.film.width,els.film.height); gl.drawArrays(gl.TRIANGLE_STRIP,0,4); }
+
+  // Fallback 2D caso WebGL2 falhe
+  let ctx2d=null; function render2d(){ if(!ctx2d) return; const w=els.film.width,h=els.film.height; ctx2d.fillStyle='rgba(0,0,0,.06)'; ctx2d.fillRect(0,0,w,h); const p=8; for(let i=0;i<300;i++){ const x=((Math.random()*w/p)|0)*p; const y=((Math.random()*h/p)|0)*p; ctx2d.fillStyle=`hsl(${(seed*40+x+y)%360},100%,60%)`; ctx2d.fillRect(x,y,p,p);} }
+
+  function loop(){ if(running && !frozen){ if(gl) render(); else render2d(); if(!els.bg.hidden){ const bgc=els.bg.getContext('2d'); bgc.globalAlpha=parseFloat(els.bg.style.opacity||0.42); render2dOn(els.bg, bgc); } }
+    requestAnimationFrame(loop); }
+  function render2dOn(canvas, c){ const w=canvas.width,h=canvas.height; c.fillStyle='rgba(0,0,0,.05)'; c.fillRect(0,0,w,h); for(let i=0;i<200;i++){ const x=Math.random()*w, y=Math.random()*h; c.fillStyle=`hsla(${(seed*30+x+y)%360},100%,60%,.9)`; c.fillRect(x,y,6,6);} }
+
+  // Boot: tenta WebGL; se não, 2D
+  fit(); const ok = initGL(); if(!ok){ ctx2d = els.film.getContext('2d'); }
+  running = true; loop();
+  els.status.textContent = '▶️ Rodando';
+
+  // ===== UI =====
+  document.querySelectorAll('.dotbtn[data-el]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.dotbtn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active'); activeEl = btn.dataset.el;
+      const map={agua:['--agua1','--agua2'],fogo:['--fogo1','--fogo2'],terra:['--terra1','--terra2'],ar:['--ar1','--ar2']};
+      document.documentElement.style.setProperty('--a1', css(map[activeEl][0]));
+      document.documentElement.style.setProperty('--a2', css(map[activeEl][1]));
+      dt = {agua:1.0,fogo:1.4,terra:0.9,ar:1.1}[activeEl];
+      drift = {agua:0.02,fogo:0.05,terra:0.015,ar:0.03}[activeEl];
+    });
+  });
+
+  els.btnPlay.onclick = ()=>{ running=true; els.status.textContent='▶️ Rodando'; };
+  els.btnPause.onclick = ()=>{ running=false; els.status.textContent='⏸️ Pausado'; };
+  els.btnFreeze.onclick = ()=>{ frozen=!frozen; els.btnFreeze.textContent = frozen? 'Descongelar' : 'Espiral Congelada'; };
+  els.btnBreeze.onclick = ()=>{ seed = Math.random()*1000; };
+
+  els.toggleBg.onchange = ()=>{ els.bg.hidden = !els.toggleBg.checked; fit(); };
+
+  els.btnExport.onclick = ()=>{ const state={v:1,dt,diffuse,drift,seed,element:activeEl,colors:{a1:css('--a1'),a2:css('--a2')}}; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(state)],{type:'application/json'})); a.download='pulso-state.json'; a.click(); };
+  els.btnImport.onclick = ()=>{ const inp=document.createElement('input'); inp.type='file'; inp.accept='.json,application/json'; inp.onchange=async()=>{ const s=JSON.parse(await inp.files[0].text()); dt=s.dt||dt; drift=s.drift||drift; seed=s.seed||seed; if(s.colors){ document.documentElement.style.setProperty('--a1', s.colors.a1); document.documentElement.style.setProperty('--a2', s.colors.a2);} }; inp.click(); };
+
+  els.btnRecord.onclick = ()=>{ const stream = els.film.captureStream(30); const rec = new MediaRecorder(stream, {mimeType:'video/webm;codecs=vp9'}); const chunks=[]; rec.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); }; rec.onstop=()=>{ const url=URL.createObjectURL(new Blob(chunks,{type:'video/webm'})); const a=document.createElement('a'); a.href=url; a.download='pulso.webm'; a.click(); els.btnRecord.textContent='Gravar Pulso'; }; rec.start(); els.btnRecord.textContent='⏺ Gravando 15s...'; setTimeout(()=>rec.stop(),15000); };
+
+  // ===== TTS =====
+  function loadVoices(){ const vs=speechSynthesis.getVoices(); els.voiceSel.innerHTML=''; vs.filter(v=>/pt|en/i.test(v.lang)).forEach(v=>{ const o=document.createElement('option'); o.value=v.name; o.textContent=`${v.name} (${v.lang})`; els.voiceSel.appendChild(o); }); }
+  loadVoices(); speechSynthesis.onvoiceschanged = loadVoices;
+  let utter=null; els.ttsSpeak.onclick = ()=>{ speechSynthesis.cancel(); utter = new SpeechSynthesisUtterance(els.story.value); const v = speechSynthesis.getVoices().find(x=>x.name===els.voiceSel.value); if(v) utter.voice=v; utter.lang='pt-BR'; utter.rate={agua:1.0,fogo:1.1,terra:0.95,ar:1.02}[activeEl]||1; utter.pitch={agua:1.02,fogo:1.05,terra:0.92,ar:1.02}[activeEl]||1; utter.volume=parseFloat(els.ttsVol.value||'1'); utter.onboundary=e=>{ const x=Math.min(1,(e.charIndex/(els.story.value.length||1))); els.ttsProg.style.width=(x*100).toFixed(1)+'%'; }; utter.onend=()=>{ els.ttsProg.style.width='100%'; setTimeout(()=>els.ttsProg.style.width='0%',600); }; speechSynthesis.speak(utter); };
+  els.ttsStop.onclick = ()=>{ speechSynthesis.cancel(); els.ttsProg.style.width='0%'; };
+})();
+</script>
+</body>
+</html>

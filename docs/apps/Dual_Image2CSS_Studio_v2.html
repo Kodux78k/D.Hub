@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="pt-br">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Dual • Image→CSS Studio v2</title>
+<style>
+  :root{--bg:#0b0b12;--ink:#f3f4fa;--line:#23233a;--panel:#121226;--acc:#b066ff;--ring:#29d3ff}
+  *{box-sizing:border-box} html,body{height:100%} body{margin:0;background:var(--bg);color:var(--ink);font:500 15px/1.55 Inter,system-ui}
+  .wrap{max-width:980px;margin:0 auto;padding:18px}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .card{background:linear-gradient(180deg,#141424,#101018);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 10px 40px #0009,0 0 0 1px #000 inset}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+  .c8{grid-column:span 8} .c4{grid-column:span 4} @media(max-width:900px){.c8,.c4{grid-column:1/-1}}
+  input[type=file],textarea,button,select{background:#0f0f18;color:var(--ink);border:1px solid #232344;border-radius:12px;padding:10px}
+  button{cursor:pointer}
+  .swatch{width:24px;height:24px;border-radius:6px;border:1px solid #0006;box-shadow:0 2px 8px #0007}
+  .pill{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:999px;background:#17172a;border:1px solid #2a2a44}
+  .out{white-space:pre;user-select:all}
+  .tabs{display:flex;gap:8px;margin-bottom:8px}
+  .tabs button{opacity:.7} .tabs button.active{opacity:1;outline:2px solid #2a2a66}
+</style>
+<div class="wrap">
+  <h1>Dual • Image→CSS Studio v2</h1>
+  <div class="tabs">
+    <button id="tabImg" class="active">Imagem → CSS</button>
+    <button id="tabCss">Colar CSS</button>
+  </div>
+  <div class="grid">
+    <div class="card c8">
+      <div id="paneImg">
+        <h3>1) Soltar imagem ou escolher</h3>
+        <div class="row"><input id="file" type="file" accept="image/*,.svg"/></div>
+        <p>Opcional: cole um HTML para pré-visualizar com o tema aplicado.</p>
+        <textarea id="html" rows="8" placeholder="Cole aqui um HTML para preview…"></textarea>
+        <div class="row" style="margin-top:10px">
+          <button id="btnGen">Gerar CSS</button>
+          <select id="preset">
+            <option value="">— presets —</option>
+            <option value="NebulaPro_ALT.css">Nebula Pro ALT</option>
+            <option value="Dual_BASE.css">Dual Base</option>
+            <option value="Dual_GOLD.css">Dual Gold</option>
+            <option value="Dual_DARK.css">Dual Dark</option>
+          </select>
+          <button id="btnPreset">Usar preset</button>
+        </div>
+      </div>
+      <div id="paneCss" style="display:none">
+        <h3>Colar CSS de injection</h3>
+        <textarea id="cssPaste" rows="12" placeholder="Cole aqui seu CSS (tokens/estilos)…"></textarea>
+        <div class="row" style="margin-top:10px">
+          <button id="btnUseCss">Aplicar no Preview</button>
+        </div>
+      </div>
+    </div>
+    <div class="card c4">
+      <h3>2) Tokens/Info</h3>
+      <div id="tokens">Gere ou cole CSS</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <h3>Saída</h3>
+    <div class="row">
+      <button id="btnCopy">Copiar CSS</button>
+      <button id="btnDownloadCSS">Baixar CSS</button>
+      <button id="btnExportHTML">Exportar HTML (com &lt;style&gt;)</button>
+      <button id="btnExportHTMLInjector">Exportar HTML (com injector + localStorage)</button>
+    </div>
+    <pre id="out" class="out"></pre>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <h3>Preview</h3>
+    <iframe id="preview" style="width:100%;height:380px;border:0;border-radius:12px;background:#000"></iframe>
+  </div>
+</div>
+<script>
+let currentCSS = `/* gere ou cole um CSS aqui */`;
+
+function cssFromTokens(t){
+  return `:root{
+  --bg:${t.bg};--panel:${t.panel};--ink:${t.ink};--acc:${t.acc};--ring:${t.ring};
+  --line:${t.line};--ok:${t.ok};--bad:${t.bad};--radius:18px;--blur:18px
+}
+html,body{background:var(--bg);color:var(--ink)}
+.metalux-card{background:linear-gradient(180deg,color-mix(in oklab,var(--panel) 85%,#000),var(--panel));border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 8px 40px #0009,0 0 0 1px #000 inset}
+.kobllux-pill{background:linear-gradient(180deg,color-mix(in oklab,var(--panel) 80%,#141425),var(--panel));border:1px solid color-mix(in oklab,var(--line) 70%,#ffffff20);color:var(--ink)}
+.dual-tabs{background:linear-gradient(180deg,color-mix(in oklab,var(--panel) 75%,#0f0f18),var(--panel));border-top:1px solid var(--line)}
+a,.btn.primary{color:white;background:linear-gradient(90deg,var(--acc),var(--ring));border:none}`;
+}
+
+function renderTokensFromCSS(css){
+  // Na falta de análise automática completa, tentamos capturar tokens básicos por regex
+  const grab = (name)=>{
+    const m = css.match(new RegExp(`--${name}\\s*:\\s*([^;]+);`));
+    return m? m[1].trim(): '—';
+  };
+  const t = ['bg','panel','ink','acc','ring','line','ok','bad'].map(k=>[k,grab(k)]);
+  document.getElementById('tokens').innerHTML = t.map(([k,v])=>`<div class="row" style="margin:6px 0"><span style="width:80px">${k}</span> <span class="swatch" style="background:${v}"></span> <code>${v}</code></div>`).join('');
+}
+
+function updateOutput(css){
+  currentCSS = css;
+  document.getElementById('out').textContent = css;
+  renderTokensFromCSS(css);
+  const htmlIn = document.getElementById('html').value.trim() || '<!doctype html><meta charset="utf-8"><title>Demo</title><style>.card{padding:14px;border-radius:12px;border:1px solid var(--line)} .btn{padding:10px 14px;border-radius:12px;border:1px solid var(--line)}</style><div class="card metalux-card"><h2>Demo</h2><p>Texto de exemplo</p><button class="btn primary">Botão</button></div>';
+  const iframe = document.getElementById('preview');
+  const doc = `<!doctype html><meta charset="utf-8"><style>${css}</style>${htmlIn}`;
+  const blob = new Blob([doc], {type:"text/html"});
+  iframe.src = URL.createObjectURL(blob);
+}
+
+document.getElementById('btnGen').onclick = ()=>{
+  // Placeholder: aqui você acionaria o pipeline de análise de imagem; para v2 mantemos CSS atual (preset/cole).
+  // Dica: carregue o preset e ajuste manualmente até ligar seu fluxo com modelo visão+texto.
+  const css = currentCSS || '/* gere/cole CSS */';
+  updateOutput(css);
+};
+document.getElementById('btnCopy').onclick = async ()=> {
+  try{ await navigator.clipboard.writeText(currentCSS); alert('CSS copiado!'); }catch{ alert('Não deu para copiar 😅'); }
+};
+document.getElementById('btnDownloadCSS').onclick = ()=>{
+  const blob = new Blob([currentCSS || '/* vazio */'], {type:'text/css'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'image2css.css'; a.click();
+};
+document.getElementById('btnExportHTML').onclick = ()=>{
+  const htmlIn = document.getElementById('html').value.trim() || '<!doctype html><meta charset="utf-8"><title>Demo</title><div class="metalux-card" style="padding:16px;border:1px solid var(--line);border-radius:12px"><h2>Demo</h2><p>Conteúdo</p></div>';
+  const full = `<!doctype html><meta charset="utf-8"><title>Export Studio</title><style>${currentCSS}</style>${htmlIn}`;
+  const blob = new Blob([full], {type:'text/html'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'export_with_style.html'; a.click();
+};
+document.getElementById('btnExportHTMLInjector').onclick = ()=>{
+  const htmlIn = document.getElementById('html').value.trim() || '<!doctype html><meta charset="utf-8"><title>Demo</title><div class="metalux-card" style="padding:16px;border:1px solid var(--line);border-radius:12px"><h2>Demo</h2><p>Conteúdo</p></div>';
+  const script = `<script>localStorage.setItem('dual.theme.css', \`${currentCSS.replace(/`/g,'\\`')}\`);<\/script>
+<script src="./image2css.injector.js"><\/script>`;
+  const full = `<!doctype html><meta charset="utf-8"><title>Export Studio (Injector)</title>${script}${htmlIn}`;
+  const blob = new Blob([full], {type:'text/html'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'export_with_injector.html'; a.click();
+};
+document.getElementById('btnUseCss').onclick = ()=>{
+  const css = document.getElementById('cssPaste').value || '/* vazio */';
+  updateOutput(css);
+};
+document.getElementById('btnPreset').onclick = async ()=>{
+  const sel = document.getElementById('preset').value;
+  if(!sel) return;
+  try{
+    const res = await fetch(sel);
+    const txt = await res.text();
+    updateOutput(txt);
+  }catch(e){ alert('Não consegui carregar o preset: '+sel); }
+};
+
+// Tabs
+const tabImg = document.getElementById('tabImg');
+const tabCss = document.getElementById('tabCss');
+tabImg.onclick = ()=>{tabImg.classList.add('active');tabCss.classList.remove('active');document.getElementById('paneImg').style.display='block';document.getElementById('paneCss').style.display='none';}
+tabCss.onclick = ()=>{tabCss.classList.add('active');tabImg.classList.remove('active');document.getElementById('paneCss').style.display='block';document.getElementById('paneImg').style.display='none';}
+
+// Start with a preset for convenience
+fetch('NebulaPro_ALT.css').then(r=>r.text()).then(updateOutput);
+</script>
+</html>

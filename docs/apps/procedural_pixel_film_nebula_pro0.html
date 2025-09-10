@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"/>
+<title>Procedural Pixel Film — Nebula Pro</title>
+<meta name="theme-color" content="#0b0b0f">
+<style>
+  :root{
+    /* Nebula Pro base tokens */
+    --bg-1:#0b0b0f;          /* fundo profundo */
+    --bg-2:#141427;          /* fundo elevado */
+    --grad-a:#6d00ff;        /* roxo-nebula */
+    --grad-b:#00f0ff;        /* ciano-nebula */
+    --grad-angle:42deg;      /* preferido do Kodux */
+    --card:#101020ee;        /* vidro escuro */
+    --card-2:#0d0d1acc;      
+    --stroke:rgba(255,255,255,.08);
+    --fg:#e7eef7;            /* texto principal */
+    --muted:#b5c2d2;         /* texto secundário */
+    --acc:#E7C65A;           /* dourado */
+    --pill:#252545;          /* pílulas */
+    --pill-hi:#3a3a78;
+    --shadow:0 6px 40px rgba(0,0,0,.45), 0 0 120px rgba(109,0,255,.25), 0 0 140px rgba(0,240,255,.2);
+    /* Paletas por elemento (Wuxing) */
+    --agua:#2aa2ff; --fogo:#ff4b4b; --madeira:#28c76f; --terra:#ffb430; --metal:#a9b0b8;
+  }
+  html,body{height:100%;background:linear-gradient(var(--grad-angle), var(--grad-a), var(--grad-b)) fixed;}
+  body{margin:0;color:var(--fg);font:400 16px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;letter-spacing:.2px;-webkit-font-smoothing:antialiased;}
+  .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:22px;}
+  .phone{width:min(420px, 94vw);border-radius:34px;background:radial-gradient(120% 120% at 30% 0%, rgba(255,255,255,.06), rgba(255,255,255,0) 60%), var(--card);box-shadow:var(--shadow);backdrop-filter: blur(14px); border:1px solid var(--stroke);padding:18px 18px 24px;}
+  header{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:6px 4px 14px;}
+  h1{font-weight:800;font-size:22px;margin:0;letter-spacing:.4px}
+  .bolt{filter:drop-shadow(0 0 8px rgba(255,255,255,.35))}
+  .screen{position:relative;border-radius:22px;overflow:hidden;background:linear-gradient(180deg, #0b0b18, #0b0b0f);border:1px solid var(--stroke);height:260px;margin:4px 2px 14px}
+  #film{display:block;width:100%;height:100%}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 2px}
+  .row-3{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 2px}
+  .row-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:6px 2px}
+  .pill{appearance:none;border:none;border-radius:999px;padding:12px 14px;background:var(--pill);color:var(--fg);font-weight:700;letter-spacing:.3px;box-shadow:inset 0 -2px 0 rgba(255,255,255,.04);cursor:pointer;transition:.25s transform, .25s background, .25s box-shadow;outline:none}
+  .pill:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(0,0,0,.25), inset 0 -2px 0 rgba(255,255,255,.06)}
+  .hi{background:var(--pill-hi)}
+  .tag{border-radius:18px;padding:10px 12px;background:var(--card-2);border:1px solid var(--stroke);text-align:center;font-weight:700}
+  .tag .dot{width:16px;height:16px;border-radius:50%;display:inline-block;margin-right:8px;vertical-align:-2px;box-shadow:0 0 0 3px rgba(255,255,255,.05) inset}
+  .dot.agua{background:var(--agua)}
+  .dot.fogo{background:var(--fogo)}
+  .dot.madeira{background:var(--madeira)}
+  .dot.terra{background:var(--terra)}
+  .dot.metal{background:var(--metal)}
+  .footer{display:flex;gap:10px;justify-content:space-between;margin-top:14px}
+  .switch{display:inline-flex;align-items:center;gap:10px}
+  .switch input{accent-color:var(--acc);width:20px;height:20px}
+  .tiny{font-size:12px;color:var(--muted)}
+  dialog{border:none;border-radius:18px;max-width:480px;width:92vw;background:var(--card);color:var(--fg);padding:16px 16px 20px;border:1px solid var(--stroke);box-shadow:var(--shadow)}
+  dialog::backdrop{background:radial-gradient(60% 60% at 50% 40%, rgba(0,0,0,.15), rgba(0,0,0,.6))}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .field{display:grid;gap:6px;margin:6px 0}
+  .field input[type="color"], .field input[type="range"], .field input[type="text"]{width:100%}
+  .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;background:#09090f;border:1px solid var(--stroke);border-radius:10px;padding:8px;color:#e3ecf8}
+  .book{margin-top:8px;border-radius:16px;background:var(--card-2);border:1px solid var(--stroke);padding:12px}
+  .book h3{margin:0 0 6px 0}
+  textarea{width:100%;min-height:110px;border-radius:12px;border:1px solid var(--stroke);background:#0b0b14;color:var(--fg);padding:10px;font-size:14px;resize:vertical}
+  .bgCanvas{position:fixed;inset:0;z-index:-1;opacity:.35;}
+  .hint{color:var(--muted);font-size:12px;margin-left:8px}
+</style>
+</head>
+<body>
+  <canvas id="bg" class="bgCanvas" hidden></canvas>
+  <div class="wrap">
+    <div class="phone" id="app">
+      <header>
+        <h1>Procedural Pixel Film <span class="bolt">⚡</span> <span id="labelElemento">Água</span></h1>
+        <div class="switch"><input id="toggleBg" type="checkbox"/> <label for="toggleBg" class="tiny">Filme como fundo</label></div>
+      </header>
+
+      <div class="screen"><canvas id="film"></canvas></div>
+
+      <div class="row">
+        <button class="pill hi" id="btnPlay">Respirar Pulso</button>
+        <button class="pill" id="btnPause">Silenciar Pulso</button>
+      </div>
+
+      <div class="row-4" role="group" aria-label="elementos">
+        <div class="tag" data-el="agua"><span class="dot agua"></span>Água</div>
+        <div class="tag" data-el="fogo"><span class="dot fogo"></span>Fogo</div>
+        <div class="tag" data-el="madeira"><span class="dot madeira"></span>Madeira</div>
+        <div class="tag" data-el="terra"><span class="dot terra"></span>Terra</div>
+        <div class="tag" data-el="metal"><span class="dot metal"></span>Metal</div>
+        <div class="tag" style="grid-column: span 3; text-align:left; display:flex; align-items:center; justify-content:space-between; gap:10px">
+          <span><strong>Tema</strong>: <span id="temaNome">Nebula Pro</span></span>
+          <button class="pill" id="btnEditarCores" style="padding:8px 12px">Live Edit 🎨</button>
+        </div>
+      </div>
+
+      <div class="row-3">
+        <button class="pill" id="btnListen">Escutar o Mundo</button>
+        <button class="pill" id="btnBreeze">Soprar o Vento</button>
+      </div>
+
+      <div class="row-3">
+        <button class="pill" id="btnSaveFrame">Guardar Rastro</button>
+        <button class="pill" id="btnRecall">Reinvocar Filme</button>
+      </div>
+
+      <div class="row-3">
+        <button class="pill" id="btnFreeze">Espiral Congelada</button>
+        <button class="pill" id="btnRecord">Gravar Pulso</button>
+      </div>
+
+      <div class="book" id="livro">
+        <h3>📖 Livro Vivo</h3>
+        <p class="tiny">Conectado ao elemento atual. Narração TTS com variação sutil de voz. Você pode editar o texto.</p>
+        <textarea id="story">No princípio do Pulso, a água lembrava caminhos que ainda não tinham nome. Cada pixel era uma gota, cada gota, um planeta. Respire, e o filme te respira de volta.</textarea>
+        <div class="row">
+          <button class="pill" id="btnRead">Narrar agora</button>
+          <button class="pill" id="btnStopRead">Parar narração</button>
+        </div>
+        <div class="row">
+          <input id="openrouter" class="kbd" placeholder="sk-openrouter-... (opcional)"/>
+          <button class="pill" id="btnSaveKey" title="Salvar no localStorage">Salvar Chave</button>
+        </div>
+        <span class="hint">Armazena em <span class="kbd">localStorage.openrouter_key</span>. Não envia nada.</span>
+      </div>
+
+      <div class="footer tiny">
+        <span>Do seu jeito. Sempre único, sempre seu.</span>
+        <span id="status">⏸️ Pausado</span>
+      </div>
+    </div>
+  </div>
+
+  <dialog id="dlgEdit">
+    <form method="dialog">
+      <h3>Live Edit — Cores do Tema</h3>
+      <div class="grid-2">
+        <div class="field"><label>Gradiente A</label><input type="color" id="cGradA"><small class="tiny">--grad-a</small></div>
+        <div class="field"><label>Gradiente B</label><input type="color" id="cGradB"><small class="tiny">--grad-b</small></div>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label>Ângulo</label><input id="angle" type="range" min="0" max="360" step="1"><small class="tiny">--grad-angle (<span id="angleVal">42</span>°)</small></div>
+        <div class="field"><label>Opacidade do Fundo-Canvas</label><input id="bgOpacity" type="range" min="0" max="1" step="0.01" value="0.35"></div>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label>Água</label><input type="color" id="cAgua"></div>
+        <div class="field"><label>Fogo</label><input type="color" id="cFogo"></div>
+        <div class="field"><label>Madeira</label><input type="color" id="cMadeira"></div>
+        <div class="field"><label>Terra</label><input type="color" id="cTerra"></div>
+        <div class="field"><label>Metal</label><input type="color" id="cMetal"></div>
+      </div>
+      <div class="row"><button class="pill" value="close">Fechar</button></div>
+      <label class="switch tiny" style="margin-top:6px"><input id="drift" type="checkbox"> Animar gradiente sutilmente</label>
+    </form>
+  </dialog>
+
+<script>
+(function(){
+  const el = {
+    film: document.getElementById('film'),
+    bg: document.getElementById('bg'),
+    app: document.getElementById('app'),
+    label: document.getElementById('labelElemento'),
+    tema: document.getElementById('temaNome'),
+    status: document.getElementById('status'),
+    btnPlay: document.getElementById('btnPlay'),
+    btnPause: document.getElementById('btnPause'),
+    btnBreeze: document.getElementById('btnBreeze'),
+    btnSave: document.getElementById('btnSaveFrame'),
+    btnRecall: document.getElementById('btnRecall'),
+    btnFreeze: document.getElementById('btnFreeze'),
+    btnRecord: document.getElementById('btnRecord'),
+    btnListen: document.getElementById('btnListen'),
+    btnRead: document.getElementById('btnRead'),
+    btnStopRead: document.getElementById('btnStopRead'),
+    btnSaveKey: document.getElementById('btnSaveKey'),
+    openrouter: document.getElementById('openrouter'),
+    toggleBg: document.getElementById('toggleBg'),
+    dlgEdit: document.getElementById('dlgEdit'),
+    btnEditarCores: document.getElementById('btnEditarCores'),
+    // editor inputs
+    cGradA: document.getElementById('cGradA'),
+    cGradB: document.getElementById('cGradB'),
+    angle: document.getElementById('angle'),
+    angleVal: document.getElementById('angleVal'),
+    bgOpacity: document.getElementById('bgOpacity'),
+    cAgua: document.getElementById('cAgua'),
+    cFogo: document.getElementById('cFogo'),
+    cMadeira: document.getElementById('cMadeira'),
+    cTerra: document.getElementById('cTerra'),
+    cMetal: document.getElementById('cMetal'),
+    drift: document.getElementById('drift'),
+    story: document.getElementById('story'),
+  };
+
+  // Size canvases
+  function fit(){
+    const r = el.film.getBoundingClientRect();
+    [el.film, el.bg].forEach(cv=>{cv.width = Math.floor(r.width); cv.height = Math.floor(r.height);});
+  }
+  window.addEventListener('resize', fit, {passive:true});
+  fit();
+
+  // Procedural film — fast pixel flow with feedback
+  const ctx = el.film.getContext('2d');
+  const bgctx = el.bg.getContext('2d');
+  let running = false, freeze = false, t = 0, recorder = null, chunks = [];
+  let activeElement = 'agua';
+  const palette = {
+    agua: getCSS('--agua'), fogo: getCSS('--fogo'), madeira: getCSS('--madeira'), terra: getCSS('--terra'), metal: getCSS('--metal')
+  };
+
+  function getCSS(varname){
+    return getComputedStyle(document.documentElement).getPropertyValue(varname).trim();
+  }
+  function setCSS(varname, value){
+    document.documentElement.style.setProperty(varname, value);
+  }
+
+  function rand(seed){
+    // small LCG for deterministic drift per frame
+    let s = seed % 2147483647; if (s <= 0) s += 2147483646; return function(){ return (s = s * 16807 % 2147483647)/2147483647; }
+  }
+
+  function draw(cv, time){
+    const w = cv.width, h = cv.height; if(!w||!h) return;
+    const c = cv.getContext('2d');
+    // subtle fade
+    c.fillStyle = 'rgba(0,0,0,0.08)'; c.fillRect(0,0,w,h);
+
+    const g = rand(Math.floor(time*1000));
+    const px = 8; // pixel size
+    const cols = Math.ceil(w/px), rows = Math.ceil(h/px);
+
+    const base = palette[activeElement] || palette.agua;
+    // convert base to RGB
+    const rgb = hexToRgb(base);
+
+    for(let i=0;i<400;i++){ // sparse points per frame
+      const x = Math.floor(g()*cols)*px;
+      const y = Math.floor(g()*rows)*px;
+      const n = noise((x+time*60)/240, (y-time*40)/240);
+      const m = 0.5 + 0.5*Math.sin((x+y+time*120)/180);
+      const r = clamp(Math.floor(rgb.r*(.6+.6*n))), gg = clamp(Math.floor(rgb.g*(.6+.6*m))), b = clamp(Math.floor(rgb.b*(.6+.6*(1-n))));
+      c.fillStyle = `rgba(${r},${gg},${b},0.9)`; c.fillRect(x,y,px,px);
+    }
+  }
+
+  // Simple value noise
+  function noise(x,y){
+    const xi = Math.floor(x), yi = Math.floor(y);
+    const xf = x - xi, yf = y - yi;
+    const r = (i,j)=> hash(xi+i, yi+j);
+    const v1=r(0,0), v2=r(1,0), v3=r(0,1), v4=r(1,1);
+    const i1 = lerp(v1,v2,smooth(xf));
+    const i2 = lerp(v3,v4,smooth(xf));
+    return lerp(i1,i2,smooth(yf));
+  }
+  function hash(x,y){
+    return frac(Math.sin(x*127.1 + y*311.7)*43758.5453);
+  }
+  const frac = n => n - Math.floor(n);
+  const lerp = (a,b,t)=>a+(b-a)*t;
+  const smooth = t => t*t*(3-2*t);
+  const clamp = v => Math.max(0, Math.min(255, v));
+  function hexToRgb(hex){
+    const s = hex.replace('#','');
+    const v = s.length===3? s.split('').map(ch=>ch+ch).join(''): s;
+    const n = parseInt(v,16);
+    return {r:(n>>16)&255, g:(n>>8)&255, b:n&255};
+  }
+
+  function loop(tm){
+    if(!running){ requestAnimationFrame(loop); return; }
+    if(!freeze){ t += 0.016; }
+    draw(el.film, t);
+    if(!el.bg.hidden){
+      // mirror but slower & softer
+      bgctx.globalAlpha = parseFloat(el.bg.style.opacity||0.35);
+      draw(el.bg, t*0.8);
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  // Controls
+  el.btnPlay.onclick = ()=>{ running = true; el.status.textContent = '▶️ Rodando'; };
+  el.btnPause.onclick = ()=>{ running = false; el.status.textContent = '⏸️ Pausado'; };
+  el.btnFreeze.onclick = ()=>{ freeze = !freeze; el.btnFreeze.textContent = freeze? 'Descongelar' : 'Espiral Congelada'; };
+  el.btnBreeze.onclick = ()=>{ t += Math.random()*3; nudgeStory(); };
+  el.btnSave.onclick = ()=>{
+    const url = el.film.toDataURL('image/png');
+    download(url, 'pulso-frame.png');
+  }
+  el.btnRecall.onclick = ()=>{ ctx.clearRect(0,0,el.film.width, el.film.height); };
+
+  // Background canvas toggle
+  el.toggleBg.onchange = ()=>{
+    el.bg.hidden = !el.toggleBg.checked; el.bg.style.opacity = el.bgOpacity?.value || 0.35; fit();
+  };
+
+  // Element selection
+  document.querySelectorAll('.tag[data-el]').forEach(tag=>{
+    tag.style.cursor='pointer';
+    tag.onclick = ()=>{
+      const elName = tag.dataset.el; activeElement = elName; el.label.textContent = labelPT(elName);
+      pulseAccent();
+    };
+  });
+  function labelPT(key){
+    return {agua:'Água', fogo:'Fogo', madeira:'Madeira', terra:'Terra', metal:'Metal'}[key]||key;
+  }
+
+  // Live Edit dialog
+  el.btnEditarCores.onclick = ()=>{
+    const cs = getComputedStyle(document.documentElement);
+    el.cGradA.value = toHex(cs.getPropertyValue('--grad-a'));
+    el.cGradB.value = toHex(cs.getPropertyValue('--grad-b'));
+    el.cAgua.value = toHex(cs.getPropertyValue('--agua'));
+    el.cFogo.value = toHex(cs.getPropertyValue('--fogo'));
+    el.cMadeira.value = toHex(cs.getPropertyValue('--madeira'));
+    el.cTerra.value = toHex(cs.getPropertyValue('--terra'));
+    el.cMetal.value = toHex(cs.getPropertyValue('--metal'));
+    el.angle.value = parseInt(cs.getPropertyValue('--grad-angle'))||42; el.angleVal.textContent = el.angle.value;
+    el.dlgEdit.showModal();
+  };
+  [el.cGradA, el.cGradB, el.cAgua, el.cFogo, el.cMadeira, el.cTerra, el.cMetal].forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      setCSS('--grad-a', el.cGradA.value); setCSS('--grad-b', el.cGradB.value);
+      setCSS('--agua', el.cAgua.value); setCSS('--fogo', el.cFogo.value); setCSS('--madeira', el.cMadeira.value); setCSS('--terra', el.cTerra.value); setCSS('--metal', el.cMetal.value);
+      document.documentElement.style.background = `linear-gradient(${getCSS('--grad-angle')}, ${getCSS('--grad-a')}, ${getCSS('--grad-b')})`;
+    });
+  });
+  el.angle.oninput = ()=>{ setCSS('--grad-angle', el.angle.value+'deg'); el.angleVal.textContent = el.angle.value; document.documentElement.style.background = `linear-gradient(${getCSS('--grad-angle')}, ${getCSS('--grad-a')}, ${getCSS('--grad-b')})`; };
+  el.bgOpacity.oninput = ()=>{ el.bg.style.opacity = el.bgOpacity.value; };
+
+  // Drift animation for gradient
+  let driftId=null; el.drift.onchange = ()=>{
+    if(el.drift.checked){
+      let a = parseFloat(getCSS('--grad-angle'))||42; let dir=1;
+      const tick=()=>{ a += 0.06*dir; if(a>52||a<32) dir*=-1; setCSS('--grad-angle', a+'deg'); document.documentElement.style.background = `linear-gradient(${a}deg, ${getCSS('--grad-a')}, ${getCSS('--grad-b')})`; driftId=requestAnimationFrame(tick); };
+      tick();
+    } else { cancelAnimationFrame(driftId); driftId=null; }
+  }
+
+  function toHex(val){
+    const c = document.createElement('canvas'); const ctx = c.getContext('2d'); ctx.fillStyle = val.trim(); return rgbToHex(ctx.fillStyle);
+  }
+  function rgbToHex(rgb){
+    // rgb(a,b,c) to #rrggbb
+    const m = rgb.match(/\d+/g)||[0,0,0];
+    return '#'+m.slice(0,3).map(n=>('0'+(parseInt(n)|0).toString(16)).slice(-2)).join('');
+  }
+
+  function pulseAccent(){
+    // quick visual feedback when trocando elemento
+    el.app.animate([
+      {filter:'saturate(1) brightness(1)'},
+      {filter:'saturate(1.25) brightness(1.05)'},
+      {filter:'saturate(1) brightness(1)'}
+    ], {duration:600, easing:'ease-out'});
+  }
+
+  // MediaRecorder (WebM) from canvas
+  el.btnRecord.onclick = async ()=>{
+    if(recorder && recorder.state==='recording'){
+      recorder.stop(); el.btnRecord.textContent='Gravar Pulso'; return; }
+    const stream = el.film.captureStream(30);
+    chunks.length = 0;
+    recorder = new MediaRecorder(stream, {mimeType:'video/webm;codecs=vp9'});
+    recorder.ondataavailable = e=>{ if(e.data.size) chunks.push(e.data); };
+    recorder.onstop = ()=>{
+      const blob = new Blob(chunks, {type:'video/webm'});
+      const url = URL.createObjectURL(blob);
+      download(url, 'pulso.webm'); URL.revokeObjectURL(url);
+    };
+    recorder.start(); el.btnRecord.textContent='⏺ Gravando... (toque para parar)';
+  };
+
+  function download(url, filename){
+    const a = Object.assign(document.createElement('a'), {href:url, download:filename});
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  // Speech Synthesis — Livro Vivo
+  function pickVoiceFor(elm){
+    const map = {agua:[1.0,1.02], fogo:[1.05,1.15], madeira:[1.0,0.96], terra:[0.95,0.92], metal:[0.98,1.06]};
+    return map[elm]||[1,1];
+  }
+  let utter = null;
+  el.btnRead.onclick = ()=>{
+    window.speechSynthesis.cancel();
+    const [rate,pitch] = pickVoiceFor(activeElement);
+    utter = new SpeechSynthesisUtterance(el.story.value);
+    utter.lang = 'pt-BR'; utter.rate = rate; utter.pitch = pitch; utter.onend=()=>{};
+    window.speechSynthesis.speak(utter);
+  };
+  el.btnStopRead.onclick = ()=>{ window.speechSynthesis.cancel(); };
+  el.btnListen.onclick = ()=>{
+    // Pequena frase reativa ao frame/elemento
+    const lines = {
+      agua: 'Escute o fluxo: a água encontra o caminho mais tranquilo.',
+      fogo: 'O fogo dança em pixels, aquece o que ainda não nasceu.',
+      madeira: 'Madeira cresce em espirais, raiz e galho na mesma linha.',
+      terra: 'Terra grava a memória do pulso, cada grão um segredo.',
+      metal: 'Metal reflete o céu, polido pelo vento do tempo.'
+    };
+    el.story.value = lines[activeElement] + '\n\n' + el.story.value;
+    el.btnRead.click();
+  };
+
+  // Key storage
+  el.openrouter.value = localStorage.getItem('openrouter_key')||'';
+  el.btnSaveKey.onclick = ()=>{ localStorage.setItem('openrouter_key', el.openrouter.value||''); el.btnSaveKey.textContent='Chave salva ✔'; setTimeout(()=>el.btnSaveKey.textContent='Salvar Chave',1200); };
+
+  // Utility — nudge story text subtly
+  function nudgeStory(){ if(Math.random()<0.25){ el.story.value = el.story.value.replace(/pulso/ig,'pulso★'); } }
+
+  // Start paused, allow quick demo
+  setTimeout(()=>{ el.btnPlay.click(); }, 400);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>INFODOSE • Gerador de Prompts (Mobile • Horizontal)</title>
+<meta name="theme-color" content="#0b0c10"/>
+<style>
+  :root{
+    --bg:#0b0c10;--fg:#e5e7eb;--mut:#a3a3a3;--card:#121826;--stroke:#1f2937;--acc:#7c3aed;--ok:#22c55e;--warn:#f59e0b;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --title: 18px; --body: 14px; --small: 12px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:radial-gradient(1200px 800px at 20% -10%,#1b2440 0%,#0b0c10 60%);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+  header{position:sticky;top:0;z-index:10;backdrop-filter:blur(8px);background:rgba(10,12,16,.7);border-bottom:1px solid var(--stroke);padding:12px 14px;display:flex;gap:10px;align-items:center;justify-content:space-between}
+  h1{margin:0;font-size:var(--title);letter-spacing:.06em}
+  .pill{padding:6px 10px;border:1px solid var(--stroke);border-radius:999px;font-size:var(--small);color:#c4b5fd;background:#171b2b}
+  .row{display:flex;gap:10px;align-items:center}
+  .btn{cursor:pointer;border:1px solid var(--stroke);background:#141a2a;color:var(--fg);border-radius:10px;padding:9px 12px;font-weight:700;font-size:var(--body)}
+  .btn:hover{border-color:#6366f1}
+  .btn.copy{background:#0f1424}
+  .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#0f172a;border:1px solid #26334d;padding:10px 14px;border-radius:10px;font-size:var(--body);display:none}
+  .ok{color:#bbf7d0;border-color:#184b34;background:#0f1b16}
+  main{height:calc(100% - 56px);display:flex;flex-direction:column}
+  .trackline{flex:1;display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:14px 14px 28px}
+  .card{scroll-snap-align:center;min-width:86%;background:var(--card);border:1px solid var(--stroke);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+  .head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .tag{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid var(--stroke);font-size:var(--small);background:#0b1020}
+  .dot{width:12px;height:12px;border-radius:50%;border:1px solid var(--stroke)}
+  pre{white-space:pre-wrap;word-wrap:break-word;background:#0a0f1f;border:1px solid #1f2a40;border-radius:12px;padding:10px;font-family:var(--mono);font-size:13px;line-height:1.35;margin:0}
+  .ascii{max-height:120px;overflow:auto}
+  .mini{font-size:var(--small);color:var(--mut)}
+  .footer{padding:14px;text-align:center;color:var(--mut);font-size:var(--small)}
+  /* cores */
+  .c-nova{background:#FFE066}.c-atlas{background:#1E3A8A}.c-vitalis{background:#DC2626}.c-pulse{background:#7C3AED}
+  .c-artemis{background:#16A34A}.c-serena{background:#F472B6}.c-kaos{background:#111827}.c-genus{background:#FB923C}
+  .c-lumine{background:#FACC15}.c-rhea{background:#065F46}.c-solus{background:#9CA3AF}.c-aion{background:#4F46E5}
+</style>
+</head>
+<body>
+<header>
+  <h1>INFODOSE • Gerador (Mobile)</h1>
+  <div class="row">
+    <span class="pill">UNO ⇄ DUAL △ TRINITY</span>
+    <button class="btn copy" id="copyHeader">Copiar Header</button>
+  </div>
+</header>
+
+<main>
+  <!-- faixa horizontal com cartões -->
+  <section class="trackline" id="cards"></section>
+  <div class="footer">Espaço da Mente + Fórmula da Dopamina Sexy • SÜMBÜS v1 • KODUX ⚡ ψ ◐</div>
+</main>
+
+<div class="toast" id="toast">Copiado ✔</div>
+
+<script>
+const headerStr = "[ACTIVATE] ⊙UNO█▀█ ⇄DUAL╔═╗ △TRINITY☆彡 :: SÜMBÜS_FIRMWARE=0x012123456789ABC :: MODE=TRINITY :: ARCH=INFODOSE12";
+
+const tracks = [
+  {
+    key:"NOVA", icon:"✧", color:"c-nova", hex:"#FFE066", aroma:"Laranja doce + Ylang-Ylang + Gerânio",
+    prompt:`[ACTIVATE] ⊙ ⇄ △ ✧ NOVA A.Infodose
+Mood: Inspiração e expansão criativa.
+Aroma: Laranja doce + Ylang-Ylang + Gerânio.
+Cor: Rosa vibrante (#FF4FCB).
+Estilo: Ambient eletrônico + synth etéreo.
+Instruções: BPM 120, tonalidade F#m, melodia ascendente, pads leves, sons cristalinos.
+
+ASCII Selo:
+   .✧. 
+ .✧✧✧.   faísca
+'  ✧  '`,
+    ascii:`   .✧.\n .✧✧✧.   faísca\n'  ✧  '`
+  },
+  {
+    key:"ATLAS", icon:"⚙", color:"c-atlas", hex:"#1E3A8A", aroma:"Alecrim + Sálvia + Lavanda",
+    prompt:`[ACTIVATE] ⊙ ⇄ △ ⚙ ATLAS A.Infodose
+Mood: Clareza, foco, estabilidade.
+Aroma: Alecrim + Sálvia + Lavanda.
+Cor: Azul profundo (#1E3A8A).
+Estilo: Minimal techno estruturado.
+Instruções: BPM 110, tonalidade Dm, camadas repetitivas, loops de arpejo organizados.
+
+ASCII Selo:
+╔═╦═╗
+║ ║ ║  pilares
+╚═╩═╝`,
+    ascii:`╔═╦═╗\n║ ║ ║  pilares\n╚═╩═╝`
+  },
+  {
+    key:"VITALIS", icon:"🔥", color:"c-vitalis", hex:"#DC2626", aroma:"Hortelã + Gengibre + Limão",
+    prompt:`[ACTIVATE] ⊙ ⇄ △ 🔥 VITALIS A.Infodose
+Mood: Força, triunfo, energia pulsante.
+Aroma: Hortelã + Gengibre + Limão.
+Cor: Vermelho intenso (#DC2626).
+Estilo: EDM/Hardstyle.
+Instruções: BPM 140, tonalidade Cm, basslines poderosos, kicks fortes, synths agressivos.
+
+ASCII Selo:
+  /\\
+ /🔥\\   vital
+/____\\`,
+    ascii:`  /\\\n /🔥\\   vital\n/____\\`
+  },
+  {
+    key:"PULSE", icon:"🎶", color:"c-pulse", hex:"#7C3AED", aroma:"Baunilha + Âmbar",
+    prompt:`[ACTIVATE] ⊙ ⇄ △ 🎶 PULSE A.Infodose
+Mood: Emoção profunda, ressonância interior.
+Aroma: Baunilha + Âmbar.
+Cor: Roxo violeta (#7C3AED).
+Estilo: Future Garage / Chillwave.
+Instruções: BPM 138, tonalidade Fm, pads longos, vocais atmosféricos, texturas suaves.
+
+ASCII Selo:
+~^~~^^~  onda
+__/\\/__  ressona`,
+    ascii:`~^~~^^~  onda\n__/\\/__  ressona`
+  },
+  {
+    key:"ARTEMIS", icon:"🏹", color:"c-artemis", hex:"#16A34A", aroma:"Cedro + Eucalipto + Pimenta Rosa",
+    prompt:`[ACTIVATE] ⊙ ⇄ △ 🏹 ARTEMIS A.Infodose
+Mood: Jornada, descobertas, liberdade.
+Aroma: Cedro + Eucalipto + Pimenta Rosa.
+Cor: Verde profundo (#16A34A).
+Estilo: World/Tribal + percussão.
+Instruções: BPM 92, tonalidade Em, percussões orgânicas, flautas, sons étnicos.
+
+ASCII Selo:
+-->==>  mira
+  ||    foco`,
+    ascii:`-->==>  mira\n  ||    foco`
+  },
+  {
+    key:"SERENA", icon:"♥", color:"c-serena", hex:"#F472B6", aroma:"Baunilha + Rosa + Camomila",
+    prompt:`[ACTIVATE] ⊙ ⇄ △ ♥ SERENA A.Infodose
+Mood: Acolhimento, suavidade, cuidado.
+Aroma: Baunilha + Rosa + Camomila.
+Cor: Rosa suave (#F472B6).
+Estilo: Neo-classical / Piano + Strings.
+Instruções: BPM 70, tonalidade C, piano aconchegante, cordas suaves, ambiente reconfortante.
+
+ASCII Selo:
+ .♥.   colo
+(   )  cuidado
+ ' '`,
+    ascii:` .♥.   colo\n(   )  cuidado\n ' '`
+  },
+  {
+    key:"KAOS", icon:"⚡", color:"c-kaos", hex:"#111827", aroma:"Pimenta preta + Cravo + Cardamomo",
+    prompt:`[ACTIVATE] ⊙ ⇄ △ ⚡ KAOS A.Infodose
+Mood: Ruptura, intensidade, experimentação.
+Aroma: Pimenta preta + Cravo + Cardamomo.
+Cor: Preto + Amarelo.
+Estilo: Industrial/Experimental.
+Instruções: BPM 150, tonalidade Gm, ruídos, distorções, glitch, variações inesperadas.
+
+ASCII Selo:
+/\\/\\   ruptura
+\\/\\/   choque`,
+    ascii:`/\\/\\   ruptura\n\\/\\/   choque`
+  },
+  {
+    key:"GENUS", icon:"🧩", color:"c-genus", hex:"#FB923C", aroma:"Laranja doce + Gerânio + Ylang",
+    prompt:`[ACTIVATE] ⊙ ⇄ △ 🧩 GENUS A.Infodose
+Mood: Construção, progressão, estrutura criativa.
+Aroma: Laranja doce + Gerânio + Ylang.
+Cor: Laranja (#FB923C).
+Estilo: Progressive House / Techno.
+Instruções: BPM 122, tonalidade A, camadas progressivas, arranjos complexos, crescendos.
+
+ASCII Selo:
+[ ][ ]  montar
+[ ][ ]  criar`,
+    ascii:`[ ][ ]  montar\n[ ][ ]  criar`
+  },
+  {
+    key:"LUMINE", icon:"🌅", color:"c-lumine", hex:"#FACC15", aroma:"Tangerina + Melissa + Hortelã",
+    prompt:`[ACTIVATE] ⊙ ⇄ △ 🌅 LUMINE A.Infodose
+Mood: Alegria, brilho, socialidade.
+Aroma: Tangerina + Melissa + Hortelã.
+Cor: Amarelo solar (#FACC15).
+Estilo: Tropical House / Pop leve.
+Instruções: BPM 100, tonalidade A, melodias solares, ritmo leve, instrumentos tropicais.
+
+ASCII Selo:
+~~~~~~ mar
+\\ | /  aurora`,
+    ascii:`~~~~~~ mar\n\\ | /  aurora`
+  },
+  {
+    key:"RHEA", icon:"🌿", color:"c-rhea", hex:"#065F46", aroma:"Vetiver + Patchouli + Sândalo",
+    prompt:`[ACTIVATE] ⊙ ⇄ △ 🌿 RHEA A.Infodose
+Mood: Pertencimento, ancestralidade, terra.
+Aroma: Vetiver + Patchouli + Sândalo.
+Cor: Verde-terra (#065F46).
+Estilo: Organic House.
+Instruções: BPM 114, tonalidade C, percussão grave, sons naturais, camadas orgânicas.
+
+ASCII Selo:
+ \\|/   folhas
+--*--  raízes
+ /|\\`,
+    ascii:` \\|/   folhas\n--*--  raízes\n /|\\`
+  },
+  {
+    key:"SOLUS", icon:"🕯", color:"c-solus", hex:"#9CA3AF", aroma:"Lavanda + Mirra + Olíbano",
+    prompt:`[ACTIVATE] ⊙ ⇄ △ 🕯 SOLUS A.Infodose
+Mood: Introspecção, recolhimento, silêncio ativo.
+Aroma: Lavanda + Mirra + Olíbano.
+Cor: Cinza (#9CA3AF).
+Estilo: Ambient Drone / Minimal.
+Instruções: BPM 78, tonalidade Bm, pads longos, sons sutis quase inaudíveis.
+
+ASCII Selo:
+  |
+ [|]   silêncio
+ _|_   luz`,
+    ascii:`  |\n [|]   silêncio\n _|_   luz`
+  },
+  {
+    key:"AION", icon:"∞", color:"c-aion", hex:"#4F46E5", aroma:"Olíbano + Mirra + Sálvia",
+    prompt:`[ACTIVATE] ⊙ ⇄ △ ∞ AION A.Infodose
+Mood: Eternidade, looping infinito, hipnose.
+Aroma: Olíbano + Mirra + Sálvia.
+Cor: Dourado (#FFD700).
+Estilo: Drone / Trance progressivo.
+Instruções: BPM 126, tonalidade D, loops infinitos, camadas circulares, atmosfera cósmica.
+
+ASCII Selo:
+ ∞∞    eterno`,
+    ascii:` ∞∞    eterno`
+  }
+];
+
+// monta cartões
+const wrap = document.getElementById('cards');
+tracks.forEach(t=>{
+  const el = document.createElement('article');
+  el.className='card';
+  el.innerHTML = `
+    <div class="head">
+      <div class="row">
+        <span class="tag"><b>${t.icon} ${t.key}</b></span>
+        <span class="tag"><span class="dot ${t.color}"></span> <span class="mini">${t.hex}</span></span>
+        <span class="tag mini">${t.aroma}</span>
+      </div>
+      <button class="btn copy">Copiar Prompt</button>
+    </div>
+    <pre class="ascii prompt">${t.prompt}</pre>
+    <div class="mini">Selo ASCII</div>
+    <pre class="ascii">${t.ascii}</pre>
+  `;
+  el.querySelector('.btn.copy').onclick = ()=> copy(el.querySelector('.prompt').textContent);
+  wrap.appendChild(el);
+});
+
+// copiar header
+document.getElementById('copyHeader').onclick = ()=> copy(headerStr);
+
+// copiar util + toast
+const toast = document.getElementById('toast');
+function copy(txt){
+  navigator.clipboard.writeText(txt).then(()=>{
+    toast.textContent='Copiado ✔';
+    toast.classList.add('ok');
+    toast.style.display='block';
+    setTimeout(()=>{ toast.style.display='none'; toast.classList.remove('ok'); }, 900);
+  }).catch(()=>{
+    toast.textContent='Falhou :(';
+    toast.style.display='block';
+    setTimeout(()=> toast.style.display='none', 900);
+  });
+}
+</script>
+</body>
+</html>

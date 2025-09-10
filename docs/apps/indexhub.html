@@ -1,0 +1,966 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>DUAL.Infodose🔘HUB — Memória</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0b0b0b" id="metaThemeColor">
+  <style>
+    :root{
+      --bg:#0b0b0b; --fg:#fff; --muted:#b9c7cf; --acc:#E7C65A;
+      --stroke:rgba(255,235,180,.20); --stroke-soft:rgba(255,235,180,.12);
+      --blur:22px; --radius:18px; --dock-space:84px; --maxw:980px;
+    }
+    /* Base */
+    html,body{height:100%;margin:0}
+    html{background:var(--bg)}
+    body{
+      background:var(--bg); color:var(--fg);
+      font-family:ui-rounded,system-ui,-apple-system,Inter,Segoe UI,Roboto,Arial;
+      min-height:100vh; min-height:100svh;
+    }
+    /* Header */
+    .header{
+      position:sticky;top:0;z-index:10;
+      backdrop-filter:blur(var(--blur)) saturate(150%);
+      background:rgba(0,0,0,.45);
+      border-bottom:1px solid var(--stroke);
+      box-shadow:0 12px 34px rgba(0,0,0,.42);
+      padding-top:env(safe-area-inset-top)
+    }
+    .inner{max-width:var(--maxw);margin:0 auto;padding:14px;display:flex;gap:14px;align-items:center}
+    .logo{width:46px;height:46px;border-radius:50%;display:inline-grid;place-items:center;position:relative;background:rgba(0,0,0,.25)}
+    .ring{position:absolute;inset:0;border:2px solid var(--acc);border-radius:50%;animation:spin 6s linear infinite}
+    .bar{position:absolute;left:50%;top:50%;width:60%;height:2px;background:var(--acc);transform:translate(-50%,-50%);border-radius:999px;animation:breathe 2.4s ease-in-out infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes breathe{0%,100%{opacity:.8}50%{opacity:1}}
+    h1{font-size:1.16rem;margin:.12rem 0 0;font-weight:800}
+    .kicker{font-size:.72rem;letter-spacing:.16em;color:#e0e0e0;text-transform:uppercase}
+
+    /* Toolbar */
+    .toolbar{max-width:var(--maxw);margin:10px auto 0;padding:0 14px 8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .pill{border:1px solid var(--stroke-soft);border-radius:999px;padding:.5rem .8rem;background:rgba(255,255,255,.04);font-weight:700;display:flex;gap:.45rem;align-items:center}
+    .input{flex:1;min-width:180px;border:1px solid var(--stroke-soft);border-radius:999px;padding:.6rem .9rem;background:rgba(255,255,255,.06);color:#fff;outline:none}
+    .select{border:1px solid var(--stroke-soft);border-radius:999px;padding:.56rem .9rem;background:rgba(255,255,255,.06);color:#fff}
+
+    /* Section */
+    .section{max-width:var(--maxw);margin:14px auto 6px;padding:0 14px}
+    .section h2{
+      font-size:.92rem;letter-spacing:.12em;text-transform:uppercase;
+      color:#e6e6e6;margin:14px 0 8px;opacity:.9
+    }
+
+    /* Grid/cards */
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    @media(max-width:560px){.grid{grid-template-columns:1fr}}
+    .card{
+      background:rgba(0,0,0,.32); border:1px solid var(--stroke-soft);
+      border-radius:18px; padding:12px; display:flex; gap:12px; align-items:center;
+      box-shadow:0 6px 18px rgba(0,0,0,.45); position:relative;
+    }
+    .icon{width:56px;height:56px;border-radius:14px;display:grid;place-items:center;overflow:hidden;background:#0f1320;border:1px solid var(--stroke-soft);position:relative}
+    .icon img{width:100%;height:100%;object-fit:cover;display:block}
+    .icon .fav-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:999px;background:#ffd86a;box-shadow:0 0 8px rgba(255,216,106,.8)}
+    .title{font-weight:800;margin-bottom:4px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+    .badges{display:flex;gap:6px;flex-wrap:wrap}
+    .badge{font-size:.72rem;padding:.16rem .5rem;border-radius:999px;border:1px solid var(--stroke-soft);background:rgba(255,255,255,.06);color:#eaf6ff}
+    .muted{color:var(--muted);font-size:.86rem}
+    .row{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+    .btn{appearance:none;border:1px solid var(--stroke-soft);cursor:pointer;background:rgba(255,255,255,.06);color:#fff;padding:.64rem .9rem;border-radius:999px;font-weight:800}
+    .btn.star.active{background:rgba(231,198,90,.18);border-color:rgba(231,198,90,.5);color:#ffd86a}
+    .btn.primary{background:linear-gradient(90deg,#9f7cff,#29d3ff);border-color:transparent}
+
+    /* Bottom Dock */
+    .dock{position:fixed;left:0;right:0;bottom:0;z-index:30;display:block}
+    .dock-inner{
+      max-width:var(--maxw);margin:0 auto;
+      padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+      display:flex;gap:8px;justify-content:space-between;align-items:center;
+      backdrop-filter:blur(18px) saturate(140%); background:rgba(0,0,0,.50);
+      border-top:1px solid var(--stroke); box-shadow:0 -10px 30px rgba(0,0,0,.45)
+    }
+    .dbtn{appearance:none;border:1px solid var(--stroke);background:rgba(255,255,255,.06);color:#fff;padding:.64rem .9rem;border-radius:12px;font-weight:700}
+    footer{color:#fff;font-size:.8rem;text-align:center;margin:18px 0 calc(18px + var(--dock-space));opacity:.9}
+    .spacer{height:calc(var(--dock-space) + env(safe-area-inset-bottom) + 8px)}
+
+    /* Viewer (fullscreen) */
+    .viewer{position:fixed;inset:0;z-index:50;background:#000;touch-action:pan-y}
+    .viewer iframe{position:absolute;inset:0 0 60px 0;border:0;width:100%;height:calc(100% - 60px)}
+    .viewer-footer{
+      position:fixed;left:0;right:0;bottom:0;height:60px;
+      display:flex;gap:8px;align-items:center;justify-content:center;
+      padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+      backdrop-filter:blur(18px) saturate(140%); background:rgba(0,0,0,.65);
+      border-top:1px solid var(--stroke)
+    }
+    .swipe-hint{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;padding:.35rem .6rem;border-radius:999px;font-weight:800;opacity:.95;transition:opacity .4s}
+    .swipe-hint.hide{opacity:0}
+
+    /* ====== MEMÓRIA — COMPACT RAIL (importado/ajustado) ====== */
+    .mem-rail{
+      position:fixed; right:10px; z-index:55;
+      display:flex; flex-direction:column; gap:8px; align-items:center;
+      top:199px;
+      max-height:calc(100svh - 24px - env(safe-area-inset-bottom));
+      overflow:auto; padding:8px 6px;
+      backdrop-filter:blur(12px) saturate(140%); background:rgba(0,0,0,.35);
+      border:1px solid var(--stroke); border-radius:14px;
+      box-shadow:0 10px 28px rgba(0,0,0,.45);
+    }
+    .mem-rail.collapsed{ padding:6px; gap:6px; background:rgba(0,0,0,.25); }
+    .mem-rail.collapsed .mem-item, .mem-rail.collapsed #memClear{ display:none !important; }
+    .mem-rail.collapsed #memToggle{ opacity:.6; transform:scale(.9); }
+    .mem-item{position:relative;width:44px;height:44px;border-radius:14px;overflow:hidden;background:#0f1320;box-shadow:0 8px 22px rgba(0,0,0,.45);border:1px solid var(--stroke-soft);cursor:pointer;display:grid;place-items:center}
+    .mem-item img{width:100%;height:100%;object-fit:cover;display:block}
+    .mem-item .letter{font-weight:900;color:#eaf6ff;font-size:.9rem}
+    .mem-item .close{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.55);color:#fff;font-size:.72rem;line-height:16px;display:grid;place-items:center}
+    .mem-btn{appearance:none;border:1px solid var(--stroke);background:rgba(255,255,255,.06);color:#fff;width:44px;height:34px;border-radius:10px;font-weight:800;cursor:pointer;display:grid;place-items:center}
+    .mem-rail[data-hidden="1"] .mem-item{opacity:.15;pointer-events:none}
+    @media(max-width:560px){
+      .mem-item,.mem-btn{width:40px;height:40px}.mem-btn{height:32px}
+    }
+    @supports (padding: max(0px)) {
+      .mem-rail { margin-bottom: env(safe-area-inset-bottom); }
+    }
+    @media (min-height: 760px){
+      .mem-rail{ transform: translateY(14vh); max-height: calc(100svh - 34vh); }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="inner">
+      <span class="logo" aria-hidden="true"><span class="ring"></span><span class="bar"></span></span>
+      <div style="flex:1">
+        <div class="kicker">Infodose • Hub Principal</div>
+        <h1>Infodose Hub Ultra</h1>
+      </div>
+      <nav aria-label="Ações">
+        <button class="btn primary" id="btnDownloadLoader" type="button">⤓ Baixar HUB</button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <input id="search" class="input" type="search" placeholder="Buscar e filtrar por nome, url, tag…" autocomplete="off"/>
+    <select id="sort" class="select" title="Ordenação">
+      <option value="group">Ordenar por grupos</option>
+      <option value="az">A → Z</option>
+      <option value="za">Z → A</option>
+    </select>
+    <label class="pill" title="Quando marcado, abre no overlay (viewer)">
+      <input id="sameTab" type="checkbox" style="accent-color:#29d3ff" checked> 🔘
+    </label>
+
+  
+      <button class="pill" id="btnTTS" type="button" title="Narrar eventos (Speech Synthesis)">🗣️ TTS: ON</button>
+      <!-- botão para alternar preset de voz -->
+      <button class="pill" id="btnVoicePreset" type="button" title="Alterar voz TTS">Voz Natural</button>
+</div>
+
+  <main id="content"></main>
+  <footer>DualInfodose • HUB</footer>
+
+  <div class="dock" role="navigation" aria-label="Dock">
+    <div class="dock-inner">
+      <button class="dbtn" id="dockHome" type="button">🏘️</button>
+      <button class="dbtn" id="dockInfodose" type="button">💊</button>
+      <button class="dbtn" id="dockInstall" type="button">⤓ 🦠 ⤓</button>
+    </div>
+  </div>
+
+  <!-- MEMÓRIA — Compact Rail -->
+  <aside id="memRail" class="mem-rail" aria-label="Memória de Páginas">
+    <button class="mem-btn" id="memToggle" title="Ocultar/mostrar">◧</button>
+    <!-- itens entram aqui -->
+    <button class="mem-btn" id="memClear" title="Limpar memória">🧹</button>
+  </aside>
+
+<script>
+/** ===== util ===== **/
+const $ = (q,root=document)=>root.querySelector(q);
+const $content = $('#content');
+const $count = $('#countApps');
+const $search = $('#search');
+const $sort = $('#sort');
+const $sameTab = $('#sameTab');
+const $memRail=$('#memRail'), $memToggle=$('#memToggle'), $memClear=$('#memClear');
+
+/** ===== ícones ===== **/
+const FALLBACK_ICONS = {
+  base:   '/icons/icon-192.png',
+  chats:  '/icons/icon-192-chats.png',
+  editors:'/icons/icon-192-editors.png',
+  indexrs:'/icons/icon-192-indexrs.png'
+};
+
+/** ===== grupos ===== **/
+const GROUP_TITLES = {
+  favorites:'Favoritos',
+  locals:'Locais (HTMLs)',
+  index_hubs: 'Index / Hubs',
+  chats: 'Chats / Render',
+  editors_tools: 'Editors & Tools',
+  menus: 'Menus',
+  tutorials: 'Tutoriais',
+  visual_splash: 'Visual / Splash',
+  docs: 'Docs',
+  players: 'Players',
+  others: 'Outros'
+};
+const GROUP_ORDER = ['favorites','locals','index_hubs','chats','editors_tools','menus','tutorials','visual_splash','docs','players','others'];
+
+/** ===== regras inteligentes ===== **/
+const TAG_PRIORITIES = {
+  index_hubs: ['hub','index','nebula','metalux','sumbus','sümbüs','barra','barrao'],
+  chats: ['chat','render','response','kobllux','autoload'],
+  editors_tools: ['editor','edit','labs','xml','conv','converter','kblx','sigma','metalux','apps.json'],
+  menus: ['menu'],
+  tutorials: ['tutorial','ativacoes','ativação','v7','guia'],
+  visual_splash: ['splash','visual'],
+  docs: ['book','oidual','doc','.txt'],
+  players: ['player','audio','tts']
+};
+const REGEX_RULES = [
+  { key:'index_hubs',    rx: /(index|hub|nebula|metalux|s[üu]mb[üu]s|barrao)/i },
+  { key:'chats',         rx: /(chat|render[-_ ]?response|autoload|kobllux)/i },
+  { key:'editors_tools', rx: /(editor|labs|xml|conv|converter|apps\.json|kblx|sigma|metalux)/i },
+  { key:'menus',         rx: /(^|[-_ ])menu([-_ ]|$)/i },
+  { key:'tutorials',     rx: /(tutorial|ativa[cç][oõ]es|v7\b)/i },
+  { key:'visual_splash', rx: /splash/i },
+  { key:'docs',          rx: /(book|oidual|\.txt\b)/i },
+  { key:'players',       rx: /(player|audio|tts)/i }
+];
+
+/** ===== helpers ===== **/
+function safe(v){ return (v||'').toString(); }
+function lastFile(url){
+  try{ const u = new URL(url, location.href); return (u.pathname.split('/').pop()||'').toLowerCase(); }
+  catch{ return (url||'').split('/').pop()?.toLowerCase() || ''; }
+}
+function folderHint(url){
+  try{
+    const u = new URL(url, location.href);
+    const parts = u.pathname.split('/').filter(Boolean);
+    const i = parts.indexOf('apps');
+    if(i>=0 && parts[i+1]) return parts[i+1].toLowerCase();
+  }catch{}
+  return '';
+}
+function sourceString(app){
+  return [app.key, app.title, app.desc, app.url].map(safe).join(' ').toLowerCase() + ' ' + lastFile(app.url);
+}
+function classify(app){
+  if(app.group && GROUP_TITLES[app.group]) return app.group;
+  if(Array.isArray(app.tags)){
+    const tagsLower = app.tags.map(t=>safe(t).toLowerCase());
+    for(const [gk,tagList] of Object.entries(TAG_PRIORITIES)){
+      if(tagList.some(t => tagsLower.includes(t))) return gk;
+    }
+  }
+  const folder = folderHint(app.url);
+  if(folder){
+    if(/(hub|index|nebula|metalux|s[üu]mb[üu]s|bar)/i.test(folder)) return 'index_hubs';
+    if(/(chat|render|resp|kobllux|auto)/i.test(folder)) return 'chats';
+    if(/(edit|labs|xml|conv|kblx|sigma)/i.test(folder)) return 'editors_tools';
+    if(/menu/i.test(folder)) return 'menus';
+    if(/(tutorial|ativ|v7)/i.test(folder)) return 'tutorials';
+    if(/splash/i.test(folder)) return 'visual_splash';
+    if(/(doc|book|oidual|txt)/i.test(folder)) return 'docs';
+    if(/(player|audio|tts)/i.test(folder)) return 'players';
+  }
+  const s = sourceString(app);
+  for (const r of REGEX_RULES) if (r.rx.test(s)) return r.key;
+  return 'others';
+}
+function mapGroupKeyToType(key){
+  if(key==='index_hubs') return 'indexrs';
+  if(key==='chats') return 'chats';
+  if(key==='editors_tools' || key==='menus') return 'editors';
+  return 'base';
+}
+function groupIconFor(key, defaults){
+  return (defaults && (defaults[key] || defaults[ mapGroupKeyToType(key) ])) ||
+         ({
+           favorites: FALLBACK_ICONS.base,
+           index_hubs: FALLBACK_ICONS.indexrs,
+           chats: FALLBACK_ICONS.chats,
+           editors_tools: FALLBACK_ICONS.editors,
+           menus: FALLBACK_ICONS.editors,
+           tutorials: FALLBACK_ICONS.base,
+           visual_splash: FALLBACK_ICONS.base,
+           docs: FALLBACK_ICONS.base,
+           players: FALLBACK_ICONS.base,
+           others: FALLBACK_ICONS.base
+         }[key] || FALLBACK_ICONS.base);
+}
+function pickIcon(app, groupKey, defaults){
+  if (app.icon && app.icon.trim()) return app.icon;
+  return groupIconFor(groupKey, defaults);
+}
+function h(el, attrs={}, children=[]){
+  const e = document.createElement(el);
+  Object.entries(attrs).forEach(([k,v])=>{
+    if(k==='class') e.className = v;
+    else if(k==='html') e.innerHTML = v;
+    else e.setAttribute(k, v);
+  });
+  (Array.isArray(children)?children:[children]).filter(Boolean).forEach(c=> e.appendChild(c));
+  return e;
+}
+function badgeEl(text){ return h('span', {class:'badge', html: text}); }
+
+/** ===== favoritos (opcional) ===== **/
+function appKey(a){return (a.key&&String(a.key))||String(a.url)}
+function loadFavs(){try{return new Set(JSON.parse(localStorage.getItem('infodose:favs')||'[]'))}catch{return new Set}}
+function saveFavs(s){try{localStorage.setItem('infodose:favs',JSON.stringify([...s]))}catch{}}
+const FAVS=loadFavs(); function isFav(a){return FAVS.has(appKey(a))} function toggleFav(a){const k=appKey(a);FAVS.has(k)?FAVS.delete(k):FAVS.add(k);saveFavs(FAVS);render()}
+
+/** ===== UI builders ===== **/
+function sectionWrap(title, key){ return h('section',{class:'section','data-group':key},[
+  h('h2',{html:title}),
+  h('div',{class:'grid'})
+]);}
+function favBtn(a){
+  const b=h('button',{class:'btn star'+(isFav(a)?' active':''),html:(isFav(a)?'★ Fav':'☆ Fav')});
+  b.addEventListener('click',ev=>{ev.stopPropagation();toggleFav(a)});
+  return b;
+}
+function card(app, groupKey, defaults){
+  const iconSrc = pickIcon(app, groupKey, defaults);
+  const badges = deriveBadges(app);
+  const c = h('div',{class:'card'},[
+    h('div',{class:'icon', html:`<img src="${iconSrc}" alt="">`}),
+    h('div',{style:'flex:1'},[
+      h('div',{class:'title', html: `${safe(app.title||app.key)}`}),
+      badges.length? h('div',{class:'badges'}, badges.map(badgeEl)) : null,
+      h('div',{class:'muted', html: safe(app.desc||'') }),
+      h('div',{class:'row'},[
+        favBtn(app),
+        h('button',{class:'btn', html:'Abrir'}),
+        h('button',{class:'btn', html:'⎘ Injection', title:'Copiar snippet de injection'})
+      ])
+    ])
+  ]);
+  c.querySelectorAll('.btn')[1].addEventListener('click', ()=> openApp(app));
+  c.querySelectorAll('.btn')[2].addEventListener('click', ()=> copyInjection(app));
+  return c;
+}
+function deriveBadges(app){
+  const out = [];
+  if(Array.isArray(app.tags)) out.push(...app.tags.slice(0,5));
+  const f = (safe(app.key)+' '+safe(app.title)+' '+safe(app.url)).toLowerCase();
+  if(/fix/.test(f)) out.push('fix');
+  if(/final/.test(f)) out.push('final');
+  if(/beta|rc/.test(f)) out.push('beta');
+  if(/metalux/.test(f)) out.push('metalux');
+  if(/nebula/.test(f)) out.push('nebula');
+  if(/menu/.test(f)) out.push('menu');
+  if(/splash/.test(f)) out.push('splash');
+  return [...new Set(out)].slice(0,6);
+}
+
+/** ===== render ===== **/
+function renderGrouped(groups, defaults){
+  $content.innerHTML = '';
+  let total = 0;
+  GROUP_ORDER.forEach(gk=>{
+    const list = groups[gk];
+    if(Array.isArray(list) && list.length){
+      total += list.length;
+      const sec = sectionWrap(GROUP_TITLES[gk] || gk, gk);
+      const grid = sec.querySelector('.grid');
+      list.forEach(app => grid.appendChild(card(app, gk, defaults)));
+      $content.appendChild(sec);
+    }
+  });
+  // grupos extras
+  Object.keys(groups).forEach(gk=>{
+    if(!GROUP_ORDER.includes(gk)){
+      const list = groups[gk];
+      if(Array.isArray(list) && list.length){
+        total += list.length;
+        const sec = sectionWrap(GROUP_TITLES[gk] || gk, gk);
+        const grid = sec.querySelector('.grid');
+        list.forEach(app => grid.appendChild(card(app, gk, defaults)));
+        $content.appendChild(sec);
+      }
+    }
+  });
+  const spacer = document.createElement('div'); spacer.className='spacer'; $content.appendChild(spacer);
+  if($count) $count.textContent = `${total} itens organizados`;
+}
+function renderFlat(apps, defaults){
+  const groups = {};
+  for(const app of apps){
+    const gk = classify(app);
+    (groups[gk] ||= []).push(app);
+  }
+  const mode = $sort.value;
+  if (mode === 'az' || mode === 'za'){
+    const dir = (mode==='az') ? 1 : -1;
+    Object.keys(groups).forEach(k=>{
+      groups[k].sort((a,b)=> safe(a.title||a.key).localeCompare(safe(b.title||b.key)) * dir);
+    });
+  } else {
+    Object.keys(groups).forEach(k=>{
+      groups[k].sort((a,b)=> safe(a.title||a.key).localeCompare(safe(b.title||b.key)));
+    });
+  }
+  // injeta favoritos como grupo no topo, se houver
+  const all = Object.values(groups).flat();
+  const favs = all.filter(a=>isFav(a));
+  if(favs.length) groups.favorites = favs;
+  renderGrouped(groups, defaults);
+}
+
+/** ===== busca ===== **/
+function applySearchFilter(original, isGrouped){
+  const q = $search.value.trim().toLowerCase();
+  if(!q) return original;
+  const byTag = (app)=> Array.isArray(app.tags) && app.tags.some(t=>safe(t).toLowerCase().includes(q));
+  const matchApp = app=>{
+    const s = (safe(app.key)+' '+safe(app.title)+' '+safe(app.desc)+' '+safe(app.url)).toLowerCase();
+    return s.includes(q) || byTag(app);
+  };
+  if(isGrouped){
+    const out = {};
+    Object.entries(original).forEach(([gk,list])=>{
+      const f = list.filter(matchApp);
+      if(f.length) out[gk] = f;
+    });
+    return out;
+  } else {
+    return original.filter(matchApp);
+  }
+}
+
+/** ===== loader resiliente do apps.json ===== **/
+let RAW = null;
+let DEFAULTS = null;
+
+async function tryFetch(url){
+  const res = await fetch(url, {cache:'no-store'});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return res.json();
+}
+async function load(){
+  const candidates = [
+    './apps.json',
+    './apps/apps.json',
+    './docs/apps/apps.json',
+    '/apps/apps.json'
+  ];
+  let data=null, lastErr=null;
+  for(const u of candidates){
+    try{ data = await tryFetch(u); break; }
+    catch(e){ lastErr=e; }
+  }
+  if(!data){
+    console.error('Falha apps.json', lastErr);
+    $content.innerHTML = `
+      <section class="section">
+        <div class="card">
+          <div class="icon">⚠️</div>
+          <div>
+            <div class="title">Falha ao carregar apps</div>
+            <div class="muted">Tente colocar o arquivo em ./apps/apps.json (ou docs/apps/apps.json).</div>
+          </div>
+        </div>
+      </section>`;
+    if($count) $count.textContent = 'Erro no apps.json';
+    return;
+  }
+  RAW = data;
+  DEFAULTS = data.defaultIcons || data.groups?.defaultIcons || {
+    base: FALLBACK_ICONS.base,
+    chats: FALLBACK_ICONS.chats,
+    editors: FALLBACK_ICONS.editors,
+    indexrs: FALLBACK_ICONS.indexrs,
+    index_hubs: FALLBACK_ICONS.indexrs
+  };
+  render();
+  setTimeout(tryAutoOpen, 0);
+}
+function allApps(){
+  const locals = localsAsApps();
+  if(!RAW) return locals;
+  if(Array.isArray(RAW.apps)) return [...locals, ...RAW.apps];
+  if(RAW.groups && typeof RAW.groups==='object') return [...locals, ...Object.values(RAW.groups).flat().filter(Boolean)];
+  return locals;
+}
+function render(){
+  if(!RAW) return;
+  const mode = $sort.value;
+  if (RAW.groups && typeof RAW.groups === 'object'){
+    let groups = RAW.groups;
+    // injeta favoritos no topo, se houver
+    const all = Object.values(groups).flat().filter(Boolean);
+    const favs = all.filter(a=>isFav(a));
+    if(favs.length) groups = { favorites: favs, ...groups };
+    groups = applySearchFilter(groups, true);
+    if (mode==='az' || mode==='za'){
+      const dir = (mode==='az') ? 1 : -1;
+      const g2 = {};
+      Object.keys(groups).forEach(gk=>{
+        g2[gk] = [...groups[gk]].sort((a,b)=> safe(a.title||a.key).localeCompare(safe(b.title||b.key))*dir);
+      });
+      groups = g2;
+    }
+    renderGrouped(groups, DEFAULTS);
+  } else if (Array.isArray(RAW.apps)){
+    let list = RAW.apps;
+    list = applySearchFilter(list, false);
+    renderFlat(list, DEFAULTS);
+  } else {
+    $content.innerHTML = `
+      <section class="section">
+        <div class="card">
+          <div class="icon">⚠️</div>
+          <div>
+            <div class="title">Formato não reconhecido</div>
+            <div class="muted">Use {groups:{...}} ou {apps:[...]}</div>
+          </div>
+        </div>
+      </section>`;
+  }
+}
+
+
+/** ===== LOCAIS (HTMLs no localStorage) ===== **/
+const LOCAL_KEY='infodose:locals:v1';
+function loadLocals(){ try{ return JSON.parse(localStorage.getItem(LOCAL_KEY)||'[]'); }catch{ return []; } }
+function saveLocals(arr){ try{ localStorage.setItem(LOCAL_KEY, JSON.stringify(arr)); }catch{} }
+function clearLocals(){ localStorage.removeItem(LOCAL_KEY); render(); }
+function addLocalFiles(files){
+  if(!files || !files.length) return;
+  const tasks = [];
+  for(const f of files){
+    tasks.push(new Promise(res=>{
+      const r = new FileReader();
+      r.onload = () => res({ name:f.name.replace(/\.(html?|txt)$/i,''), html:String(r.result||''), ts:Date.now() });
+      r.readAsText(f);
+    }));
+  }
+  Promise.all(tasks).then(list=>{
+    const cur = loadLocals();
+    list.forEach(n => {
+      const id = 'l_'+Math.random().toString(36).slice(2);
+      const exists = cur.find(x => x.name===n.name && x.html===n.html);
+      if(exists){ exists.ts = Date.now(); }
+      else cur.unshift({id, ...n});
+    });
+    saveLocals(cur); render();
+  });
+}
+function localsAsApps(){
+  return loadLocals().map(l => ({
+    key: 'local:'+l.id,
+    title: l.name || 'Local',
+    desc: 'Arquivo local salvo no Hub',
+    url: 'local:'+l.id,
+    icon: FALLBACK_ICONS.editors,
+    group: 'locals',
+    tags: ['local','offline','html']
+  }));
+}
+function getLocalByUrl(url){
+  if(!url || !String(url).startsWith('local:')) return null;
+  const id = String(url).slice(6);
+  return loadLocals().find(x=>x.id===id) || null;
+}
+function removeLocalByUrl(url){
+  const id = String(url||'').replace(/^local:/,'');
+  saveLocals(loadLocals().filter(x=>x.id!==id)); render();
+}
+function blobUrlFromLocal(local){
+  const blob = new Blob([local.html], {type:'text/html;charset=utf-8'});
+  return URL.createObjectURL(blob);
+}
+
+
+
+/** ===== Audio & Speech Synthesis ===== */
+let AUDIO_UNLOCKED = false;
+let _ac = null;
+function unlockAudioOnce(){
+  if (AUDIO_UNLOCKED) return;
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(AC){
+      _ac = _ac || new AC();
+      if(_ac.state === 'suspended'){ _ac.resume(); }
+      const o = _ac.createOscillator();
+      const g = _ac.createGain();
+      g.gain.value = 0.0001;
+      o.connect(g).connect(_ac.destination);
+      o.start(); o.stop(_ac.currentTime + 0.02);
+    }
+  }catch{}
+  try{
+    const u = new SpeechSynthesisUtterance('');
+    u.volume = 0; speechSynthesis.speak(u);
+  }catch{}
+  AUDIO_UNLOCKED = true;
+}
+['click','touchstart','pointerdown','keydown'].forEach(evt=>{
+  window.addEventListener(evt, unlockAudioOnce, {passive:true});
+});
+
+let TTS_ENABLED = true;
+function speak(text){
+  if(!TTS_ENABLED || !window.speechSynthesis) return;
+  try{
+    const u = new SpeechSynthesisUtterance(
+      String(text||'').replace(/\s+/g,' ').trim()
+    );
+
+    // tenta pegar vozes mais naturais
+    let voices = speechSynthesis.getVoices();
+    let v = voices.find(v=>/Google português do Brasil/i.test(v.name));
+    if(!v) v = voices.find(v=>/Microsoft Maria/i.test(v.name));
+    if(!v) v = voices.find(v=>/female/i.test(v.name) && /pt/i.test(v.lang));
+    if(!v) v = voices.find(v=>/pt-BR/i.test(v.lang)); // último fallback
+
+    if(v) u.voice = v;
+
+    // configs de naturalidade
+    u.rate = 0.9;   // velocidade cadenciada
+    u.pitch = 1.05; // mais feminino
+    u.volume = 1;
+
+    speechSynthesis.cancel(); // limpa fila antiga
+    speechSynthesis.speak(u);
+  }catch(e){
+    console.error("Erro no TTS:", e);
+  }
+}
+/** ===== Injection util ===== */
+function injectionSnippet(){
+  return `
+<!-- INFODOSE: injection footer -->
+<style>
+  .infodose-footer{position:fixed;left:0;right:0;bottom:0;z-index:99999;display:flex;gap:10px;justify-content:center;align-items:center;padding:10px 12px calc(10px + env(safe-area-inset-bottom));backdrop-filter:blur(14px) saturate(140%);background:rgba(0,0,0,.65);border-top:1px solid rgba(255,255,255,.18)}
+  .infodose-footer .btn{appearance:none;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:.6rem 1rem;background:rgba(255,255,255,.08);color:#fff;font-weight:800;cursor:pointer}
+</style>
+<div class="infodose-footer">
+  <button class="btn" onclick="(function(){ try{ if(window.history.length>1) history.back(); else location.href='index.html'; }catch(e){ location.href='index.html'; } })()">⬅ Voltar ao Hub</button>
+</div>
+<!-- /INFODOSE -->
+`.trim();
+}
+async function downloadInjected(app){
+  try{
+    const lref = getLocalByUrl(app.url);
+    let html = null;
+    if(lref){ html = String(lref.html||''); }
+    else{
+      const res = await fetch(app.url, {cache:'no-store'});
+      html = await res.text();
+    }
+    const inj = injectionSnippet();
+    const out = html.includes('</body>') ? html.replace('</body>', inj + '\n</body>') : (html + '\n' + inj);
+    const blob = new Blob([out], {type:'text/html'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = (lastFile(app.url)||'page') + '.injected.html';
+    document.body.appendChild(a); a.click(); a.remove();
+  }catch(e){
+    alert('Não foi possível baixar/injetar este HTML (CORS?).');
+  }
+}
+function copyInjection(){ navigator.clipboard.writeText(injectionSnippet()).then(()=>alert('Injection copiado!'),()=>alert('Falha ao copiar')) }
+
+/** ===== MEMÓRIA de páginas ===== */
+const MEM_KEY='infodose:mem', MEM_LIMIT=12;
+function loadMem(){try{return JSON.parse(localStorage.getItem(MEM_KEY)||'[]')}catch{return[]}}
+function saveMem(l){try{localStorage.setItem(MEM_KEY,JSON.stringify(l))}catch{}}
+function titleLetter(t){const c=(t||'').trim().charAt(0);return (/[a-z0-9]/i.test(c)?c:'•').toUpperCase()}
+function normalizeMem(app){
+  let icon = safe(app.icon||'').trim();
+  if(!icon){ const g = classify(app); icon = groupIconFor(g, DEFAULTS); }
+  return { key: appKey(app), title: safe(app.title||app.key||lastFile(app.url)||'App'), url: app.url, icon, ts: Date.now() }
+}
+function addToMem(app){
+  const m=loadMem(), it=normalizeMem(app);
+  const i=m.findIndex(x=>x.key===it.key||x.url===it.url);
+  if(i>=0) m.splice(i,1);
+  m.unshift(it);
+  if(m.length>MEM_LIMIT) m.length=MEM_LIMIT;
+  saveMem(m); renderMem();
+}
+function removeFromMem(key){ saveMem(loadMem().filter(x=>x.key!==key)); renderMem() }
+function clearMem(){ if(confirm('Limpar memória de páginas?')){ saveMem([]); renderMem() } }
+function openFromMem(it){
+  const a = allApps().find(x=>x.url===it.url||appKey(x)===it.key);
+  openApp(a||{key:it.key,title:it.title,url:it.url,icon:it.icon});
+}
+function renderMem(){
+  const rail=$memRail;
+  rail.querySelectorAll('.mem-item').forEach(n=>n.remove());
+  const mem=loadMem();
+  let anchor=$memToggle;
+  mem.forEach(item=>{
+    const btn=document.createElement('button');
+    btn.className='mem-item'; btn.type='button'; btn.title=item.title;
+    if(item.icon){ const img=new Image(); img.src=item.icon; img.alt=item.title; btn.appendChild(img); }
+    else { const sp=document.createElement('span'); sp.className='letter'; sp.textContent=titleLetter(item.title); btn.appendChild(sp); }
+    const close=document.createElement('button'); close.className='close'; close.type='button'; close.textContent='x';
+    close.addEventListener('click',(e)=>{e.stopPropagation();removeFromMem(item.key)});
+    btn.appendChild(close);
+    btn.addEventListener('click',()=>openFromMem(item));
+    anchor.insertAdjacentElement('afterend',btn); anchor=btn;
+  });
+}
+
+/** ===== viewer ===== **/
+let VIEWER_OPEN=false;
+function openApp(app){
+  try{localStorage.setItem('infodose:lastView',JSON.stringify(app))}catch{}
+  addToMem(app);
+  if(!$sameTab.checked){
+    const lref = getLocalByUrl(app.url);
+    const targetUrl = lref ? blobUrlFromLocal(lref) : app.url;
+    window.open(targetUrl, '_blank', 'noopener'); return; }
+  const v = document.createElement('div'); unlockAudioOnce(); speak('Abrindo ' + (app.title||'aplicativo'));
+  v.className = 'viewer';
+  v.innerHTML = `
+    <div class="swipe-hint" id="swipeHint">⬇️ Arraste para fechar</div>
+    <iframe src="${(getLocalByUrl(app.url)?blobUrlFromLocal(getLocalByUrl(app.url)):app.url)}" allow="autoplay; encrypted-media; clipboard-read; clipboard-write; fullscreen; picture-in-picture"></iframe>
+    <div class="viewer-footer">
+      <button class="btn" id="backHub">⬅ Hub</button>
+      <button class="btn" id="dlHtml">⤓ Sümbüs)</button>
+      <button class="btn" id="copyInj">⎘ Unjekt</button>
+    </div>`;
+  document.body.appendChild(v);
+  const _f = v.querySelector('iframe');
+  if(_f){ _f.addEventListener('load', ()=>{ try{ _f.contentWindow.postMessage({type:'INFODOSE_UNBLUR_AUDIO'}, '*');
+        _f.contentWindow.postMessage({type:'INFODOSE_BRAIN', data: window.InfodoseBrain}, '*'); }catch{} }); }
+  setTimeout(()=>$('#swipeHint')?.classList.add('hide'),2000);
+  const prev=document.body.style.overflow; document.body.style.overflow='hidden'; VIEWER_OPEN=true;
+  let sy=null,ly=null; const th=48;
+  v.addEventListener('touchstart',e=>{const t=e.touches?.[0]; sy=t?t.clientY:e.clientY; ly=sy},{passive:true});
+  v.addEventListener('touchmove',e=>{const t=e.touches?.[0]; ly=t?t.clientY:e.clientY},{passive:true});
+  v.addEventListener('touchend',()=>{ if(sy!=null&&ly!=null&&(ly-sy)>th) back(); sy=null; ly=null},{passive:true});
+  function back(){v.remove();document.body.style.overflow=prev;VIEWER_OPEN=false}
+  v.querySelector('#backHub').addEventListener('click',back);
+  v.querySelector('#dlHtml').addEventListener('click',()=>downloadInjected(app));
+  v.querySelector('#copyInj').addEventListener('click',()=>copyInjection());
+}
+
+/** ===== eventos UI ===== **/
+$('#dockHome').addEventListener('click', ()=> {
+  window.scrollTo({top:0, behavior:'smooth'});
+  history.pushState('', document.title, window.location.pathname + window.location.search);
+});
+$('#dockInfodose').addEventListener('click', ()=> window.open('https://infodose.com.br','_blank','noopener'));
+function buildLoaderHTML(){
+  return '<!doctype html><meta charset="utf-8"><title>Infodose Loader</title><style>html,body{height:100%;margin:0;background:#0b0b0b;color:#fff;display:grid;place-items:center;font:16px/1.4 system-ui}.dot{width:14px;height:14px;border-radius:50%;background:#29d3ff;box-shadow:0 0 22px #29d3ff;animation:p 1s infinite alternate}@keyframes p{to{transform:scale(1.4);opacity:.7}}</style><div><div class="dot"></div><p>Carregando…</p></div>';
+}
+function downloadLoader(){
+  const html = buildLoaderHTML();
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'index.html';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+$('#btnDownloadLoader').addEventListener('click', downloadLoader);
+$('#dockInstall').addEventListener('click', downloadLoader);
+$search.addEventListener('input', render);
+$sort.addEventListener('change', render);
+/** ===== mem controls ===== **/
+$memToggle.addEventListener('click',()=>{ $memRail.classList.toggle('collapsed'); });
+$memClear.addEventListener('click', clearMem);
+
+/** ===== auto-open ===== */
+function findAppByKeyOrFile(q){
+  if(!q) return null;
+  const n=q.toLowerCase();
+  for(const a of allApps()){
+    const key=safe(a.key).toLowerCase(), title=safe(a.title).toLowerCase(), url=safe(a.url).toLowerCase(), file=lastFile(a.url);
+    if(key===n||title===n||url.includes(n)||file===n) return a;
+  }
+  return null;
+}
+function tryAutoOpen(){
+  const sp=new URLSearchParams(location.search);
+  let t=sp.get('view');
+  if(!t&&location.hash.startsWith('#view=')) t=decodeURIComponent(location.hash.slice(6));
+  if(t){const app=findAppByKeyOrFile(t); if(app){openApp(app); return}}
+  const marked=allApps().find(a=>a.open===true); if(marked){openApp(marked);return}
+  const last=localStorage.getItem('infodose:lastView'); if(last){try{const app=JSON.parse(last); if(app&&app.url)openApp(app)}catch{}}
+}
+
+/** ===== init ===== **/
+renderMem();
+load();
+
+/** ===== Locais: eventos toolbar ===== */
+$('#btnAddLocal')?.addEventListener('click', ()=> $('#fileLocal').click());
+$('#fileLocal')?.addEventListener('change', (e)=>{
+  const files = Array.from(e.target.files||[]);
+  addLocalFiles(files);
+  e.target.value='';
+});
+$('#btnClear')?.addEventListener('click', ()=>{
+  if(confirm('Apagar todos os HTMLs locais?')) clearLocals();
+});
+$('#btnExport')?.addEventListener('click', ()=>{
+  const data = { v:1, when:Date.now(), items: loadLocals() };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'infodose_locais_pack.json';
+  document.body.appendChild(a); a.click(); a.remove();
+});
+$('#btnImport')?.addEventListener('click', ()=> $('#fileImport').click());
+$('#btnTTS')?.addEventListener('click', ()=>{ TTS_ENABLED = !TTS_ENABLED; const b=$('#btnTTS'); if(b) b.textContent = '🗣️ TTS: ' + (TTS_ENABLED?'ON':'OFF'); });
+$('#fileImport')?.addEventListener('change', (e)=>{
+  const f = (e.target.files||[])[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{
+    try{
+      const data = JSON.parse(String(r.result||'{}'));
+      if(!data || !Array.isArray(data.items)) throw new Error('Formato inválido');
+      const cur = loadLocals();
+      data.items.forEach(n=>{
+        const ex = cur.find(x => x.name===n.name && x.html===n.html);
+        if(ex){ ex.ts = Date.now(); }
+        else cur.unshift({ id:'l_'+Math.random().toString(36).slice(2), name:n.name||'Local', html:String(n.html||''), ts:Date.now() });
+      });
+      saveLocals(cur); render(); alert('Importado com sucesso!');
+    }catch(err){ alert('Falha ao importar pacote.'); }
+  };
+  r.readAsText(f);
+  e.target.value='';
+});
+
+/* ===== DUAL Infodose TTS Enhancements ===== */
+(function(){
+  const TTS_PRESETS2 = { natural:{rate:0.95,pitch:1.05}, neutra:{rate:1.0,pitch:1.0}, dinamica:{rate:0.90,pitch:1.15} };
+  let currentPreset = localStorage.getItem('infodose:ttsPreset') || 'natural';
+  let availableVoices = [];
+  let voicesReadyResolver;
+  const voicesReady2 = new Promise(res => { voicesReadyResolver = res; });
+  function refreshVoices2(){
+    try{
+      const vs = speechSynthesis.getVoices();
+      if(vs && vs.length){ availableVoices = vs.slice(); voicesReadyResolver(true); }
+    }catch{}
+  }
+  if('speechSynthesis' in window){ refreshVoices2(); window.speechSynthesis.onvoiceschanged = refreshVoices2; }
+  function pickPtBr2(){
+    const order = [
+      /Google.*(portugu[eê]s.*brasil|pt[-_ ]?br)/i,
+      /Microsoft.*(Maria|Francisca|Daniela).*(pt[-_ ]?br)/i,
+      /(pt[-_ ]?br)/i
+    ];
+    for(const rx of order){
+      const found = availableVoices.find(v => rx.test(`${v.name} ${v.lang||''}`));
+      if(found) return found;
+    }
+    return availableVoices.find(v => /^pt/i.test(v.lang||'') ) || null;
+  }
+  function split2(text, maxLen=180){
+    const clean = String(text||'').replace(/\s+/g,' ').trim();
+    if(!clean) return [];
+    const parts = clean.match(/[^.!?;:]+[.!?;:]?|\S+/g)?.map(s => s.trim()) || [clean];
+    const chunks=[]; let buf='';
+    for(const p of parts){
+      if((buf+' '+p).trim().length <= maxLen){
+        buf = (buf ? buf+' ' : '') + p;
+      } else {
+        if(buf) chunks.push(buf.trim());
+        buf = p;
+      }
+    }
+    if(buf) chunks.push(buf.trim());
+    return chunks.filter(Boolean);
+  }
+  let queue2=[]; let speaking2=false;
+  window.speak = async function(text){
+    if(!TTS_ENABLED || !('speechSynthesis' in window)) return;
+    unlockAudioOnce();
+    await voicesReady2;
+    try{
+      speechSynthesis.cancel();
+      queue2 = split2(text);
+      if(!queue2.length) return;
+      const voice = pickPtBr2();
+      speaking2=true;
+      const base = TTS_PRESETS2[currentPreset] || TTS_PRESETS2.natural;
+      function next(){
+        if(!speaking2) return;
+        const part = queue2.shift();
+        if(!part){ speaking2=false; return; }
+        const u = new SpeechSynthesisUtterance(part);
+        if(voice) u.voice = voice;
+        u.lang = voice?.lang || 'pt-BR';
+        const jitter = (min,max)=> min + Math.random()*(max-min);
+        const punctuationSlow = /[.!?;:]$/.test(part);
+        let rate = base.rate;
+        let pitch = base.pitch;
+        if(currentPreset === 'dinamica'){
+          const rVar = punctuationSlow ? Math.max(0.85, base.rate - 0.06) : jitter(base.rate - 0.05, base.rate + 0.05);
+          const pVar = jitter(base.pitch - 0.05, base.pitch + 0.05);
+          rate = rVar; pitch = pVar;
+        }
+        u.rate = Math.min(1.15, Math.max(0.75, rate));
+        u.pitch = Math.min(1.35, Math.max(0.7, pitch));
+        u.volume = 1.0;
+        const pause = punctuationSlow ? 120 : 60;
+        u.onend = ()=> setTimeout(next, pause);
+        u.onerror = ()=> setTimeout(next, 80);
+        speechSynthesis.speak(u);
+      }
+      next();
+    }catch(e){ console.error('Erro no TTS override:', e); }
+  };
+  window.InfodoseTTS = {
+    stop(){ queue2=[]; speaking2=false; try{ speechSynthesis.cancel(); }catch{} },
+    isSpeaking(){ return speaking2; }
+  };
+  function loadBrain2(){
+    let brain={};
+    try{ brain = JSON.parse(localStorage.getItem('infodose:brain') || '{}') || {}; }catch{}
+    brain.userSK = brain.userSK || localStorage.getItem('infodose:userSK') || '';
+    brain.userName = brain.userName || localStorage.getItem('infodose:userName') || '';
+    brain.assistantName = brain.assistantName || localStorage.getItem('infodose:assistantName') || 'DualInfodose';
+    brain.ttsPreset = currentPreset;
+    brain.preferences = brain.preferences || {};
+    return brain;
+  }
+  window.InfodoseBrain = loadBrain2();
+  window.updateBrain = function(key,value){
+    window.InfodoseBrain[key] = value;
+    try{ localStorage.setItem('infodose:brain', JSON.stringify(window.InfodoseBrain)); }catch{}
+  };
+  const presets = ['natural','neutra','dinamica'];
+  const labels = { natural:'Voz Natural', neutra:'Voz Neutra', dinamica:'Voz Dinâmica' };
+  function updateVoiceButton(){
+    const b = document.getElementById('btnVoicePreset');
+    if(b){ b.textContent = labels[currentPreset] || ('Voz '+currentPreset); }
+  }
+  updateVoiceButton();
+  const btnVoice = document.getElementById('btnVoicePreset');
+  if(btnVoice){
+    btnVoice.addEventListener('click', ()=>{
+      const i = presets.indexOf(currentPreset);
+      currentPreset = presets[(i+1) % presets.length];
+      try{ localStorage.setItem('infodose:ttsPreset', currentPreset); }catch{}
+      window.updateBrain('ttsPreset', currentPreset);
+      updateVoiceButton();
+    });
+  }
+})();
+</script>
+</body>
+</html>
