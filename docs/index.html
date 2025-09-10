@@ -1,11 +1,10 @@
-<!DOCTYPE html>
-
+<!doctype html>
 <html lang="pt-br">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" name="viewport"/>
-<title>DUAL • Nebula Pro — Hub + Chat + Brain (Monólito v6) — Dev &amp; Minify Live</title>
-<meta content="#0b0b14" name="theme-color"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>DUAL • Nebula Pro — Hub + Chat + Brain (Monólito v5 — refine-in-bubble + ASCII)</title>
+<meta name="theme-color" content="#0b0b14">
 <style>
   :root{
     --bg:#0a0b13; --bg-2:#0b0d1a; --fg:#e9ecff; --muted:#9aa4c7; --soft:#c6c9ff33;
@@ -16,8 +15,8 @@
   }
   *{box-sizing:border-box}
   html,body{height:100%}
-  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,ui-monospace;color:var(--fg);
-    background: radial-gradient(1200px 900px at 50% -200px, #20163e 0%, #0b0d1a 55%, #070812 100%), #05060c; overflow:hidden;}
+  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,ui-monospace,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";color:var(--fg);
+    background: radial-gradient(1200px 900px at 50% -200px, #20163e 0%, #0b0d1a 55%, #070812 100%), #05060c; overflow:auto;}
   .app{position:relative;height:100%;display:flex;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
   header.top{padding:14px 18px 8px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:saturate(130%) blur(8px);
     background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0));border-bottom:1px solid #ffffff12;}
@@ -32,40 +31,36 @@
   @keyframes fade{from{opacity:0;transform:translateY(6px)}}
   .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding-top:6px}
   .card{background: radial-gradient(120% 120% at 80% 0%, #1c1540aa 0, #0b0e22aa 55%, #0a0d1eaa 100%);
-    border:1px solid #ffffff12;box-shadow:var(--shadow);border-radius:var(--radius);padding:18px 16px;min-height:110px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;isolation:isolate}
+    border:1px solid #ffffff12;box-shadow:var(--shadow);border-radius:var(--radius);padding:18px 16px;min-height:110px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;isolation:isolate;contain:layout paint}
   .card:before{content:"";position:absolute;inset:-1px;border-radius:inherit;z-index:-1;background:conic-gradient(from 30deg at 80% 0%,#a77cff33,#5ed0ff22,#ff5bd422,transparent 60%);filter:blur(18px);opacity:.7}
-  .card .ico{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(180deg,#1b1f37,#0e1228);border:1px solid #ffffff10;box-shadow:inset 0 1px 0 #ffffff20, 0 6px 18px rgba(0,0,0,.4);overflow:hidden}
+  .card .ico{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(180deg,#1b1f37,#0e1228);border:1px solid #ffffff10;box-shadow:inset 0 1px 0 #ffffff20, 0 6px 18px rgba(0,0,0,.4);overflow:hidden;will-change:transform,opacity}
   .card h3{margin:12px 0 0;font-size:14px;font-weight:700;letter-spacing:.02em}
   .card p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+  .fab-row{display:flex;gap:16px;justify-content:center;margin:18px 0 10px}
+  .fab{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(120% 120% at 70% 0%,#261a4f,#0d1126);border:1px solid #ffffff14;box-shadow:var(--shadow)}
   nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;justify-content:space-around;align-items:center;height:var(--tabsH);
     padding:10px 14px env(safe-area-inset-bottom);border-top:1px solid #ffffff12;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.04));backdrop-filter:blur(8px);gap:10px}
   .tab-btn{--size:46px;width:var(--size);height:var(--size);border-radius:16px;display:grid;place-items:center;background:linear-gradient(180deg,#12152a,#0d1124);border:1px solid #ffffff12;box-shadow:var(--shadow);opacity:.85}
   .tab-btn.active{opacity:1;outline:1px solid var(--ring)}
 
-  /* lateral page rail */
-  .page-rail{position:fixed; right:10px; top:160px; z-index:58; display:flex; flex-direction:column; gap:8px;
-    background:rgba(10,12,24,.35); border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:8px; backdrop-filter: blur(12px);}
-  .pbtn{width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,#15182c,#0e1122);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow);}
-
   /* CHAT */
-  #view-chat .app-frame{width:100%;max-width:980px;margin:0 auto;position:relative;overflow:hidden;background:radial-gradient(1200px 900px at 50% -40%,rgba(255,255,255,.05),transparent 55%);
-    min-height:calc(100dvh - var(--tabsH)); padding:12px 12px calc(12px + var(--tabsH)); border-radius:22px; box-shadow:0 40px 120px rgba(0,0,0,.45)}
+  #view-chat .app-frame{width:100%;max-width:1180px;margin:0 auto;position:relative;overflow:hidden;background:radial-gradient(1200px 900px at 50% -40%,rgba(255,255,255,.05),transparent 55%);min-height:calc(100dvh - var(--tabsH));padding:8px 10px calc(12px + var(--tabsH));border-radius:22px;box-shadow:0 40px 120px rgba(0,0,0,.45)}
   #view-chat .header{height:56px;display:flex;align-items:center;gap:10px;padding:8px 10px;position:sticky;top:0;z-index:50;background:linear-gradient(180deg,rgba(10,10,18,.9),rgba(10,10,18,.60) 70%,transparent);backdrop-filter:saturate(110%) blur(8px);border-radius:16px}
   #view-chat .hbtn{width:34px;height:34px;border-radius:12px;border:1px solid rgba(255,255,255,.06);display:grid;place-items:center;background:linear-gradient(180deg,#1c1d32,#121327);box-shadow:var(--shadow);cursor:pointer;user-select:none}
   #view-chat .title{margin-left:2px;font-weight:700;letter-spacing:2px}
   #view-chat .page{display:flex;flex-direction:column;padding:8px;gap:10px}
-  #view-chat .scroll{flex:1;overflow:auto;padding:8px 6px 12px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.00))}
-  #view-chat .row{display:flex;gap:8px;margin:8px 8px;position:relative}
+  #view-chat .scroll{flex:1;overflow:auto;padding:6px 6px 12px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.00))}
+  #view-chat .row{display:flex;gap:8px;margin:6px 6px;position:relative}
   #view-chat .row.ai{justify-content:flex-start}
   #view-chat .row.me{justify-content:flex-end}
-  #view-chat .bubble{max-width:82%;padding:12px 14px;border-radius:18px;display:inline-block;position:relative;box-shadow:0 10px 18px rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.05);backdrop-filter:saturate(120%) blur(2px);font-size:16px}
+  #view-chat .bubble{max-width:96%;padding:10px 12px;border-radius:18px;display:inline-block;position:relative;box-shadow:0 10px 18px rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.05);backdrop-filter:saturate(120%) blur(2px);font-size:15px;contain:layout paint}
   #view-chat .bubble .pulse{display:none;margin-top:8px;font-size:12px;color:#cfe2ffbb}
   #view-chat .bubble .ascii{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:11.5px;line-height:1.1; white-space:pre; color:#cfe2ff99; opacity:.6; margin-top:6px}
   #view-chat .ai{background:linear-gradient(180deg,rgba(90,60,180,.35),rgba(60,40,120,.35));color:#e6e8ff}
   #view-chat .me{background:linear-gradient(180deg,rgba(41,211,255,.35),rgba(154,124,255,.35));color:#eafcff}
   #view-chat .avatar{width:34px;height:34px;border-radius:12px;background:linear-gradient(180deg,#1b1c30,#101124);border:1px solid rgba(255,255,255,.06);display:grid;place-items:center;flex:0 0 auto;box-shadow:var(--shadow)}
   #view-chat .timestamp{font-size:12px;color:#a3b4c2;margin:2px 12px}
-  #view-chat .composer{position:fixed;left:12px;right:12px;bottom:calc(var(--tabsH) + 6px);z-index:55;margin:0 auto;max-width:980px;padding:10px;border-radius:18px;background:linear-gradient(180deg,#14152a,#101424);display:flex;gap:8px;align-items:center;border:1px solid rgba(255,255,255,.06);box-shadow:var(--shadow)}
+  #view-chat .composer{position:fixed;left:12px;right:12px;bottom:calc(var(--tabsH) + 6px);z-index:55;margin:0 auto;max-width:900px;padding:10px;border-radius:18px;background:linear-gradient(180deg,#14152a,#101424);display:flex;gap:8px;align-items:center;border:1px solid rgba(255,255,255,.06);box-shadow:var(--shadow)}
   #view-chat input[type=text]{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 12px;color:var(--fg);outline:none;transition:.2s;min-width:0;font-size:16px}
   #view-chat .cbtn{width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#1c1d32,#121327);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow);flex:0 0 auto}
   #view-chat .readout{text-align:center;font-size:12px;color:#cfe9ff99;margin-top:6px;display:flex;align-items:center;gap:6px;justify-content:center;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
@@ -109,329 +104,240 @@
   #mapper .row label{font-size:12px;color:var(--muted)}
   #mapper select,#mapper button{height:36px;border-radius:10px;border:1px solid #ffffff18;background:#0f1326;color:#e9ecff}
 
-  /* APPS view */
-  #view-apps .apps-wrap{max-width:980px;margin:0 auto;padding:6px}
-  #view-apps .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  #view-apps .app-card{background:rgba(0,0,0,.32); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:12px; display:flex; gap:12px; align-items:center; box-shadow:0 6px 18px rgba(0,0,0,.45)}
-  #view-apps .app-icon{width:56px;height:56px;border-radius:14px;display:grid;place-items:center;overflow:hidden;background:#0f1320;border:1px solid rgba(255,255,255,.12)}
-  #view-apps .muted{color:#a9b4cc}
-  #view-apps .row{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
-  #view-apps .btn{appearance:none;border:1px solid rgba(255,255,255,.12);cursor:pointer;background:rgba(255,255,255,.06);color:#fff;padding:.64rem .9rem;border-radius:999px;font-weight:800}
-  #view-apps .btn.primary{background:linear-gradient(90deg,#9f7cff,#29d3ff);border-color:transparent}
-  @media(max-width:560px){ #view-apps .grid{grid-template-columns:1fr} }
+  @media (max-width:480px){
+    #view-chat .app-frame{width:100%;max-width:1180px;margin:0 auto;position:relative;overflow:hidden;background:radial-gradient(1200px 900px at 50% -40%,rgba(255,255,255,.05),transparent 55%);min-height:calc(100dvh - var(--tabsH));padding:8px 10px calc(12px + var(--tabsH));border-radius:22px;box-shadow:0 40px 120px rgba(0,0,0,.45)}
+    #view-chat .composer{left:8px; right:8px; max-width:100%}
+  }
 
-  /* Dev docs overlay */
-  .dev-toggle{position:fixed;left:12px;top:12px;z-index:9999;background:#0f1220;border:1px solid rgba(255,255,255,.08);padding:8px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.6)}
-  .dev-panel{position:fixed;right:12px;top:12px;bottom:12px;width:480px;max-width:92vw;padding:12px;overflow:auto;background:linear-gradient(180deg,rgba(10,10,16,.9),rgba(10,10,16,.95));border:1px solid rgba(255,255,255,.06);border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6);z-index:9998;color:#dfe9ff}
-  .dev-panel h3{margin:0 0 6px 0}
-  .dev-panel pre{background:#07102b;border-radius:8px;padding:8px;overflow:auto;color:#cfe9ff;font-size:12px}
-  .dev-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-  .btn-dev{padding:8px 10px;border-radius:8px;border:0;background:#1a1b2a;color:white;cursor:pointer}
-  .muted-doc{color:#93a6d1;font-size:13px}
+/* === Themes: NebulaPro (default), Luxara, Ignyra, Elysha === */
+:root{ --theme-name: 'NebulaPro'; }
+body.theme-nebula { --bg:#0a0b13; --bg-2:#0b0d1a; --fg:#e9ecff; --muted:#9aa4c7; --acc:#a77cff; --acc-2:#5ed0ff; --mag:#ff5bd4; --ok:#5bffcf; }
+body.theme-luxara{ --bg:#0a0812; --bg-2:#140a22; --fg:#f7ecff; --muted:#d1b9ff; --acc:#ff7af2; --acc-2:#ffe069; --mag:#ff5bd4; --ok:#6cffb8; --theme-name:'Luxara'; }
+body.theme-ignyra{ --bg:#0b0a10; --bg-2:#140b14; --fg:#eef8ff; --muted:#a7c7ff; --acc:#ff375f; --acc-2:#29d3ff; --mag:#ff2b95; --ok:#6cffb8; --theme-name:'Ignyra'; }
+body.theme-elysha{ --bg:#081014; --bg-2:#0b1822; --fg:#e9feff; --muted:#a6e0ff; --acc:#29d3ff; --acc-2:#8a5cff; --mag:#36ffe0; --ok:#a8ff6c; --theme-name:'Elysha'; }
+
+/* subtle theme glow for header title dot */
+body.theme-luxara .title .dot{ background:#ff7af2; box-shadow:0 0 18px #ff7af2;}
+body.theme-ignyra .title .dot{ background:#ff375f; box-shadow:0 0 18px #ff375f;}
+body.theme-elysha .title .dot{ background:#29d3ff; box-shadow:0 0 18px #29d3ff;}
+
+
+#view-chat .scroll{flex:1;overflow:auto;padding:6px 6px 12px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.00))}
+@media (max-width:480px){#view-chat .bubble{max-width:96%;padding:10px 12px;border-radius:18px;display:inline-block;position:relative;box-shadow:0 10px 18px rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.05);backdrop-filter:saturate(120%) blur(2px);font-size:15px;contain:layout paint}}
 </style>
 </head>
 <body>
 <div class="app">
-<header class="top">
-<div class="title">DUAL <span class="dot"></span> NEBULA</div>
-<div class="hdr-actions">
-<div aria-label="Integrador" class="icon-btn" id="btnIntegrator" title="Integrador">
-<span class="badge"></span>
-<svg aria-hidden="true" fill="none" height="18" viewbox="0 0 24 24" width="18">
-<path d="M5 12a7 7 0 0 1 14 0" stroke="#a77cff" stroke-linecap="round" stroke-width="1.6"></path>
-<circle cx="12" cy="12" r="3.2" stroke="#5ed0ff" stroke-width="1.6"></circle>
-</svg>
-</div>
-<div aria-label="Opções" class="icon-btn" id="btnMenu" title="Opções">
-<svg aria-hidden="true" fill="none" height="18" viewbox="0 0 24 24" width="18">
-<circle cx="5" cy="12" fill="#cfd6ff" r="2"></circle>
-<circle cx="12" cy="12" fill="#cfd6ff" r="2"></circle>
-<circle cx="19" cy="12" fill="#cfd6ff" r="2"></circle>
-</svg>
-</div>
-</div>
-</header>
-<!-- Lateral page rail -->
+  <header class="top">
+    <div class="title">DUAL <span class="dot"></span> NEBULA</div>
+    <div class="hdr-actions">
+      <div class="icon-btn" id="btnIntegrator" title="Integrador" aria-label="Integrador">
+        <span class="badge"></span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M5 12a7 7 0 0 1 14 0" stroke="#a77cff" stroke-width="1.6" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="3.2" stroke="#5ed0ff" stroke-width="1.6"/>
+        </svg>
+      </div>
+      <div class="icon-btn" id="btnMenu" title="Opções" aria-label="Opções">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="5" cy="12" r="2" fill="#cfd6ff"/>
+          <circle cx="12" cy="12" r="2" fill="#cfd6ff"/>
+          <circle cx="19" cy="12" r="2" fill="#cfd6ff"/>
+        </svg>
+      </div>
+    </div>
+  </header>
 
-<main>
-<!-- HOME / HUB -->
-<section class="view active" id="view-home">
-<div class="grid">
-<button class="card" data-icon="lan" data-open="lan"><div class="ico"><svg fill="none" height="26" viewbox="0 0 24 24" width="26"><path d="M6 7h12v5H6zM10 12v5M14 12v5M8 17h8" stroke="#5ed0ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg></div><div><h3>LAN Scanner</h3><p>Descobrir dispositivos</p></div></button>
-<button class="card" data-icon="bind" data-open="bind"><div class="ico"><svg fill="none" height="26" viewbox="0 0 24 24" width="26"><path d="M7 7l10 10M7 17L17 7" stroke="#a77cff" stroke-linecap="round" stroke-width="1.7"></path><circle cx="7" cy="7" r="3" stroke="#ff5bd4" stroke-width="1.4"></circle><circle cx="17" cy="17" r="3" stroke="#5ed0ff" stroke-width="1.4"></circle></svg></div><div><h3>Bind</h3><p>Conectar &amp; parear</p></div></button>
-<button class="card" data-icon="report" data-open="report"><div class="ico"><svg fill="none" height="26" viewbox="0 0 24 24" width="26"><path d="M6 17v-9l6-3 6 3v9l-6 3-6-3z" stroke="#a77cff" stroke-linejoin="round" stroke-width="1.6"></path><path d="M9 12h6M9 15h4" stroke="#cfd6ff" stroke-linecap="round" stroke-width="1.6"></path></svg></div><div><h3>Relatório</h3><p>Métricas e logs</p></div></button>
-<button class="card" data-icon="memory" data-open="memory"><div class="ico"><svg fill="none" height="26" viewbox="0 0 24 24" width="26"><rect height="14" rx="3" stroke="#5ed0ff" stroke-width="1.6" width="16" x="4" y="5"></rect><path d="M8 9h8M8 13h6" stroke="#cfd6ff" stroke-linecap="round" stroke-width="1.6"></path></svg></div><div><h3>Memória</h3><p>Docs &amp; sessões</p></div></button>
-<button class="card" data-icon="apps" data-nav="apps"><div class="ico"><svg fill="none" height="26" viewbox="0 0 24 24" width="26"><rect height="6" rx="2" stroke="#5ed0ff" stroke-width="1.6" width="6" x="4" y="4"></rect><rect height="6" rx="2" stroke="#a77cff" stroke-width="1.6" width="6" x="14" y="4"></rect><rect height="6" rx="2" stroke="#ff5bd4" stroke-width="1.6" width="6" x="4" y="14"></rect><rect height="6" rx="2" stroke="#cfd6ff" stroke-width="1.6" width="6" x="14" y="14"></rect></svg></div><div><h3>Apps</h3><p>Atalhos</p></div></button>
-<button class="card" data-icon="user" data-nav="profile"><div class="ico"><svg fill="none" height="26" viewbox="0 0 24 24" width="26"><circle cx="12" cy="8" r="3.2" stroke="#cfd6ff" stroke-width="1.6"></circle><path d="M5 19c1.5-3.2 4.3-5 7-5s5.5 1.8 7 5" stroke="#5ed0ff" stroke-linecap="round" stroke-width="1.6"></path></svg></div><div><h3>Usuário</h3><p>Preferências</p></div></button>
-</div>
-</section>
-<!-- CHAT -->
-<section class="view" id="view-chat">
-<div class="app-frame">
-<div class="header">
-<div aria-label="Ações rápidas" class="hbtn" id="chat-btnMore" title="Ações rápidas">
-<svg fill="none" height="18" viewbox="0 0 24 24" width="18"><circle cx="5" cy="12" fill="#cfe9ff" r="2"></circle><circle cx="12" cy="12" fill="#cfe9ff" r="2"></circle><circle cx="19" cy="12" fill="#cfe9ff" r="2"></circle></svg>
-</div>
-<div class="title">DUAL <span>• CHAT</span></div>
-<div style="flex:1"></div>
-<div aria-label="TTS" class="hbtn" id="chat-btnTTS" title="TTS: ligado">
-<svg fill="none" height="18" viewbox="0 0 24 24" width="18"><path d="M3 10v4a1 1 0 001 1h3l5 4V5l-5 4H4a1 1 0 00-1 1z" stroke="#cfe9ff" stroke-width="2"></path></svg>
-</div>
-<div aria-label="Exportar" class="hbtn" id="chat-btnExport" title="Exportar chat">
-<svg fill="none" height="18" viewbox="0 0 24 24" width="18"><path d="M12 5v14M5 12l7-7 7 7" stroke="#cfe9ff" stroke-linecap="round" stroke-width="2"></path></svg>
-</div>
-</div>
-<div class="page">
-<div class="scroll" id="chat-list"></div>
-<div class="readout" id="chat-status">
+  <main>
+    <!-- HOME / HUB -->
+    <section class="view active" id="view-home">
+      <div class="grid">
+        <button class="card" data-open="lan" data-icon="lan"><div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M6 7h12v5H6zM10 12v5M14 12v5M8 17h8" stroke="#5ed0ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><h3>LAN Scanner</h3><p>Descobrir dispositivos</p></div></button>
+        <button class="card" data-open="bind" data-icon="bind"><div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M7 7l10 10M7 17L17 7" stroke="#a77cff" stroke-width="1.7" stroke-linecap="round"/><circle cx="7" cy="7" r="3" stroke="#ff5bd4" stroke-width="1.4"/><circle cx="17" cy="17" r="3" stroke="#5ed0ff" stroke-width="1.4"/></svg></div><div><h3>Bind</h3><p>Conectar & parear</p></div></button>
+        <button class="card" data-open="report" data-icon="report"><div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M6 17v-9l6-3 6 3v9l-6 3-6-3z" stroke="#a77cff" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12h6M9 15h4" stroke="#cfd6ff" stroke-width="1.6" stroke-linecap="round"/></svg></div><div><h3>Relatório</h3><p>Métricas e logs</p></div></button>
+        <button class="card" data-open="memory" data-icon="memory"><div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="14" rx="3" stroke="#5ed0ff" stroke-width="1.6"/><path d="M8 9h8M8 13h6" stroke="#cfd6ff" stroke-width="1.6" stroke-linecap="round"/></svg></div><div><h3>Memória</h3><p>Docs & sessões</p></div></button>
+        <button class="card" data-nav="apps" data-icon="apps"><div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="6" height="6" rx="2" stroke="#5ed0ff" stroke-width="1.6"/><rect x="14" y="4" width="6" height="6" rx="2" stroke="#a77cff" stroke-width="1.6"/><rect x="4" y="14" width="6" height="6" rx="2" stroke="#ff5bd4" stroke-width="1.6"/><rect x="14" y="14" width="6" height="6" rx="2" stroke="#cfd6ff" stroke-width="1.6"/></svg></div><div><h3>Apps</h3><p>Atalhos</p></div></button>
+        <button class="card" data-nav="profile" data-icon="user"><div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.2" stroke="#cfd6ff" stroke-width="1.6"/><path d="M5 19c1.5-3.2 4.3-5 7-5s5.5 1.8 7 5" stroke="#5ed0ff" stroke-width="1.6" stroke-linecap="round"/></svg></div><div><h3>Usuário</h3><p>Preferências</p></div></button>
+      </div>
+    </section>
+
+    <!-- CHAT -->
+    <section class="view" id="view-chat">
+      <div class="app-frame">
+        <div class="header">
+          <div class="hbtn" id="chat-btnMore" title="Ações rápidas" aria-label="Ações rápidas">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="2" fill="#cfe9ff"/><circle cx="12" cy="12" r="2" fill="#cfe9ff"/><circle cx="19" cy="12" r="2" fill="#cfe9ff"/></svg>
+          </div>
+          <div class="title">DUAL <span>• CHAT</span></div>
+          <div style="flex:1"></div>
+          <div class="hbtn" id="chat-btnTTS" title="TTS: ligado" aria-label="TTS">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 10v4a1 1 0 001 1h3l5 4V5l-5 4H4a1 1 0 00-1 1z" stroke="#cfe9ff" stroke-width="2"/></svg>
+          </div>
+          <div class="hbtn" id="chat-btnExport" title="Exportar chat" aria-label="Exportar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12l7-7 7 7" stroke="#cfe9ff" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+
+        <div class="page">
+          <div class="scroll" id="chat-list"></div>
+          <div class="readout" id="chat-status">
 <pre class="ascii" id="status-ascii">╭────────── pulso em expansão ──────────╮
 │ ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁        │
 ╰───────────────────────────────────────╯</pre>
-</div>
-</div>
-<div class="composer">
-<button aria-label="Ditado" class="cbtn" id="chat-btnMic" title="Ditado">
-<svg fill="none" height="18" viewbox="0 0 24 24" width="18"><rect height="10" rx="3" stroke="#cfe9ff" stroke-width="2" width="6" x="9" y="3"></rect><path d="M12 19v2M7 12v1a5 5 0 0010 0v-1" stroke="#cfe9ff" stroke-linecap="round" stroke-width="2"></path></svg>
-</button>
-<input autocomplete="off" id="chat-input" inputmode="text" placeholder="Digite uma mensagem…" type="text"/>
-<button aria-label="Anexo" class="cbtn" id="chat-btnAttach" title="Anexo">
-<svg fill="none" height="18" viewbox="0 0 24 24" width="18"><path d="M21 11.5V17a5 5 0 01-10 0V8a3 3 0 116 0v7a1 1 0 11-2 0V9" stroke="#cfe9ff" stroke-linecap="round" stroke-width="2"></path></svg>
-</button>
-<button aria-label="Enviar" class="cbtn" id="chat-btnSend" title="Enviar">
-<svg fill="none" height="18" viewbox="0 0 24 24" width="18"><path d="M22 2L11 13" stroke="#cfe9ff" stroke-linecap="round" stroke-width="2"></path><path d="M22 2l-7 20-4-9-9-4 20-7z" stroke="#cfe9ff" stroke-linejoin="round" stroke-width="2"></path></svg>
-</button>
-</div>
-<!-- Sheets -->
-<div class="sheet" id="chat-sheet">
-<div style="text-align:center;opacity:.8">Ações rápidas</div>
-<div class="row"><div class="btn" data-action="lan">LAN</div><div class="btn" data-action="bind">Bind</div></div>
-<div class="row"><div class="btn" data-action="report">Relatório</div><div class="btn" data-action="memory">Memória</div></div>
-<div class="row"><div class="btn" data-action="clear">Limpar</div><div class="btn" data-action="import">Importar</div></div>
-</div>
-<div class="sheet" id="menu-sheet">
-<div style="text-align:center;opacity:.8">Opções</div>
-<div class="row"><div class="btn" data-nav="home">Início</div><div class="btn" data-nav="brain">Brain</div></div>
-<div class="row"><div class="btn" data-nav="apps">Apps</div><div class="btn" data-nav="profile">Perfil</div></div>
-<div class="row"><div class="btn" id="close-menu">Fechar</div></div>
-</div>
-</div>
-</section>
-<!-- BRAIN -->
-<section class="view" id="view-brain">
-<div class="wrap">
-<div class="hbar">
-<div class="title">AETHER <span class="dot"></span> BRAIN</div>
-<div class="top-right"><button class="round small" id="brain-open-integrator" title="Integrador">◇</button></div>
-</div>
-<div class="grid">
-<div class="card" style="grid-column:1/-1">
-<div class="label">Infodose Brain • Local</div>
-<div class="sublabel">Chave prefixo: <code>dual.brain.*</code></div>
-<div class="hr"></div>
-<div class="grid" style="grid-template-columns:1fr 1fr;gap:10px">
-<input class="input" id="brain-k" placeholder="chave (ex.: prompt)"/>
-<button class="btn-pill" id="brain-save">Salvar</button>
-<textarea class="code" id="brain-v" placeholder="valor..." style="grid-column:1/-1;min-height:120px"></textarea>
-<div style="display:flex;gap:8px">
-<button class="btn-pill" id="brain-del" style="background:linear-gradient(90deg,#ff5a99,#7b61ff)">Excluir</button>
-<button class="btn-pill" id="brain-copy">Copiar tudo</button>
-<button class="btn-pill" id="brain-export">Exportar .json</button>
-<input accept=".json,application/json" hidden="" id="brain-importFile" type="file"/>
-<button class="btn-pill" id="brain-importBtn" style="background:linear-gradient(90deg,#29D3FF,#6CFFB8)">Importar</button>
-</div>
-</div>
-</div>
-<div class="card" style="grid-column:1/-1">
-<div class="label">Vozes por Arquétipo</div>
-<div class="sublabel">Mapeie as vozes (salva em <code>dual.brain.voice.*</code>)</div>
-<div class="hr"></div>
-<div id="mapper"></div>
-<div style="display:flex;gap:8px;margin-top:8px">
-<button class="btn-pill" id="refreshVoices">Atualizar vozes</button>
-<button class="btn-pill" id="resetVoices" style="background:linear-gradient(90deg,#ff7a7a,#b86bff)">Reset</button>
-</div>
-</div>
-<div class="card" style="grid-column:1/-1">
-<div class="label">ASCII • Estilo Global</div>
-<div class="sublabel">Preferência salva em <code>dual.brain.ascii.style</code> — <i>wave</i> | <i>spark</i> | <i>grid</i> | <i>ether</i></div>
-<div class="hr"></div>
-<div class="grid" style="grid-template-columns:repeat(4,1fr)">
-<button class="btn-pill" data-ascii="wave">wave</button>
-<button class="btn-pill" data-ascii="spark">spark</button>
-<button class="btn-pill" data-ascii="grid">grid</button>
-<button class="btn-pill" data-ascii="ether">ether</button>
-</div>
-</div>
-</div>
-</div>
-<div class="panel" id="brain-panel">
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-<div class="label" style="font-weight:800">Integrador</div>
-<button class="round small" id="brain-close">✕</button>
-</div>
-<div class="sublabel">Backend salvo no dispositivo (DualStore)</div>
-<div class="hr"></div>
-<div class="grid" style="grid-template-columns:1fr;gap:10px">
-<input class="input" id="brain-be" placeholder="http://192.168.0.x:xxxx"/>
-<div style="display:flex;gap:8px">
-<button class="btn-pill" id="brain-saveBE">Salvar</button>
-<button class="btn-pill" id="brain-test">Test</button>
-<button class="btn-pill" id="brain-ping" style="background:linear-gradient(90deg,#29D3FF,#FF5AD9)">Ping</button>
-<button class="btn-pill" id="brain-health" style="background:linear-gradient(90deg,#6CFFB8,#29D3FF)">Health</button>
-</div>
-<div class="status" id="brain-status">—</div>
-<div class="log" id="brain-log"></div>
-</div>
-</div>
-</section>
-<!-- APPS -->
-<section class="view" id="view-apps">
-<div class="apps-wrap">
-<div class="grid" id="apps-grid"></div>
-</div>
-</section>
-<!-- PERFIL -->
-<section class="view" id="view-profile">
-<div style="display:flex;flex-direction:column;gap:14px;padding-top:4px;max-width:980px;margin:0 auto">
-<div style="width:84px;height:84px;border-radius:50%;display:grid;place-items:center;margin:4px auto 8px;background:radial-gradient(120% 120% at 70% 0%,#231a52,#0d122a);border:1px solid #ffffff18;box-shadow:var(--shadow)">
-<svg fill="none" height="40" viewbox="0 0 24 24" width="40"><circle cx="12" cy="8" r="3.2" stroke="#cfd6ff" stroke-width="1.6"></circle><path d="M5 19c1.5-3.2 4.3-5 7-5s5.5 1.8 7 5" stroke="#5ed0ff" stroke-linecap="round" stroke-width="1.6"></path></svg>
-</div>
-<div class="card"><div style="font-size:11px;color:var(--muted)">Nome</div><div contenteditable="true">trinity</div></div>
-<div class="card"><div style="font-size:11px;color:var(--muted)">Assinatura</div>
-<select style="width:100%;background:transparent;border:0;outline:0;color:var(--fg);font-size:14px;padding:6px 0 2px;">
-<option>Trinity</option><option>Uno</option><option>Dual</option>
-</select>
-</div>
-</div>
-</section>
-</main>
-<nav class="tabs">
-<button aria-label="Início" class="tab-btn active" data-nav="home" title="Início">
-<svg fill="none" height="18" viewbox="0 0 24 24" width="18"><path d="M12 3l8 6v10a2 2 0 0 1-2 2h-4v-6H10v6H6a2 2 0 0 1-2-2V9z" stroke="#a77cff" stroke-linejoin="round" stroke-width="1.6"></path></svg>
-</button>
-<button aria-label="Chat" class="tab-btn" data-nav="chat" title="Chat">
-<svg fill="none" height="18" viewbox="0 0 24 24" width="18"><path d="M4 5h16v9H7l-3 3z" stroke="#5ed0ff" stroke-linejoin="round" stroke-width="1.6"></path></svg>
-</button>
-<button aria-label="Brain" class="tab-btn" data-nav="brain" title="Brain">
-<svg fill="none" height="18" viewbox="0 0 24 24" width="18"><rect height="14" rx="3" stroke="#5ed0ff" stroke-width="1.6" width="16" x="4" y="5"></rect><path d="M8 9h8M8 13h6" stroke="#cfd6ff" stroke-linecap="round" stroke-width="1.6"></path></svg>
-</button>
-<button aria-label="Apps" class="tab-btn" data-nav="apps" title="Apps">
-<svg fill="none" height="18" viewbox="0 0 24 24" width="18">
-<rect height="6" rx="2" stroke="#5ed0ff" stroke-width="1.6" width="6" x="4" y="4"></rect>
-<rect height="6" rx="2" stroke="#a77cff" stroke-width="1.6" width="6" x="14" y="4"></rect>
-<rect height="6" rx="2" stroke="#ff5bd4" stroke-width="1.6" width="6" x="4" y="14"></rect>
-<rect height="6" rx="2" stroke="#cfd6ff" stroke-width="1.6" width="6" x="14" y="14"></rect>
-</svg>
-</button>
-<button aria-label="Perfil" class="tab-btn" data-nav="profile" title="Perfil">
-<svg fill="none" height="18" viewbox="0 0 24 24" width="18"><circle cx="12" cy="8" r="3.2" stroke="#cfd6ff" stroke-width="1.6"></circle><path d="M5 19c1.5-3.2 4.3-5 7-5s5.5 1.8 7 5" stroke="#5ed0ff" stroke-linecap="round" stroke-width="1.6"></path></svg>
-</button>
-</nav>
-</div>
-<!-- Dev docs overlay: explanations + download/minify controls -->
-<div class="dev-toggle" id="devToggle">
-<button class="btn-dev" id="openDocs">Dev Docs</button>
-</div>
-<div class="dev-panel" id="devPanel" style="display:none;">
-<h3>DUAL • Nebula — Dev docs (Live)</h3>
-<div class="muted-doc">Esta camada contém documentação rápida, pontos de configuração e botões para exportar a versão otimizada (minificada).</div>
-<h4>Visão geral</h4>
-<p class="muted-doc">Arquitetura: SPA simples sem framework; principais áreas: <b>Router</b>, <b>Chat</b> (persistência e TTS), <b>Brain</b> (mapper + integrador), <b>Apps loader</b>.</p>
-<h4>Onde editar textos &amp; labels</h4>
-<pre><code>/* HTML: títulos, botões, placeholders — buscar no &lt;body&gt;.
-Ex.: 'Digite uma mensagem…' está em &lt;input id="chat-input"&gt; */</code></pre>
-<h4>TTS / Vozes</h4>
-<pre><code>// JS: pickVoice() — mapeia nomes de voz para cada arquétipo.
-// Salvos em localStorage em dual.brain.voice.{Arquétipo}
-// Atualize ARCH_PREFS no bloco do Chat para personalizar sugestões.</code></pre>
-<h4>Persistência</h4>
-<pre><code>// KEY: dual.chat.history - JSON localStorage.
-// Brain backend URL salvo em: dual.backend.url</code></pre>
-<h4>Apps loader</h4>
-<pre><code>// load() tenta './apps.json', './apps/apps.json', etc.
-// Estrutura esperada: { "apps": [ { "title","url","desc","icon" }, ... ] }</code></pre>
-<h4>Integrator (Backend)</h4>
-<pre><code>// Painel direito (Integrador) faz GET simples em base + '/ping' '/health'.
-// Configure backend em: input #brain-be e clique 'Salvar' (salva em localStorage)</code></pre>
-<div class="dev-row">
-<button class="btn-dev" id="downloadAnnotated">Download HTML (annotated)</button>
-<button class="btn-dev" id="downloadMinified">Download HTML (minified)</button>
-<button class="btn-dev" id="showMinified">Mostrar minified (pre)</button>
-<button class="btn-dev" id="closeDocs">Fechar</button>
-</div>
-<h4>Minificação aplicada</h4>
-<div class="muted-doc">A minificação remove quebras de linha e espaços desnecessários entre tags, e elimina comentários HTML via função JS (executada no navegador).</div>
-<pre id="minifiedPreview" style="display:none;height:240px;overflow:auto;background:#061025;color:#cfe9ff;padding:8px;border-radius:6px"></pre>
-<h4>Atalhos de desenvolvimento</h4>
-<pre class="muted-doc">- refreshVoices: atualiza lista de vozes do navegador.
-- resetVoices: remove mapeamentos de voz do localStorage.
-- Exportar chat / Importar chat via botões na UI.</pre>
-<div style="height:12px"></div>
-<div class="muted-doc">Arquivo sugerido: <b>DUAL_Monolith_NebulaPro_HubChatBrain_v6.html</b></div>
-</div>
-<script>
-/* ===== Dev-panel client helpers: download / minify (runs in browser) ===== */
+          </div>
+        </div>
 
-(function(){
-  function downloadFile(filename, content){
-    const blob = new Blob([content], {type: 'text/html;charset=utf-8'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename; document.body.appendChild(a); a.click();
-    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 600);
-  }
+        <div class="composer">
+          <button class="cbtn" id="chat-btnMic" title="Ditado" aria-label="Ditado">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="9" y="3" width="6" height="10" rx="3" stroke="#cfe9ff" stroke-width="2"/><path d="M12 19v2M7 12v1a5 5 0 0010 0v-1" stroke="#cfe9ff" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+          <input id="chat-input" type="text" inputmode="text" placeholder="Digite uma mensagem…" autocomplete="off"/>
+          <button class="cbtn" id="chat-btnAttach" title="Anexo" aria-label="Anexo">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 11.5V17a5 5 0 01-10 0V8a3 3 0 116 0v7a1 1 0 11-2 0V9" stroke="#cfe9ff" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+          <button class="cbtn" id="chat-btnSend" title="Enviar" aria-label="Enviar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13" stroke="#cfe9ff" stroke-width="2" stroke-linecap="round"/><path d="M22 2l-7 20-4-9-9-4 20-7z" stroke="#cfe9ff" stroke-width="2" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
 
-  // Simple HTML minifier (runs in browser)
-  function minifyHTML(htmlText){
-    // Remove HTML comments
-    let out = htmlText.replace(/<!--[\s\S]*?-->/g, '');
-    // Remove extra whitespace between tags
-    out = out.replace(/>\s+</g, '><');
-    // Collapse multiple spaces
-    out = out.replace(/\s{2,}/g, ' ');
-    // Trim
-    return out.trim();
-  }
+        <!-- Sheets -->
+        <div class="sheet" id="chat-sheet">
+          <div style="text-align:center;opacity:.8">Ações rápidas</div>
+          <div class="row"><div class="btn" data-action="lan">LAN</div><div class="btn" data-action="bind">Bind</div></div>
+          <div class="row"><div class="btn" data-action="report">Relatório</div><div class="btn" data-action="memory">Memória</div></div>
+          <div class="row"><div class="btn" data-action="clear">Limpar</div><div class="btn" data-action="import">Importar</div></div>
+        </div>
 
-  const openBtn = document.getElementById('openDocs');
-  const closeBtn = document.getElementById('closeDocs');
-  const panel = document.getElementById('devPanel');
-  const minPreview = document.getElementById('minifiedPreview');
+        <div class="sheet" id="menu-sheet">
+          <div style="text-align:center;opacity:.8">Opções</div>
+          <div class="row"><div class="btn" data-nav="home">Início</div><div class="btn" data-nav="brain">Brain</div></div>
+<div class="row"><div class="btn" data-theme="nebula">NebulaPro</div><div class="btn" data-theme="luxara">Luxara</div><div class="btn" data-theme="ignyra">Ignyra</div><div class="btn" data-theme="elysha">Elysha</div></div>
+          <div class="row"><div class="btn" data-nav="apps">Apps</div><div class="btn" data-nav="profile">Perfil</div></div>
+          <div class="row"><div class="btn" id="close-menu">Fechar</div></div>
+        </div>
+      </div>
+    </section>
 
-  openBtn.addEventListener('click', ()=> panel.style.display='block');
-  closeBtn.addEventListener('click', ()=> panel.style.display='none');
+    <!-- BRAIN -->
+    <section class="view" id="view-brain">
+      <div class="wrap">
+        <div class='hbar'>
+          <div class='title'>AETHER <span class='dot'></span> BRAIN</div>
+          <div class='top-right'><button class='round small' id="brain-open-integrator" title='Integrador'>◇</button></div>
+        </div>
 
-  document.getElementById('downloadAnnotated').addEventListener('click', ()=>{
-    // Export the current DOM HTML (annotated)
-    downloadFile('DUAL_Monolith_NebulaPro_HubChatBrain_v6_annotated.html', '<!doctype html>\\n' + document.documentElement.outerHTML);
-  });
+        <div class="grid">
+          <div class="card" style="grid-column:1/-1">
+            <div class="label">Infodose Brain • Local</div>
+            <div class="sublabel">Chave prefixo: <code>dual.brain.*</code></div>
+            <div class="hr"></div>
+            <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px">
+              <input id="brain-k" class="input" placeholder="chave (ex.: prompt)">
+              <button class="btn-pill" id="brain-save">Salvar</button>
+              <textarea id="brain-v" class="code" style="grid-column:1/-1;min-height:120px" placeholder="valor..."></textarea>
+              <div style="display:flex;gap:8px">
+                <button class="btn-pill" id="brain-del" style="background:linear-gradient(90deg,#ff5a99,#7b61ff)">Excluir</button>
+                <button class="btn-pill" id="brain-copy">Copiar tudo</button>
+                <button class="btn-pill" id="brain-export">Exportar .json</button>
+                <input type="file" id="brain-importFile" hidden accept=".json,application/json">
+                <button class="btn-pill" id="brain-importBtn" style="background:linear-gradient(90deg,#29D3FF,#6CFFB8)">Importar</button>
+              </div>
+            </div>
+          </div>
 
-  document.getElementById('downloadMinified').addEventListener('click', ()=>{
-    // Build current document HTML string, then minify
-    const full = '<!doctype html>\\n' + document.documentElement.outerHTML;
-    const m = minifyHTML(full);
-    downloadFile('DUAL_Monolith_NebulaPro_HubChatBrain_v6_minified.html', m);
-    alert('Baixando versão minificada (gera arquivo no seu navegador).');
-  });
+          <div class="card" style="grid-column:1/-1">
+            <div class="label">Vozes por Arquétipo</div>
+            <div class="sublabel">Mapeie as vozes (salva em <code>dual.brain.voice.*</code>)</div>
+            <div class="hr"></div>
+            <div id="mapper"></div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class="btn-pill" id="refreshVoices">Atualizar vozes</button>
+              <button class="btn-pill" id="resetVoices" style="background:linear-gradient(90deg,#ff7a7a,#b86bff)">Reset</button>
+            </div>
+          </div>
 
-  document.getElementById('showMinified').addEventListener('click', ()=>{
-    if(minPreview.style.display === 'none'){
-      const full = '<!doctype html>\\n' + document.documentElement.outerHTML;
-      const m = minifyHTML(full);
-      minPreview.textContent = m.slice(0, 200000) + (m.length > 200000 ? '\\n\\n... (truncado)' : '');
-      minPreview.style.display = 'block';
-    } else {
-      minPreview.style.display = 'none';
-    }
-  });
+          <div class="card" style="grid-column:1/-1">
+            <div class="label">Seeds Rápidos</div>
+            <div class="sublabel">Clique para carregar no editor acima</div>
+            <div class="hr"></div>
+            <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+              <button class="btn-pill" data-seed="system">System Prompt</button>
+              <button class="btn-pill" data-seed="style">Estilo Nebula</button>
+              <button class="btn-pill" data-seed="ritual">Ritual 3•6•9</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-  // quick dblclick to toggle dev panel
-  document.getElementById('devToggle').addEventListener('dblclick', ()=> {
-    panel.style.display = (panel.style.display === 'none' ? 'block' : 'none');
-  });
-})();
-</script>
-<!-- ====== Aplicação: router, chat, brain, apps loader (mantive a lógica original, com pequenos ajustes para robustez) ===== -->
+      <div class="panel" id="brain-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div class="label" style="font-weight:800">Integrador</div>
+          <button class="round small" id="brain-close">✕</button>
+        </div>
+        <div class="sublabel">Backend salvo no dispositivo (DualStore)</div>
+        <div class="hr"></div>
+        <div class="grid" style="grid-template-columns:1fr;gap:10px">
+          <input id="brain-be" class="input" placeholder="http://192.168.0.x:xxxx">
+          <div style="display:flex;gap:8px">
+            <button class="btn-pill" id="brain-saveBE">Salvar</button>
+            <button class="btn-pill" id="brain-test">Test</button>
+            <button class="btn-pill" id="brain-ping" style="background:linear-gradient(90deg,#29D3FF,#FF5AD9)">Ping</button>
+            <button class="btn-pill" id="brain-health" style="background:linear-gradient(90deg,#6CFFB8,#29D3FF)">Health</button>
+          </div>
+          <div class="status" id="brain-status">—</div>
+          <div class="log" id="brain-log"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- APPS / PROFILE iguais à v4 -->
+    <section class="view" id="view-apps">
+      <div class="grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="card" data-nav="home" data-icon="home"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3l8 6v10a2 2 0 0 1-2 2h-4v-6H10v6H6a2 2 0 0 1-2-2V9z" stroke="#a77cff" stroke-width="1.6" stroke-linejoin="round"/></svg></div><h3>Home</h3><p>Início</p></div>
+        <div class="card" data-nav="chat" data-icon="chat"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 5h16v9H7l-3 3z" stroke="#5ed0ff" stroke-width="1.6" stroke-linejoin="round"/></svg></div><h3>Chat</h3><p>Mensagens</p></div>
+        <div class="card" data-nav="brain" data-icon="brain"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="14" rx="3" stroke="#5ed0ff" stroke-width="1.6"/><path d="M8 9h8M8 13h6" stroke="#cfd6ff" stroke-width="1.6" stroke-linecap="round"/></svg></div><h3>Brain</h3><p>Memória</p></div>
+        <div class="card" data-nav="profile" data-icon="user"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.2" stroke="#cfd6ff" stroke-width="1.6"/><path d="M5 19c1.5-3.2 4.3-5 7-5s5.5 1.8 7 5" stroke="#5ed0ff" stroke-width="1.6" stroke-linecap="round"/></svg></div><h3>Perfil</h3><p>Preferências</p></div>
+      </div>
+    </section>
+    <section class="view" id="view-profile">
+      <div style="display:flex;flex-direction:column;gap:14px;padding-top:4px;">
+        <div style="width:84px;height:84px;border-radius:50%;display:grid;place-items:center;margin:4px auto 8px;background:radial-gradient(120% 120% at 70% 0%,#231a52,#0d122a);border:1px solid #ffffff18;box-shadow:var(--shadow)">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.2" stroke="#cfd6ff" stroke-width="1.6"/><path d="M5 19c1.5-3.2 4.3-5 7-5s5.5 1.8 7 5" stroke="#5ed0ff" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <div class="card"><div style="font-size:11px;color:var(--muted)">Nome</div><div contenteditable="true">trinity</div></div>
+        <div class="card"><div style="font-size:11px;color:var(--muted)">Assinatura</div>
+          <select style="width:100%;background:transparent;border:0;outline:0;color:var(--fg);font-size:14px;padding:6px 0 2px;">
+            <option>Trinity</option><option>Uno</option><option>Dual</option>
+          </select>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-nav="home" title="Início" aria-label="Início">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3l8 6v10a2 2 0 0 1-2 2h-4v-6H10v6H6a2 2 0 0 1-2-2V9z" stroke="#a77cff" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="tab-btn" data-nav="chat" title="Chat" aria-label="Chat">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 5h16v9H7l-3 3z" stroke="#5ed0ff" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="tab-btn" data-nav="brain" title="Brain" aria-label="Brain">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="14" rx="3" stroke="#5ed0ff" stroke-width="1.6"/><path d="M8 9h8M8 13h6" stroke="#cfd6ff" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+    <button class="tab-btn" data-nav="apps" title="Apps" aria-label="Apps">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <rect x="4" y="4" width="6" height="6" rx="2" stroke="#5ed0ff" stroke-width="1.6"/>
+        <rect x="14" y="4" width="6" height="6" rx="2" stroke="#a77cff" stroke-width="1.6"/>
+        <rect x="4" y="14" width="6" height="6" rx="2" stroke="#ff5bd4" stroke-width="1.6"/>
+        <rect x="14" y="14" width="6" height="6" rx="2" stroke="#cfd6ff" stroke-width="1.6"/>
+      </svg>
+    </button>
+    <button class="tab-btn" data-nav="profile" title="Perfil" aria-label="Perfil">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.2" stroke="#cfd6ff" stroke-width="1.6"/><path d="M5 19c1.5-3.2 4.3-5 7-5s5.5 1.8 7 5" stroke="#5ed0ff" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </nav>
+</div>
+
 <script>
 /* ===== Helpers & Router ===== */
 function $(s,root=document){return root.querySelector(s)}
@@ -442,57 +348,136 @@ const h = location.hash.replace("#/",""); if(views[h]) navTo(h);
 document.querySelectorAll('[data-nav]').forEach(btn=>btn.addEventListener('click', ()=> navTo(btn.dataset.nav)));
 document.querySelectorAll('[data-open]').forEach(btn=>btn.addEventListener('click', ()=>{ const name=btn.dataset.open; navTo('chat'); setTimeout(()=>{ chatBubble('Abrir '+name+'…','me'); setTimeout(()=> chatBubble('Módulo '+name.toUpperCase()+' pronto. (exemplo)','ai'), 360); }, 150); }));
 
-/* ===== Lateral rail nav ===== */
-document.querySelectorAll('.page-rail [data-nav]').forEach(b=> b.addEventListener('click', ()=> navTo(b.dataset.nav)));
+/* ===== Hub Icon Fallback Loader ===== */
+(async function loadHubIcons(){
+  const cards = document.querySelectorAll('[data-icon] .ico');
+  for(const ico of cards){
+    const key = ico.parentElement.dataset.icon;
+    try{ const res = await fetch(`./icons/${key}.svg`, {method:'GET'}); if(res.ok){ const svg=await res.text(); ico.innerHTML=svg; } }catch(e){}
+  }
+})();
 
 /* ===== Menu btn ===== */
+function setTheme(name){
+  const map={nebula:'theme-nebula', luxara:'theme-luxara', ignyra:'theme-ignyra', elysha:'theme-elysha'};
+  const cls = map[name]||'theme-nebula';
+  document.body.classList.remove('theme-nebula','theme-luxara','theme-ignyra','theme-elysha');
+  document.body.classList.add(cls);
+  try{ localStorage.setItem('dual.theme', cls); }catch(_){}
+}
+setTheme((localStorage.getItem('dual.theme')||'theme-nebula').replace('theme-',''));
 const menuBtn = document.getElementById('btnMenu');
 const menuSheet = document.getElementById('menu-sheet');
 menuBtn.addEventListener('click', ()=>{ menuSheet.style.display = (menuSheet.style.display==='block'?'none':'block'); });
-document.getElementById('close-menu')?.addEventListener('click', ()=> menuSheet.style.display='none');
-menuSheet.addEventListener('click', (e)=>{ const btn=e.target.closest('[data-nav]'); if(!btn) return; navTo(btn.dataset.nav); menuSheet.style.display='none'; });
-
-/* ===== ASCII PRESET ENGINE ===== */
-const ASCII = {
-  wave: [
-    "▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁",
-    "  ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁",
-    "    ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁",
-    "  ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁"
-  ],
-  spark: [
-    ". . ✦ . . ✧ . . ✦ . . ✧ . . ✦",
-    ". ✧ . . ✦ . . ✧ . . ✦ . . ✧ .",
-    "✦ . . ✧ . . ✦ . . ✧ . . ✦ . .",
-    ". ✧ . . ✦ . . ✧ . . ✦ . . ✧ ."
-  ],
-  grid: [
-    "┌───┬───┬───┐ ┌───┬───┬───┐",
-    "│ ░ │ ▒ │ ▓ │ │ ▓ │ ▒ │ ░ │",
-    "├───┼───┼───┤ ├───┼───┼───┤",
-    "│ ▓ │ ▒ │ ░ │ │ ░ │ ▒ │ ▓ │"
-  ],
-  ether: [
-    "~    ~  ~~   ~    ~~   ~ ",
-    "  ~~    ~   ~~    ~   ~~ ",
-    " ~   ~~    ~    ~~   ~   ",
-    "   ~   ~~     ~   ~~    ~"
-  ]
-};
-function getAsciiStyle(){ return localStorage.getItem('dual.brain.ascii.style') || 'wave'; }
-function setAsciiStyle(s){ localStorage.setItem('dual.brain.ascii.style', s); }
+document.getElementById('close-menu').addEventListener('click', ()=> menuSheet.style.display='none');
+menuSheet.addEventListener('click', (e)=>{
+  const tbtn=e.target.closest('[data-theme]'); if(tbtn){ setTheme(tbtn.dataset.theme); menuSheet.style.display='none'; return; }
+  const btn=e.target.closest('[data-nav]'); if(!btn) return; navTo(btn.dataset.nav); menuSheet.style.display='none';
+});
 
 /* ===== ASCII status animation ===== */
 (function(){
   const el = document.getElementById('status-ascii');
-  function frames(){ const k=getAsciiStyle(); return ASCII[k] || ASCII.wave; }
-  let i=0; setInterval(()=>{ const f=frames(); el.textContent = "╭────────── pulso em expansão ──────────╮\\n│ "+ f[i=(i+1)%f.length] +" │\\n╰───────────────────────────────────────╯"; }, 900);
+  const frames = [
+`╭────────── pulso em expansão ──────────╮
+│ ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁        │
+╰───────────────────────────────────────╯`,
+`╭────────── pulso em expansão ──────────╮
+│   ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁      │
+╰───────────────────────────────────────╯`,
+`╭────────── pulso em expansão ──────────╮
+│     ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁    │
+╰───────────────────────────────────────╯`,
+`╭────────── pulso em expansão ──────────╮
+│       ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁  │
+╰───────────────────────────────────────╯`,
+`╭────────── pulso em expansão ──────────╮
+│     ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁    │
+╰───────────────────────────────────────╯`,
+`╭────────── pulso em expansão ──────────╮
+│   ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁      │
+╰───────────────────────────────────────╯`
+  ];
+  let i=0; setInterval(()=>{ el.textContent = frames[i=(i+1)%frames.length]; }, 900);
 })();
 
 /* ===== Chat with refine-in-bubble + ASCII art ===== */
 (function(){
   const list = $("#chat-list"), input=$("#chat-input"), status=$("#chat-status");
   const btnSend=$("#chat-btnSend"), btnMic=$("#chat-btnMic"), btnMore=$("#chat-btnMore");
+  // Reactions: ASCII stickers/emojis
+  const ASCII_STICKERS = [
+    {label:"(╯°□°）╯︵ ┻━┻", text:"(╯°□°）╯︵ ┻━┻"},
+    {label:"┬─┬ ノ(゜-゜ノ)", text:"┬─┬ ノ(゜-゜ノ)"},
+    {label:"¯\\_(ツ)_/¯", text:"¯\\_(ツ)_/¯"},
+    {label:"( ͡° ͜ʖ ͡°)", text:"( ͡° ͜ʖ ͡°)"},
+    {label:"(•‿•)", text:"(•‿•)"},
+    {label:"♥", text:"  ** **\\n ******\\n ******\\n  ****\\n   **"},
+    {label:"✨", text:"    *\\n   ***\\n  *****\\n   ***\\n    *"},
+    {label:"~ onda ~", text:"~      ~      ~"},
+    {label:"▶ loading", text:"[====      ]"},
+    {label:"▲", text:"  /\\\\\\n /  \\\\\\n/____\\\\"},
+    {label:"○", text:"  ***\\n *   *\\n *   *\\n *   *\\n  ***"},
+    {label:"☐", text:"#####\\n#   #\\n#   #\\n#   #\\n#####"},
+  ];
+
+  // Create reactions button & sheet if not present
+  const composer = document.querySelector('#view-chat .composer');
+  const btnAttach = $("#chat-btnAttach");
+  let btnRe = document.getElementById('chat-btnReactions');
+  if(!btnRe){
+    btnRe = document.createElement('button');
+    btnRe.className = 'cbtn';
+    btnRe.id = 'chat-btnReactions';
+    btnRe.title = 'Reações ASCII';
+    btnRe.setAttribute('aria-label','Reações ASCII');
+    btnRe.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <circle cx="8" cy="10" r="2" stroke="#cfe9ff" stroke-width="2"/>
+      <circle cx="16" cy="10" r="2" stroke="#cfe9ff" stroke-width="2"/>
+      <path d="M7 16c2 2 8 2 10 0" stroke="#cfe9ff" stroke-width="2" stroke-linecap="round"/>
+    </svg>`;
+    // insert before attach
+    composer.insertBefore(btnRe, btnAttach);
+  }
+
+  let reactSheet = document.getElementById('reactions-sheet');
+  if(!reactSheet){
+    reactSheet = document.createElement('div');
+    reactSheet.className = 'sheet';
+    reactSheet.id = 'reactions-sheet';
+    reactSheet.innerHTML = `<div style="text-align:center;opacity:.8">Reações ASCII</div>
+    <div class="row" id="reactions-grid" style="flex-wrap:wrap; gap:8px"></div>
+    <div class="row"><div class="btn" id="reactions-close">Fechar</div></div>`;
+    document.querySelector('#view-chat .app-frame').appendChild(reactSheet);
+  }
+  const grid = reactSheet.querySelector('#reactions-grid'); grid.innerHTML='';
+  ASCII_STICKERS.forEach(s=>{
+    const b=document.createElement('div'); b.className='btn';
+    b.style.minWidth='fit-content'; b.style.padding='8px 10px'; b.style.fontFamily='ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+    b.textContent=s.label;
+    b.title = s.text.replace(/\\n/g,' ');
+    b.addEventListener('click', ()=>{
+      // insert at cursor
+      const el = input;
+      const ins = (s.text.includes('\\n') ? '\\n'+s.text+'\\n' : s.text);
+      try{
+        const st = el.selectionStart||el.value.length, en = el.selectionEnd||el.value.length;
+        el.value = el.value.slice(0,st) + ins + el.value.slice(en);
+        el.focus();
+        el.selectionStart = el.selectionEnd = st + ins.length;
+      }catch(_){
+        el.value = (el.value + ' ' + ins).trim();
+      }
+      reactSheet.style.display='none';
+    });
+    grid.appendChild(b);
+  });
+
+  btnRe.addEventListener('click', ()=>{
+    reactSheet.style.display = (reactSheet.style.display==='block'?'none':'block');
+  });
+  document.getElementById('reactions-close').addEventListener('click', ()=> reactSheet.style.display='none');
+
   const btnTTS=$("#chat-btnTTS"), btnExport=$("#chat-btnExport"), sheet=$("#chat-sheet");
   const STORAGE_KEY="dual.chat.history";
   let TTS_ON=true, msgCounter=0;
@@ -561,12 +546,16 @@ function setAsciiStyle(s){ localStorage.setItem('dual.brain.ascii.style', s); }
     }catch(e){ console.warn('TTS indisponível', e) }
   }
 
-  function asciiFramesFor(style){
-    const pack = ASCII[style] || ASCII.wave;
-    return pack;
+  function asciiWaveFrames(){
+    return [
+"▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁",
+"  ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁",
+"    ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁",
+"  ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁"
+    ];
   }
 
-  // Refine inline menu
+  // Refine inline menu renderer
   function renderRefineBar(bubble, text){
     let bar = bubble.parentElement.querySelector('.refinebar');
     if(!bar){
@@ -587,7 +576,7 @@ function setAsciiStyle(s){ localStorage.setItem('dual.brain.ascii.style', s); }
         let idx = Math.max(0, prefs.findIndex(n=> n===current));
         const next = prefs[(idx+1)%prefs.length] || '';
         if(next){ setLS('dual.brain.voice.'+arch, next); chatBubble(`Voz do arquétipo ${arch} refinada → ${next}`, 'ai'); }
-        else { chatBubble(`Sem candidatos pt-BR detectados; usando automática para ${arch}.`, 'ai'); }
+        else { chatBubble(`Sem candidatos pt‑BR detectados; usando automática para ${arch}.`, 'ai'); }
       }
       if(act==='text'){
         chatBubble("Refino textual: "+text.replace(/\s+/g,' ').slice(0,160)+"…", 'ai');
@@ -603,8 +592,8 @@ function setAsciiStyle(s){ localStorage.setItem('dual.brain.ascii.style', s); }
     const row=document.createElement('div'); row.className='row '+who; row.dataset.id=id;
     if(who==='ai'){ const av=document.createElement('div'); av.className='avatar'; av.innerHTML='🔮'; row.appendChild(av); }
     const b=document.createElement('div'); b.className='bubble '+who; b.textContent=text;
-    // ascii strip according to global style
-    const ascii=document.createElement('pre'); ascii.className='ascii'; ascii.textContent=asciiFramesFor(getAsciiStyle())[0];
+    // ascii strip
+    const ascii=document.createElement('pre'); ascii.className='ascii'; ascii.textContent=asciiWaveFrames()[0];
     b.appendChild(ascii);
     // pulse meta
     const pulse=document.createElement('div'); pulse.className='pulse';
@@ -620,10 +609,14 @@ function setAsciiStyle(s){ localStorage.setItem('dual.brain.ascii.style', s); }
     if(who==='me'){ const av=document.createElement('div'); av.className='avatar'; av.innerHTML='⚡'; row.appendChild(av); }
     list.appendChild(row);
     const ts=document.createElement('div'); ts.className='timestamp'; ts.textContent=new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-    list.appendChild(ts); list.scrollTop=list.scrollHeight; persist();
+    list.appendChild(ts);
+    persist();
+    requestAnimationFrame(()=>{
+      try{ list.scrollTo({top:list.scrollHeight}); }catch(_){ list.scrollTop=list.scrollHeight; }
+    });
     if(TTS_ON && who==='ai') speak(text, arch);
-    // animate ascii subtly with selected preset
-    const frames = asciiFramesFor(getAsciiStyle()); let i=0; setInterval(()=>{ ascii.textContent = frames[i=(i+1)%frames.length]; }, 800);
+    // animate ascii subtly
+    const frames = asciiWaveFrames(); let i=0; setInterval(()=>{ ascii.textContent = frames[i=(i+1)%frames.length]; }, 800);
   }
 
   function persist(){
@@ -641,21 +634,29 @@ function setAsciiStyle(s){ localStorage.setItem('dual.brain.ascii.style', s); }
     if(!raw){ intro(); return }
     try{ JSON.parse(raw).forEach(m=> chatBubble(m.text, m.who)); }
     catch(e){ console.warn(e); intro(); }
+    requestAnimationFrame(()=>{
+      try{ list.scrollTo({top:list.scrollHeight}); }catch(_){ list.scrollTop=list.scrollHeight; }
+    });
   }
 
   function intro(){
     chatBubble("Olá, eu sou o Dual. Como posso te ajudar hoje?", 'ai');
-    chatBubble("Toque ••• para Ações rápidas. Dentro de cada resposta, use Refinar para voz/texto, ou Pulso para ver o meta. ASCII dinâmico via dual.brain.ascii.style.", 'ai');
+    chatBubble("Toque ••• para Ações rápidas. Dentro de cada resposta, use **Refinar** para voz/texto, ou **Pulso** para ver o meta.", 'ai');
   }
 
   async function reply(prompt){
     const p=prompt.trim().toLowerCase(); if(!p) return;
-    if(p.includes('scan')||p.includes('lan')){ await wait(400); chatBubble("🔎 Varredura LAN concluída: \n• 192.168.0.10 — DualHub (HTTP)\n• 192.168.0.21 — MediaBox (DLNA)\n• 192.168.0.45 — ESP32 (MQTT)", 'ai'); return; }
+    if(p.includes('scan')||p.includes('lan')){ await wait(400); chatBubble("🔎 Varredura LAN concluída:\n• 192.168.0.10 — DualHub (HTTP)\n• 192.168.0.21 — MediaBox (DLNA)\n• 192.168.0.45 — ESP32 (MQTT)", 'ai'); return; }
     if(p.includes('bind')){ await wait(300); const token=Math.random().toString(36).slice(2,10).toUpperCase(); chatBubble("🔗 Bind efetuado: TOKEN-"+token+" (mock).", 'ai'); return; }
     if(p.includes('relatório')||p.includes('relatorio')||p.includes('report')){ await wait(300);
-      chatBubble("📈 Relatório — Sessão atual\nMensagens: "+ list.querySelectorAll('.row').length +"\nTTS: "+(TTS_ON?'ativado':'desligado')+"\nPersistência: localStorage (‘"+STORAGE_KEY+"’).", 'ai'); return; }
+      chatBubble("📈 Relatório — Sessão atual\nMensagens: "+ document.querySelectorAll('#chat-list .row').length +"\nTTS: "+(TTS_ON?'ativado':'desligado')+"\nPersistência: localStorage (‘"+STORAGE_KEY+"’).", 'ai'); return; }
     if(p.includes('memória')||p.includes('memoria')){ await wait(200); chatBubble("🧠 Memória local: "+(localStorage.getItem(STORAGE_KEY)?.length||0)+" bytes. Use Ações → Limpar para resetar.", 'ai'); return; }
-    await wait(450);
+
+    // Tenta LLM via OpenRouter
+    const out = await (window.dualLLM ? window.dualLLM(prompt) : null);
+    if(out){ chatBubble(out, 'ai'); return; }
+
+    await wait(350);
     const stems=["Entendi o pulso do que disse: ","Recebi sua intenção e expando: ","Posso seguir por aqui: ","Certo! Minha leitura: "];
     chatBubble(stems[Math.floor(Math.random()*stems.length)] + prompt, 'ai');
   }
@@ -667,13 +668,14 @@ function setAsciiStyle(s){ localStorage.setItem('dual.brain.ascii.style', s); }
   let recognizing=false, rec;
   function startSTT(){
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if(!SR){ const el=document.getElementById('status-ascii'); el.textContent="╭────────── ditado indisponível ─────────╮\\n│ …                                      │\\n╰────────────────────────────────────────╯"; return }
+    if(!SR){ status.querySelector('.ascii').textContent="╭────────── ditado indisponível ─────────╮\n│ …                                      │\n╰────────────────────────────────────────╯"; return }
     if(recognizing){ rec.stop(); recognizing=false; return }
     rec=new SR(); rec.lang='pt-BR'; rec.interimResults=false; rec.maxAlternatives=1;
     rec.onresult=e=>{ input.value=(input.value+' '+e.results[0][0].transcript).trim(); };
     rec.onend=()=>{ recognizing=false; };
     rec.onerror=()=>{ recognizing=false; };
-    recognizing=true; rec.start();
+    recognizing=true;
+    rec.start();
   }
 
   // Export/Import
@@ -707,7 +709,7 @@ function setAsciiStyle(s){ localStorage.setItem('dual.brain.ascii.style', s); }
   restore();
 })();
 
-/* ===== Brain: mapper/integ + ASCII style buttons ===== */
+/* ===== Brain: mapper/integ (igual v4) ===== */
 (function(){
   const ARCHS=["Atlas","Nova","Elysha","Kaion","Artemis","Serena","Vitalis","Pulse","Aion","Rhea","Genus","Lumine"];
   const mapper = document.getElementById('mapper');
@@ -722,7 +724,6 @@ function setAsciiStyle(s){ localStorage.setItem('dual.brain.ascii.style', s); }
     });
   }
   function buildMapper(){
-    if(!mapper) return;
     mapper.innerHTML='';
     ARCHS.forEach(arch=>{
       const row=document.createElement('div'); row.className='row';
@@ -745,16 +746,11 @@ function setAsciiStyle(s){ localStorage.setItem('dual.brain.ascii.style', s); }
   }
   function initMapper(){ getVoices(); buildMapper(); }
   initMapper();
-  document.getElementById('refreshVoices')?.addEventListener('click', initMapper);
-  document.getElementById('resetVoices')?.addEventListener('click', ()=>{
+  document.getElementById('refreshVoices').addEventListener('click', initMapper);
+  document.getElementById('resetVoices').addEventListener('click', ()=>{
     ARCHS.forEach(a=> localStorage.removeItem('dual.brain.voice.'+a));
     initMapper();
   });
-
-  // ASCII style buttons
-  document.querySelectorAll('[data-ascii]').forEach(b=> b.addEventListener('click', ()=>{
-    const style = b.getAttribute('data-ascii'); setAsciiStyle(style);
-  }));
 
   // Integrator
   const panel=$("#brain-panel"), be=$("#brain-be"), log=$("#brain-log"), status=$("#brain-status");
@@ -767,60 +763,231 @@ function setAsciiStyle(s){ localStorage.setItem('dual.brain.ascii.style', s); }
     const url=path? new URL(path,base).toString(): base; status.textContent='Carregando...';
     fetchWithTimeout(url,{},5000).then(async(res)=>{ const text=await res.text(); status.textContent=(res.ok?'OK ':'ERRO ')+res.status+' — '+url; addLog((res.ok?'[OK] ':'[ERR] ')+url+' → '+text.slice(0,200)); })
       .catch(err=>{ status.textContent='Falha na requisição.'; addLog('[ERR] '+(err?.message||err)); }); }
-  document.getElementById("brain-open-integrator")?.addEventListener('click', openPanel);
-  document.getElementById("brain-close")?.addEventListener('click', ()=> panel.classList.remove("open"));
-  document.getElementById("brain-saveBE")?.addEventListener('click', ()=>{ DualStore.backend=be.value; addLog('Salvo: '+DualStore.backend); status.textContent='Backend salvo.'; });
-  document.getElementById("brain-test")?.addEventListener('click', ()=> doGET(''));
-  document.getElementById("brain-ping")?.addEventListener('click', ()=> doGET('/ping'));
-  document.getElementById("brain-health")?.addEventListener('click', ()=> doGET('/health'));
+  document.getElementById("brain-open-integrator").addEventListener('click', openPanel);
+  document.getElementById("brain-close").addEventListener('click', ()=> panel.classList.remove("open"));
+  document.getElementById("brain-saveBE").addEventListener('click', ()=>{ DualStore.backend=be.value; addLog('Salvo: '+DualStore.backend); status.textContent='Backend salvo.'; });
+  document.getElementById("brain-test").addEventListener('click', ()=> doGET(''));
+  document.getElementById("brain-ping").addEventListener('click', ()=> doGET('/ping'));
+  document.getElementById("brain-health").addEventListener('click', ()=> doGET('/health'));
 })();
 
-/* ===== Apps view: load apps/apps.json (fallbacks) ===== */
+// === Brain: Active ASCII count card (injected) ===
 (function(){
-  const grid = document.getElementById('apps-grid');
-  function safe(v){ return (v||'').toString(); }
-  function card(app){
-    const c=document.createElement('div'); c.className='app-card';
-    c.innerHTML = `<div class="app-icon"><img src="${safe(app.icon||'icons/icon-192.png')}" alt=""></div>
-    <div style="flex:1">
-      <div style="font-weight:800">${safe(app.title||app.key||'App')}</div>
-      <div class="muted">${safe(app.desc||'')}</div>
-      <div class="row">
-        <button class="btn primary">Abrir</button>
-        <button class="btn dl">Injection</button>
-      </div>
-    </div>`;
-    c.querySelector('.primary').addEventListener('click', ()=>{
-      try{ window.open(app.url, '_blank', 'noopener'); }catch{ location.href = app.url; }
-    });
-    c.querySelector('.dl').addEventListener('click', ()=>{
-      alert('Injection rápido: cole o snippet do seu HUB (indexhub) — recurso simplificado nesta view.');
-    });
-    return c;
+  const wrap = document.querySelector('#view-brain .wrap .grid');
+  if(!wrap) return;
+  const card = document.createElement('div');
+  card.className='card';
+  card.innerHTML = `<div class="label">ASCII ativos</div>
+  <div class="sublabel">Quantos blocos animar no chat (memória: <code>dual.brain.ascii.activeCount</code>)</div>
+  <div class="hr"></div>
+  <div style="display:flex;gap:8px">
+    <button class="btn-pill" data-n="1">1</button>
+    <button class="btn-pill" data-n="2">2</button>
+    <button class="btn-pill" data-n="3">3</button>
+  </div>
+  <div class="status" id="ascii-active-status" style="margin-top:8px">—</div>`;
+  wrap.appendChild(card);
+  const status = card.querySelector('#ascii-active-status');
+  function refreshStatus(){
+    const v = localStorage.getItem('dual.brain.ascii.activeCount')||'2';
+    status.textContent = 'Ativos: '+v;
   }
-  async function tryFetch(u){
-    const res = await fetch(u, {cache:'no-store'});
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    return res.json();
-  }
-  async function load(){
-    const candidates = ['./apps.json','./apps/apps.json','./docs/apps/apps.json','/apps/apps.json'];
-    let data=null;
-    for(const u of candidates){
-      try{ data = await tryFetch(u); break; }catch(e){}
-    }
-    if(!data){ grid.innerHTML = '<div class="muted">Não encontrei apps.json — tente colocar em ./apps/apps.json</div>'; return; }
-    let list = Array.isArray(data.apps) ? data.apps : (data.groups? Object.values(data.groups).flat().filter(Boolean) : []);
-    grid.innerHTML='';
-    list.forEach(a=> grid.appendChild(card(a)));
-  }
-  load();
+  card.querySelectorAll('[data-n]').forEach(b=> b.addEventListener('click', ()=>{
+    const n = b.getAttribute('data-n');
+    localStorage.setItem('dual.brain.ascii.activeCount', n);
+    refreshStatus();
+    try{ asciiRefreshActives(); }catch(_){}
+  }));
+  refreshStatus();
 })();
 
-// Integrator info
+
+// Integrator button demo (header)
 document.getElementById('btnIntegrator').addEventListener('click', ()=>{
   alert('Integrador: conecte LAN, Bind e Relatórios.\n(Protótipo unificado — backend salvo em localStorage)');
 });
 </script>
+<script>
+/* === ASCII animation manager: animate only visible + N actives === */
+(function(){
+  const frames = [
+    "▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁",
+    "  ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁",
+    "    ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁",
+    "  ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁"
+  ];
+  const active = new Map(); // el -> intervalId
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(en=>{
+      const el = en.target;
+      if(en.isIntersecting){
+        maybeAnimate(el);
+      }else{
+        stop(el);
+      }
+    });
+  }, {root: document.querySelector('#view-chat .scroll'), threshold: 0.05});
+
+  function stop(el){
+    const id = active.get(el);
+    if(id){ clearInterval(id); active.delete(el); }
+    // set stable frame
+    el.textContent = frames[0];
+  }
+
+  function maybeAnimate(el){
+    // respect limit
+    const limit = parseInt(localStorage.getItem('dual.brain.ascii.activeCount')||'2', 10);
+    if(active.size >= limit){
+      stop(el);
+      return;
+    }
+    if(active.has(el)) return;
+    let i = 0;
+    const id = setInterval(()=>{ el.textContent = frames[i=(i+1)%frames.length]; }, 800);
+    active.set(el, id);
+  }
+
+  window.asciiRefreshActives = function(){
+    // re-evaluate all
+    document.querySelectorAll('#chat-list .bubble .ascii').forEach(el=>{
+      io.unobserve(el); stop(el); io.observe(el);
+    });
+  };
+
+  // hook future bubbles
+  const list = document.getElementById('chat-list');
+  const mo = new MutationObserver(()=>{
+    list.querySelectorAll('.bubble .ascii').forEach(el=> io.observe(el));
+  });
+  mo.observe(list, {childList:true, subtree:true});
+
+  // initial
+  setTimeout(()=> asciiRefreshActives(), 100);
+})();
+</script>
+<script>
+(function(){
+  const appsView = document.getElementById('view-apps');
+  if(!appsView) return;
+  const grid = appsView.querySelector('.grid');
+  let appsLoaded=false;
+  async function loadApps(){
+    if(appsLoaded) return;
+    appsLoaded=true;
+    if(!grid) return;
+    grid.innerHTML='';
+    try{
+      const res = await fetch('./apps/apps.json', {cache:'no-store'});
+      const data = await res.json();
+      let appsList = [];
+      if(Array.isArray(data)) { appsList = data; }
+      else if(Array.isArray(data.apps)) { appsList = data.apps; }
+      else if(data.groups && typeof data.groups === 'object') {
+        for(const key in data.groups){ const arr=data.groups[key]; if(Array.isArray(arr)) appsList=appsList.concat(arr); }
+      }
+      appsList.forEach(app=>{
+        const div=document.createElement('div');
+        div.className='card';
+        const iconHtml = app.icon ?
+          `<img src="${app.icon}" alt="" style="width:32px;height:32px;border-radius:8px">` :
+          '<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="6" height="6" rx="2" stroke="#5ed0ff" stroke-width="1.6"></rect><rect x="14" y="4" width="6" height="6" rx="2" stroke="#a77cff" stroke-width="1.6"></rect><rect x="4" y="14" width="6" height="6" rx="2" stroke="#ff5bd4" stroke-width="1.6"></rect><rect x="14" y="14" width="6" height="6" rx="2" stroke="#cfd6ff" stroke-width="1.6"></rect></svg>';
+        div.innerHTML = `<div class="ico">${iconHtml}</div><h3>${app.name || app.title || 'App'}</h3><p>${app.desc || app.description || ''}</p>`;
+        if(app.url) div.addEventListener('click', ()=>{ window.open(app.url, '_blank'); });
+        grid.appendChild(div);
+      });
+    }catch(e){
+      console.warn(e);
+      if(grid) grid.innerHTML='<div style="padding:8px;color:var(--muted)">Não foi possível carregar os apps.</div>';
+    }
+  }
+  // Attach loadApps to nav clicks
+  document.querySelectorAll('[data-nav]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ if(btn.dataset.nav==='apps') loadApps(); });
+  });
+  // Auto-load if URL hash points to apps
+  if(location.hash && location.hash.toLowerCase().includes('apps')) loadApps();
+})();
+
+/* === Brain: OpenRouter key/model settings === */
+(function(){
+  const wrap = document.querySelector('#view-brain .wrap .grid');
+  if(!wrap) return;
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="label">OpenRouter • Conexão</div>
+    <div class="sublabel">Salvo localmente: <code>dual.openrouter.*</code></div>
+    <div class="hr"></div>
+    <div class="kv">
+      <div class="key">API Key (sk-...)</div>
+      <input id="or-key" class="input" placeholder="sk-..." type="password">
+    </div>
+    <div class="kv" style="margin-top:8px">
+      <div class="key">Modelo</div>
+      <select id="or-model" class="input" style="height:auto">
+        <option value="google/gemini-2.0-flash-lite">Gemini 2.0 Flash Lite (rápido)</option>
+        <option value="meta-llama/llama-3.1-8b-instruct">Llama 3.1 8B Instruct</option>
+        <option value="mistralai/mistral-small">Mistral Small</option>
+        <option value="anthropic/claude-3-haiku">Claude 3 Haiku</option>
+        <option value="qwen/qwen-2.5-7b-instruct">Qwen 2.5 7B</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn-pill" id="or-save">Salvar</button>
+      <button class="btn-pill" id="or-clear" style="background:linear-gradient(90deg,#ff5a99,#7b61ff)">Limpar</button>
+      <button class="btn-pill" id="or-test" style="background:linear-gradient(90deg,#29D3FF,#6CFFB8)">Testar</button>
+    </div>
+    <div class="status" id="or-status" style="margin-top:8px">—</div>
+  `;
+  wrap.appendChild(card);
+  const keyEl = card.querySelector('#or-key');
+  const modelEl = card.querySelector('#or-model');
+  keyEl.value = localStorage.getItem('dual.openrouter.key') || '';
+  modelEl.value = localStorage.getItem('dual.openrouter.model') || 'google/gemini-2.0-flash-lite';
+  card.querySelector('#or-save').onclick = ()=>{
+    localStorage.setItem('dual.openrouter.key', keyEl.value.trim());
+    localStorage.setItem('dual.openrouter.model', modelEl.value);
+    card.querySelector('#or-status').textContent = 'Salvo.';
+  };
+  card.querySelector('#or-clear').onclick = ()=>{
+    localStorage.removeItem('dual.openrouter.key');
+    localStorage.removeItem('dual.openrouter.model');
+    keyEl.value=''; modelEl.value='google/gemini-2.0-flash-lite';
+    card.querySelector('#or-status').textContent = 'Limpo.';
+  };
+  card.querySelector('#or-test').onclick = async ()=>{
+    const out = await window.dualLLM('Diga apenas: ok', {max_tokens:6});
+    card.querySelector('#or-status').textContent = out ? 'OK: '+out.slice(0,40) : 'Falhou.';
+  };
+})();
+
+/* === LLM helper bound to OpenRouter (client-side) === */
+window.dualLLM = async function(prompt, opts={}){
+  const key = (localStorage.getItem('dual.openrouter.key')||'').trim();
+  const model = localStorage.getItem('dual.openrouter.model') || 'google/gemini-2.0-flash-lite';
+  if(!key) return null;
+  try{
+    const res = await fetch('https://api.openrouter.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json', 'Authorization':'Bearer '+key},
+      body: JSON.stringify({
+        model,
+        messages: [{role:'system', content:'Você é o Dual. Responda em pt-BR de forma objetiva.'},{role:'user', content: prompt}],
+        max_tokens: opts.max_tokens || 512,
+        temperature: 0.7
+      })
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const j = await res.json();
+    return j.choices?.[0]?.message?.content || null;
+  }catch(e){
+    console.warn('dualLLM erro', e);
+    return null;
+  }
+};
+
+</script>
+
 </body>
 </html>
