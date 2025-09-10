@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>DUAL • Nebula Hub — Minimal</title>
+<meta name="theme-color" content="#0a0b13">
+<link rel="manifest" href="/docs/manifest.webmanifest">
+<style>
+  :root{--bg:#0a0b13;--fg:#e9ecff;--muted:#9aa4c7;--card:#0e1224cc;--ring:#a77cff88}
+  html,body{height:100%;margin:0;background:radial-gradient(60% 60% at 50% 30%, #17192d 0,#0a0b13 65%, #04060e 100%);color:var(--fg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto}
+  header{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:.75rem;padding:12px 14px;background:linear-gradient(180deg,#0b0f1ccc 0,#0b0f1c66 100%);backdrop-filter:blur(10px);border-bottom:1px solid #ffffff15}
+  .dot{width:8px;height:8px;border-radius:999px;background:#a77cff;box-shadow:0 0 16px #a77cff}
+  .title{font-weight:800;letter-spacing:.18em}
+  main{max-width:980px;margin:0 auto;padding:14px}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  @media (max-width:640px){.grid{grid-template-columns:1fr}}
+  .card{display:flex;gap:12px;align-items:center;background:linear-gradient(180deg,#14172b,#0c0f22);border:1px solid #ffffff22;border-radius:16px;padding:12px;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+  .icon{width:56px;height:56px;border-radius:14px;display:grid;place-items:center;overflow:hidden;background:#0f1320;border:1px solid #ffffff22}
+  .name{font-weight:800}
+  .muted{color:var(--muted);font-size:12px;margin-top:2px}
+  .row{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+  .btn{appearance:none;border:1px solid #ffffff22;cursor:pointer;background:rgba(255,255,255,.06);color:#fff;padding:.64rem .9rem;border-radius:999px;font-weight:800}
+  .btn.primary{background:linear-gradient(90deg,#9f7cff,#29d3ff);border-color:transparent}
+</style>
+</head>
+<body>
+  <header>
+    <div class="dot"></div><div class="title">DUAL • NEBULA HUB</div>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button id="installBtn" class="btn">Instalar Hub</button>
+    </div>
+  </header>
+  <main>
+    <div class="grid" id="appsGrid"></div>
+  </main>
+
+<script type="module">
+// SW para o Hub
+if ('serviceWorker' in navigator){ try{ await navigator.serviceWorker.register('/docs/js/service-worker.js', {scope: '/'});}catch{} }
+
+// Instalação (beforeinstallprompt)
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault(); deferredPrompt=e;
+  const b=document.getElementById('installBtn');
+  b.onclick=async()=>{ deferredPrompt?.prompt(); await deferredPrompt?.userChoice; deferredPrompt=null; };
+});
+
+const appsGrid = document.getElementById('appsGrid');
+
+function card(app){
+  const div=document.createElement('div'); div.className='card';
+  const icon = app.icons?.png_192 || app.icon || '/docs/icons/ppplayer/png/icon-192-pp6.png';
+  const title = app.name || app.title || app.id || 'App';
+  const desc = app.description || app.desc || '';
+  div.innerHTML = \`
+    <div class="icon"><img src="\${icon}" alt="" width="56" height="56"></div>
+    <div style="flex:1">
+      <div class="name">\${title}</div>
+      <div class="muted">\${desc}</div>
+      <div class="row">
+        <button class="btn primary">Abrir (Wrapper)</button>
+        <button class="btn outline">Instalar (via Wrapper)</button>
+      </div>
+    </div>\`;
+  // Abrir via wrapper com query params
+  const href = app.href || app.url || '/docs/apps/ppplayer_app.html';
+  const manifest = app.manifest || '/docs/manifests/ppplayer/manifest.json';
+  const openWrapper = ()=>{
+    const url = \`/docs/apps/wrapper.html?id=\${encodeURIComponent(app.id||title.toLowerCase())}&title=\${encodeURIComponent(title)}&src=\${encodeURIComponent(href)}&manifest=\${encodeURIComponent(manifest)}\`;
+    location.href = url;
+  };
+  div.querySelector('.primary').addEventListener('click', openWrapper);
+  div.querySelector('.outline').addEventListener('click', openWrapper); // wrapper expõe o botão Instalar
+  return div;
+}
+
+async function load(){
+  const candidates = ['/docs/apps/apps.json','/docs/apps.json','/apps/apps.json'];
+  let data=null;
+  for(const u of candidates){
+    try{ const r=await fetch(u,{cache:'no-store'}); if(r.ok){ data=await r.json(); break; } }catch(e){}
+  }
+  if(!data){ appsGrid.innerHTML='<div class="muted">apps.json não encontrado em /docs/apps/apps.json</div>'; return; }
+  let list = Array.isArray(data.apps)? data.apps : (data.groups? Object.values(data.groups).flat() : []);
+  appsGrid.innerHTML=''; list.forEach(app=> appsGrid.appendChild(card(app)));
+}
+load();
+</script>
+</body>
+</html>
