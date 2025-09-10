@@ -1,0 +1,157 @@
+{
+  "name": "PPPLAYER",
+  "short_name": "PPPlayer",
+  "id": "/ppplayer",
+  "start_url": "/docs/apps/ppplayer_app.html",
+  "display": "standalone",
+  "scope": "/docs/apps/",
+  "background_color": "#0a0b13",
+  "theme_color": "#0a0b13",
+  "description": "Ping-Pong Player com semântica musical, visual Nebula Pro.",
+  "icons": [
+    {
+      "src": "/docs/icons/ppplayer/png/icon-192-pp0.png",
+      "purpose": "any maskable",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/docs/icons/ppplayer/png/icon-192-pp1.png",
+      "purpose": "any maskable",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/docs/icons/ppplayer/png/icon-192-pp2.png",
+      "purpose": "any maskable",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/docs/icons/ppplayer/png/icon-192-pp3.png",
+      "purpose": "any maskable",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/docs/icons/ppplayer/png/icon-192-pp4.png",
+      "purpose": "any maskable",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/docs/icons/ppplayer/png/icon-192-pp5.png",
+      "purpose": "any maskable",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/docs/icons/ppplayer/png/icon-192-pp6.png",
+      "purpose": "any maskable",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/docs/icons/ppplayer/png/icon-192-pp7.png",
+      "purpose": "any maskable",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/docs/icons/ppplayer/png/icon-512-pp0.png",
+      "purpose": "any maskable",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/docs/icons/ppplayer/png/icon-512-pp1.png",
+      "purpose": "any maskable",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/docs/icons/ppplayer/png/icon-512-pp2.png",
+      "purpose": "any maskable",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/docs/icons/ppplayer/png/icon-512-pp3.png",
+      "purpose": "any maskable",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/docs/icons/ppplayer/png/icon-512-pp4.png",
+      "purpose": "any maskable",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/docs/icons/ppplayer/png/icon-512-pp5.png",
+      "purpose": "any maskable",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/docs/icons/ppplayer/png/icon-512-pp6.png",
+      "purpose": "any maskable",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/docs/icons/ppplayer/png/icon-512-pp7.png",
+      "purpose": "any maskable",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/docs/icons/ppplayer/svg/icon-pp0.svg",
+      "purpose": "any",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/docs/icons/ppplayer/svg/icon-pp1.svg",
+      "purpose": "any",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/docs/icons/ppplayer/svg/icon-pp2.svg",
+      "purpose": "any",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/docs/icons/ppplayer/svg/icon-pp3.svg",
+      "purpose": "any",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/docs/icons/ppplayer/svg/icon-pp4.svg",
+      "purpose": "any",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/docs/icons/ppplayer/svg/icon-pp5.svg",
+      "purpose": "any",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/docs/icons/ppplayer/svg/icon-pp6.svg",
+      "purpose": "any",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/docs/icons/ppplayer/svg/icon-pp7.svg",
+      "purpose": "any",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
