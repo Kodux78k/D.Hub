@@ -1,0 +1,259 @@
+
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+  <title>DUAL • Nebula Pro — Monólito Refactor V6 (FIX1)</title>
+  <meta name="theme-color" content="#0b0b14">
+  <style>
+    :root{
+      --bg:#0a0b13; --bg-2:#0b0d1a; --fg:#e9ecff; --muted:#9aa4c7;
+      --acc:#a77cff; --ring:rgba(167,124,255,.35); --tabsH:72px;
+      --app-frame-max: 100%; --app-frame-padX: 8px; --app-frame-padY: 8px; --app-frame-radius: 0px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";background:#05060c;color:var(--fg)}
+    .app{min-height:100dvh;display:flex;flex-direction:column}
+    header.top{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #ffffff20;background:linear-gradient(180deg,#0c0f20,#090c18)}
+    .title{font-weight:800;letter-spacing:.18em;display:flex;gap:.5ch;align-items:center}
+    .title img{width:22px;height:22px}
+    .hdr-actions{display:flex;gap:8px}
+    .icon-btn{width:36px;height:36px;border-radius:12px;border:1px solid #ffffff20;background:#0f1428;display:grid;place-items:center;cursor:pointer}
+    main{flex:1;position:relative}
+    section.view{position:absolute;inset:0;display:none;padding:12px;padding-bottom:calc(var(--tabsH) + 14px);overflow:auto}
+    section.view.active{display:block}
+    nav.tabs{position:fixed;left:0;right:0;bottom:0;height:var(--tabsH);display:flex;gap:10px;justify-content:space-around;align-items:center;background:linear-gradient(180deg,#0b0e1a,#070a14);border-top:1px solid #ffffff14}
+    .tab-btn{width:46px;height:46px;border-radius:14px;border:1px solid #ffffff18;background:#10142a;display:grid;place-items:center}
+    .tab-btn.active{outline:1px solid var(--ring)}
+    /* Home cards */
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .card{border:1px solid #ffffff12;background:linear-gradient(180deg,#0c1226,#0a0f1f);border-radius:16px;padding:12px;display:flex;gap:10px;align-items:center}
+    .card img.ico{width:42px;height:42px;border-radius:10px;background:#0f1426;border:1px solid #ffffff14;padding:8px}
+    /* Chat full-bleed */
+    #view-chat .app-frame{width:100%;max-width:var(--app-frame-max);margin:0 auto;min-height:calc(100dvh - var(--tabsH));padding:var(--app-frame-padY) var(--app-frame-padX) calc(var(--tabsH) + 14px);border-radius:var(--app-frame-radius);background:radial-gradient(1000px 800px at 50% -100px,rgba(255,255,255,.04),transparent 60%)}
+    #view-chat .header{position:sticky;top:0;display:flex;gap:8px;align-items:center;background:linear-gradient(180deg,rgba(12,14,28,.95),rgba(12,14,28,.6));padding:8px;border-radius:12px}
+    #view-chat .scroll{height:calc(100dvh - 210px);overflow:auto;padding:8px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.02),transparent)}
+    #view-chat .row{display:flex;gap:8px;margin:8px}
+    #view-chat .row.ai{justify-content:flex-start}
+    #view-chat .row.me{justify-content:flex-end}
+    #view-chat .avatar{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:#11172e;border:1px solid #ffffff18}
+    #view-chat .bubble{max-width:100%;padding:10px 12px;border-radius:14px;border:1px solid #ffffff14;background:linear-gradient(180deg,rgba(90,60,180,.28),rgba(60,40,120,.28))}
+    #view-chat .bubble.me{background:linear-gradient(180deg,rgba(41,211,255,.28),rgba(154,124,255,.28))}
+    #view-chat .bubble .ascii{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:11.5px;line-height:1.1; white-space:pre; color:#cfe2ffbb; margin-top:6px}
+    #view-chat .composer{position:fixed;left:10px;right:10px;bottom:calc(var(--tabsH) + 6px);display:flex;gap:8px;background:#101427;border:1px solid #ffffff18;border-radius:14px;padding:8px;align-items:center}
+    #view-chat input[type=text]{flex:1;background:#0e1428;color:var(--fg);border:1px solid #ffffff18;border-radius:10px;padding:10px}
+    #view-chat .cbtn{width:38px;height:38px;border-radius:10px;border:1px solid #ffffff18;background:#0f1428;display:grid;place-items:center}
+    /* Apps */
+    #view-apps .app-frame{max-width:1180px;margin:0 auto}
+    #view-apps .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    @media(min-width:760px){#view-apps .grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(min-width:1080px){#view-apps .grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+    #view-apps .acard{border:1px solid #ffffff14;border-radius:14px;padding:12px;display:flex;gap:10px;align-items:center;background:#0c1224}
+    #view-apps .acard img{width:40px;height:40px;border-radius:10px;background:#0e1326;border:1px solid #ffffff12;padding:8px}
+    #view-apps .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .btn{border:1px solid #ffffff18;background:#0f1428;color:#e9ecff;border-radius:10px;padding:.5rem .75rem;cursor:pointer}
+    /* Fullbleed/card toggles */
+    body.fullbleed #view-chat .app-frame{--app-frame-max:100%;--app-frame-padX:0;--app-frame-padY:0;--app-frame-radius:0}
+    body.carded   #view-chat .app-frame{--app-frame-max:1024px;--app-frame-padX:14px;--app-frame-padY:14px;--app-frame-radius:22px}
+  </style>
+</head>
+<body class="fullbleed">
+  <div class="app">
+    <header class="top">
+      <div class="title"><img src="./icons/others/favicon.svg" alt="Dual"> DUAL • NEO</div>
+      <div class="hdr-actions">
+        <button class="icon-btn" id="btnLayout" title="Alternar layout">▭</button>
+        <button class="icon-btn" id="btnMenu" title="Menu">⋯</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="view active" id="view-home">
+        <div class="grid">
+          <button class="card" data-open="lan"><img class="ico" src="./icons/others/hub_lan_scanner.svg" alt=""><div><b>LAN Scanner</b><div style="font-size:12px;color:#9aa4c7">Descobrir dispositivos</div></div></button>
+          <button class="card" data-open="bind"><img class="ico" src="./icons/others/hub_bind.svg" alt=""><div><b>Bind</b><div style="font-size:12px;color:#9aa4c7">Conectar & parear</div></div></button>
+          <button class="card" data-open="report"><img class="ico" src="./icons/others/hub_relatorio.svg" alt=""><div><b>Relatório</b><div style="font-size:12px;color:#9aa4c7">Métricas e logs</div></div></button>
+          <button class="card" data-open="memory"><img class="ico" src="./icons/others/hub_memoria.svg" alt=""><div><b>Memória</b><div style="font-size:12px;color:#9aa4c7">Docs & sessões</div></div></button>
+          <button class="card" data-nav="apps"><img class="ico" src="./icons/others/hub_apps.svg" alt=""><div><b>Apps</b><div style="font-size:12px;color:#9aa4c7">Atalhos</div></div></button>
+          <button class="card" data-nav="profile"><img class="ico" src="./icons/others/hub_perfil.svg" alt=""><div><b>Perfil</b><div style="font-size:12px;color:#9aa4c7">Preferências</div></div></button>
+        </div>
+      </section>
+
+      <section class="view" id="view-chat">
+        <div class="app-frame">
+          <div class="header">
+            <button class="icon-btn" id="chat-btnMore" title="Ações">⋯</button>
+            <div style="font-weight:800;letter-spacing:.1em">DUAL • CHAT V6</div>
+            <div style="flex:1"></div>
+            <img src="./icons/others/hub_chat.svg" alt="chat" style="width:24px;height:24px;opacity:.8">
+          </div>
+          <div id="chat-list" class="scroll"></div>
+          <div class="composer">
+            <button class="cbtn" id="chat-btnMic" title="Ditado">🎙️</button>
+            <input id="chat-input" type="text" placeholder="Digite uma mensagem…">
+            <button class="cbtn" id="chat-btnSend" title="Enviar">➤</button>
+          </div>
+          <div id="menu-sheet" style="display:none;position:fixed;left:10px;right:10px;bottom:calc(var(--tabsH) + 70px);border:1px solid #ffffff18;background:#0e1326;padding:10px;border-radius:12px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn" data-nav="home">Início</button>
+              <button class="btn" data-nav="brain">Brain</button>
+              <button class="btn" data-nav="apps">Apps</button>
+              <button class="btn" data-nav="profile">Perfil</button>
+
+              <span style="flex:1"></span>
+              <button class="btn" id="close-menu">Fechar</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-brain">
+        <div class="grid">
+          <div class="card"><img class="ico" src="./icons/others/hub_cloud.svg" alt=""><div><b>Infodose Brain</b><div style="font-size:12px;color:#9aa4c7">Armazenamento local</div></div></div>
+          <div class="card" style="grid-column:1/-1">
+            <div style="font-size:12px;color:#9aa4c7;margin-bottom:6px">Salvar chave e treinamento</div>
+            <div style="display:flex;gap:8px"><input id="brain-sk" placeholder="sk-or-v1-..." style="flex:1"><button class="btn" id="brain-saveSK">Salvar SK</button></div>
+            <textarea id="brain-training" rows="4" placeholder="Cole o treinamento..." style="margin-top:8px;width:100%"></textarea>
+            <div style="text-align:right;margin-top:6px"><button class="btn" id="brain-saveTraining">Salvar Treinamento</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-apps">
+        <div class="app-frame">
+          <div class="grid" id="apps-grid"></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-profile">
+        <div class="grid">
+          <div class="card" style="grid-column:1/-1">
+            <div style="font-size:12px;color:#9aa4c7">Nome</div>
+            <div style="display:flex;gap:8px;margin-top:6px"><input id="profile-name" placeholder="Seu nome" style="flex:1"><button class="btn" id="profile-saveName">Salvar</button></div>
+          </div>
+          <div class="card" style="grid-column:1/-1">
+            <div style="font-size:12px;color:#9aa4c7">OpenRouter</div>
+            <div style="display:flex;gap:8px;margin-top:6px"><input id="profile-sk" placeholder="sk-or-v1-..." style="flex:1"><button class="btn" id="profile-saveSK">Salvar</button></div>
+          </div>
+        </div>
+      </section>
+
+
+
+    </main>
+
+    <nav class="tabs">
+      <button class="tab-btn active" data-nav="home" title="Início"><img src="./icons/others/hub_apps.svg" style="width:22px;height:22px"></button>
+      <button class="tab-btn" data-nav="chat"  title="Chat"><img src="./icons/others/hub_chat.svg" style="width:22px;height:22px"></button>
+      <button class="tab-btn" data-nav="brain" title="Brain"><img src="./icons/others/hub_cloud.svg" style="width:22px;height:22px"></button>
+      <button class="tab-btn" data-nav="apps"  title="Apps"><img src="./icons/others/hub_apps.svg" style="width:22px;height:22px"></button>
+      <button class="tab-btn" data-nav="profile" title="Perfil"><img src="./icons/others/hub_perfil.svg" style="width:22px;height:22px"></button>
+
+    </nav>
+  </div>
+
+  <script>
+  (function(){
+    const $ = (s,root=document)=>root.querySelector(s);
+    const $$ = (s,root=document)=>Array.from(root.querySelectorAll(s));
+
+    // Views & nav
+    const views = {
+      home: $('#view-home'), chat: $('#view-chat'), brain: $('#view-brain'),
+      apps: $('#view-apps'), profile: $('#view-profile') 
+    };
+    function navTo(key){
+      for(const k in views){ if(views[k]) views[k].classList.remove('active'); }
+      (views[key]||views.home).classList.add('active');
+      $$('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.nav===key));
+      history.replaceState({}, '', '#/'+key);
+      if(key==='apps') loadApps();
+    }
+    $$('.tab-btn').forEach(b=> b.addEventListener('click', ()=> navTo(b.dataset.nav)));
+    $$('.card[data-nav]').forEach(b=> b.addEventListener('click', ()=> navTo(b.dataset.nav)));
+    $$('.card[data-open]').forEach(b=> b.addEventListener('click', ()=> { navTo('chat'); chatBubble('Abrindo '+b.dataset.open+'…','me'); }));
+
+    // Layout toggle
+    $('#btnLayout').addEventListener('click', ()=>{
+      const b=document.body; if(b.classList.contains('fullbleed')){ b.classList.remove('fullbleed'); b.classList.add('carded'); }
+      else { b.classList.remove('carded'); b.classList.add('fullbleed'); }
+    });
+
+    // Menu sheet
+    const menu = $('#menu-sheet');
+    $('#btnMenu').addEventListener('click', ()=> menu.style.display = (menu.style.display==='block'?'none':'block'));
+    $('#close-menu').addEventListener('click', ()=> menu.style.display='none');
+    menu.addEventListener('click', (e)=>{ const btn=e.target.closest('[data-nav]'); if(btn){ navTo(btn.dataset.nav); menu.style.display='none'; } });
+
+    // Chat
+    const list = $('#chat-list'), input = $('#chat-input');
+    const STORAGE_KEY='dual.chat.history';
+    function chatBubble(text, who='ai'){
+      const row = document.createElement('div');
+      row.className='row '+who;
+      if(who==='ai'){ const av=document.createElement('div'); av.className='avatar'; av.textContent='🔮'; row.appendChild(av); }
+      const b=document.createElement('div'); b.className='bubble '+(who==='me'?'me':'');
+      b.textContent=text;
+      const ascii=document.createElement('pre'); ascii.className='ascii'; ascii.textContent='╭──────────────────────────────────────╮\n│ ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁ │\n╰──────────────────────────────────────╯';
+      b.appendChild(ascii);
+      row.appendChild(b);
+      if(who==='me'){ const av=document.createElement('div'); av.className='avatar'; av.textContent='⚡'; row.appendChild(av); }
+      list.appendChild(row);
+      list.scrollTop = list.scrollHeight;
+      persist();
+    }
+    function persist(){ try{ const msgs=[...list.querySelectorAll('.row')].map(r=>({who:r.classList.contains('me')?'me':'ai', text:r.querySelector('.bubble').childNodes[0].textContent})); localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs)); }catch(e){} }
+    function restore(){ list.innerHTML=''; try{ const raw=localStorage.getItem(STORAGE_KEY); if(!raw){ chatBubble('Olá, sou o Dual. Vamos começar?','ai'); return } JSON.parse(raw).forEach(m=> chatBubble(m.text, m.who)); }catch(e){ chatBubble('Contexto iniciado.','ai'); } list.scrollTop=list.scrollHeight; }
+    function send(){ const t=input.value.trim(); if(!t) return; chatBubble(t,'me'); input.value=''; }
+    $('#chat-btnSend').addEventListener('click', send);
+    input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); send(); } });
+    $('#chat-btnMic').addEventListener('click', ()=> alert('Ditado (mock)'));
+
+    // Brain/Profile storage sync minimal
+    const KEY_BRAIN='infodose:brain', KEY_NAME='infodose:userName', KEY_SK='infodose:userSK';
+    const readBrain = ()=> { try{return JSON.parse(localStorage.getItem(KEY_BRAIN)||'{}')||{}}catch(e){return {}} };
+    const writeBrain = (obj)=> { try{ localStorage.setItem(KEY_BRAIN, JSON.stringify(obj)); }catch(e){} };
+    $('#brain-saveSK').addEventListener('click', ()=>{ const b=readBrain(); b.userSK=($('#brain-sk')?.value||'').trim(); writeBrain(b); localStorage.setItem(KEY_SK, b.userSK||''); alert('SK salvo'); });
+    $('#brain-saveTraining').addEventListener('click', ()=>{ const b=readBrain(); b.training=$('#brain-training')?.value||''; writeBrain(b); alert('Treinamento salvo'); });
+    $('#profile-saveName').addEventListener('click', ()=>{ const name=($('#profile-name')?.value||'').trim(); if(!name) return; localStorage.setItem(KEY_NAME, name); const b=readBrain(); b.userName=name; writeBrain(b); });
+    $('#profile-saveSK').addEventListener('click', ()=>{ const sk=($('#profile-sk')?.value||'').trim(); localStorage.setItem(KEY_SK, sk); const b=readBrain(); b.userSK=sk; writeBrain(b); });
+
+    // Apps loader (safe, no Python artifacts)
+    async function tryFetch(url){ try{ const res = await fetch(url, {cache:'no-store'}); if(!res.ok) throw new Error('HTTP '+res.status); return await res.json(); } catch(e){ return null; } }
+    function iconFor(app){
+      if(app.icon) return app.icon;
+      const t = ((app.tags||[]).join(' ')+' '+(app.title||'')+' '+(app.key||'')+' '+(app.url||'')).toLowerCase();
+      if(/chat|render/.test(t)) return './icons/others/hub_chat.svg';
+      if(/perfil|user|profile/.test(t)) return './icons/others/hub_perfil.svg';
+      if(/bind|pair/.test(t)) return './icons/others/hub_bind.svg';
+      if(/relat/.test(t)) return './icons/others/hub_relatorio.svg';
+      if(/mem|memo|doc/.test(t)) return './icons/others/hub_memoria.svg';
+      if(/lan|scan|network/.test(t)) return './icons/others/hub_lan_scanner.svg';
+      if(/download/.test(t)) return './icons/others/hub_download.svg';
+      if(/upload/.test(t)) return './icons/others/hub_upload.svg';
+      if(/health|status/.test(t)) return './icons/others/hub_health.svg';
+      return './icons/others/hub_apps.svg';
+    }
+    async function loadApps(){
+      const grid = $('#apps-grid'); grid.innerHTML = '';
+      let RAW = null;
+      const candidates=['./apps.json','./apps/apps.json','./docs/apps/apps.json','/apps/apps.json'];
+      for(const u of candidates){ RAW = await tryFetch(u); if(RAW) break; }
+      const list = Array.isArray(RAW?.apps)? RAW.apps : (RAW?.groups? Object.values(RAW.groups).flat().filter(Boolean) : []);
+      if(!list || !list.length){ grid.innerHTML = '<div class="acard"><img src="./icons/others/hub_upload.svg"><div><b>apps.json não encontrado</b><div style="color:#9aa4c7;font-size:12px">Coloque em ./apps/apps.json</div></div></div>'; return; }
+      list.forEach(app=>{
+        const el = document.createElement('div'); el.className='acard';
+        el.innerHTML = `<img src="${iconFor(app)}" alt=""><div style="flex:1"><div style="font-weight:800">${app.title||app.key||'App'}</div><div style="color:#9aa4c7;font-size:12px">${app.desc||''}</div><div class="row"><button class="btn open">Abrir</button><button class="btn inj">Injection</button></div></div>`;
+        el.querySelector('.open').addEventListener('click', ()=> window.open(app.url, '_blank'));
+        el.querySelector('.inj').addEventListener('click', ()=> navigator.clipboard.writeText('<!-- INFODOSE footer -->\n<div class="infodose-footer">⬅ Voltar ao Hub</div>'));
+        grid.appendChild(el);
+      });
+    }
+
+    // Init
+    (function init(){ const h=location.hash.replace('#/',''); if(views[h]) navTo(h); restore(); })();
+  })();
+  </script>
+</body>
+</html>
