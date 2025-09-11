@@ -156,6 +156,29 @@
     #view-chat .composer{left:8px; right:8px; max-width:100%}
   }
 
+  /* === Loader overlay for operations === */
+  /* This overlay appears during heavy localStorage operations to give the user visual feedback */
+  .infodose-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 99998;
+    display: none;
+    place-items: center;
+    background: rgba(0,0,0,.38);
+    backdrop-filter: blur(8px) saturate(130%);
+  }
+  .infodose-loader .dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #29d3ff;
+    box-shadow: 0 0 24px #29d3ff;
+    animation: nebula-dot 0.9s infinite alternate;
+  }
+  @keyframes nebula-dot {
+    to { transform: scale(1.35); opacity: .75; }
+  }
+
 /* === Themes: NebulaPro (default), Luxara, Ignyra, Elysha === */
 :root{ --theme-name: 'NebulaPro'; }
 body.theme-nebula { --bg:#0a0b13; --bg-2:#0b0d1a; --fg:#e9ecff; --muted:#9aa4c7; --acc:#a77cff; --acc-2:#5ed0ff; --mag:#ff5bd4; --ok:#5bffcf; }
@@ -324,6 +347,17 @@ body.theme-elysha .title .dot{ background:#29d3ff; box-shadow:0 0 18px #29d3ff;}
   .devdocs-panel .mini{ background:#121223; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,.08); font-size:12px; max-height:220px; overflow:auto; }
   .devdocs-panel .row{ display:flex; gap:8px; }
 </style>
+<!-- Global loader controller: defines functions to show/hide the loading overlay -->
+<script>
+function showLoader() {
+  const el = document.getElementById('infodoseLoader');
+  if (el) el.style.display = 'grid';
+}
+function hideLoader() {
+  const el = document.getElementById('infodoseLoader');
+  if (el) el.style.display = 'none';
+}
+</script>
 </head>
 <body>
 <div class="app">
@@ -985,10 +1019,10 @@ menuSheet.addEventListener('click', (e)=>{
     const acts=document.createElement('div');
     acts.className='actions';
     acts.innerHTML = `
-      <button class="act btn btn--sm btn--accent" data-act="expand">＋</button>
-      <button class="act btn btn--sm btn--accent" data-act="copy">⎘</button>
-      <button class="act btn btn--sm btn--accent" data-act="pulse">◉</button>
-      <button class="act btn btn--sm btn--accent" data-act="refine">↻</button>`;
+      <button class="act btn btn--sm btn--accent" data-act="expand">＋ Expandir</button>
+      <button class="act btn btn--sm btn--accent" data-act="copy">⎘ Copiar</button>
+      <button class="act btn btn--sm btn--accent" data-act="pulse">◉ Pulso</button>
+      <button class="act btn btn--sm btn--accent" data-act="refine">↻ Refinar</button>`;
     b.appendChild(acts);
     row.appendChild(b);
     if(who==='me'){
@@ -1785,10 +1819,13 @@ function openApp(app){
   const mountInApps = !!appsFrame;
   const v = document.createElement('div');
   v.className = 'viewer' + (mountInApps ? ' keep-tabs' : '');
+  // Build the viewer markup with an extra minimize button. This allows the user
+  // to temporarily hide the iframe while keeping navigation accessible.
   v.innerHTML = `
     <iframe src="${targetUrl}" allow="autoplay; encrypted-media; clipboard-read; clipboard-write; fullscreen; picture-in-picture"></iframe>
     <div class="viewer-footer">
       <button class="btn btn--sm btn--ghost" id="backHub">⬅ Hub</button>
+      <button class="btn btn--sm btn--ghost" id="minimize">— Minimizar</button>
       <button class="btn btn--sm btn--accent" id="dlHtml">⤓ Sümbüs</button>
       <button class="btn btn--sm btn--accent" id="copyInj">⎘ Injection</button>
     </div>
@@ -1808,13 +1845,40 @@ function openApp(app){
       }catch{}
     });
   }
+  // Create a badge that appears when an app is minimized. It allows reopening the iframe.
+  const reopenBadge = document.createElement('button');
+  reopenBadge.textContent = '◐ Reabrir App';
+  reopenBadge.className = 'btn btn--sm btn--prime';
+  Object.assign(reopenBadge.style, {
+    position: 'fixed',
+    right: '12px',
+    bottom: 'calc(var(--tabsH) + 12px)',
+    zIndex: '70',
+    display: 'none'
+  });
+  document.body.appendChild(reopenBadge);
+
   function back(){
+    // On back, remove the badge and viewer completely
+    try { reopenBadge.remove(); } catch {}
     v.remove();
     if(!mountInApps){
       document.body.style.overflow = '';
     }
   }
   v.querySelector('#backHub').addEventListener('click', back);
+  // Minimize button hides the iframe and shows the reopen badge
+  v.querySelector('#minimize').addEventListener('click', ()=>{
+    const f = v.querySelector('iframe');
+    if(f){ f.style.display = 'none'; }
+    reopenBadge.style.display = 'inline-flex';
+  });
+  // Reopen button restores the iframe and hides itself
+  reopenBadge.addEventListener('click', ()=>{
+    const f = v.querySelector('iframe');
+    if(f){ f.style.display = ''; }
+    reopenBadge.style.display = 'none';
+  });
   v.querySelector('#dlHtml').addEventListener('click', ()=> downloadInjected(app));
   v.querySelector('#copyInj').addEventListener('click', ()=> copyInjection());
   if(!mountInApps){
@@ -2200,17 +2264,29 @@ $('#fileImport')?.addEventListener('change', (e)=>{
   if(saveNameBtn) saveNameBtn.addEventListener('click', ()=>{
     const val=(document.getElementById('profile-name')?.value||'').trim();
     if(!val) return;
-    localStorage.setItem(KEY_NAME,val);
-    const b=readBrain(); b.userName=val; writeBrain(b);
-    syncFields();
+    // Wrap storage operations with loader for visual feedback
+    showLoader();
+    try {
+      localStorage.setItem(KEY_NAME,val);
+      const b=readBrain(); b.userName=val; writeBrain(b);
+      syncFields();
+    } finally {
+      hideLoader();
+    }
   });
   function bindSaveSK(btnId, fieldId){
     const btn=document.getElementById(btnId);
     if(btn) btn.addEventListener('click', ()=>{
-      const val=(document.getElementById(fieldId)?.value||'').trim();
-      const b=readBrain(); b.userSK=val; writeBrain(b);
-      localStorage.setItem(KEY_SK,val);
-      syncFields();
+      // Show loader while saving SK
+      showLoader();
+      try {
+        const val=(document.getElementById(fieldId)?.value||'').trim();
+        const b=readBrain(); b.userSK=val; writeBrain(b);
+        localStorage.setItem(KEY_SK,val);
+        syncFields();
+      } finally {
+        hideLoader();
+      }
     });
   }
   bindSaveSK('brain-saveSK','brain-sk');
@@ -2218,9 +2294,15 @@ $('#fileImport')?.addEventListener('change', (e)=>{
   function bindSaveTraining(btnId, fieldId){
     const btn=document.getElementById(btnId);
     if(btn) btn.addEventListener('click', ()=>{
-      const val=(document.getElementById(fieldId)?.value||'');
-      const b=readBrain(); b.training=val; writeBrain(b);
-      syncFields();
+      // Show loader while saving training
+      showLoader();
+      try {
+        const val=(document.getElementById(fieldId)?.value||'');
+        const b=readBrain(); b.training=val; writeBrain(b);
+        syncFields();
+      } finally {
+        hideLoader();
+      }
     });
   }
   bindSaveTraining('brain-saveTraining','brain-training');
@@ -2365,6 +2447,8 @@ $('#fileImport')?.addEventListener('change', (e)=>{
   });
 })();
 </script>
+<!-- Global loader overlay; hidden by default. It contains a pulsating dot as feedback during slow operations. -->
+<div class="infodose-loader" id="infodoseLoader"><div class="dot"></div></div>
 <!-- Limita animação ASCII e evita reflow no chat -->
 <script>
   (function(){
