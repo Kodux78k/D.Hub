@@ -1,0 +1,13 @@
+<!doctype html><meta charset="utf-8"><title>Ritual Elysha</title>
+<style>
+  :root{ --acc:#39ffb6; --acc2:#a77cff; --ok:#e8e2ff; }
+  html,body{height:100%}
+  body{margin:0;background:#0a0b13;color:#ecf0ff;font:16px/1.4 system-ui;display:grid;place-items:center}
+  .core{width:280px;height:280px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, var(--ok), var(--acc) 60%, transparent 62%),
+               conic-gradient(var(--acc), var(--acc2), var(--ok), var(--acc));
+    filter:drop-shadow(0 0 24px var(--acc)) drop-shadow(0 0 42px var(--acc2));
+    animation:spin 6s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+<div class="core"></div>
