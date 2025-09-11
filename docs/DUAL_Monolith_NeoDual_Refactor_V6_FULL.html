@@ -1,0 +1,352 @@
+
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>DUAL • Nebula Pro — Monólito Refactor V6</title>
+<meta name="theme-color" content="#0b0b14">
+<style>
+  :root{
+    --bg:#0a0b13; --bg-2:#0b0d1a; --fg:#e9ecff; --muted:#9aa4c7; --soft:#c6c9ff33;
+    --acc:#a77cff; --acc-2:#5ed0ff; --mag:#ff5bd4; --ok:#5bffcf;
+    --card:#0e1224cc; --card-2:#0a0f20b3; --glass:rgba(255,255,255,0.06);
+    --ring:rgba(167,124,255,.35); --shadow: 0 10px 40px rgba(8,12,32,.55), inset 0 1px 0 rgba(255,255,255,.04);
+    --radius:22px; --border:rgba(255,255,255,.08); --tabsH:72px;
+    /* Layout switches */
+    --app-frame-max: 100%; /* set 100% to ocupar a tela inteira */
+    --app-frame-padX: 8px;
+    --app-frame-padY: 8px;
+    --app-frame-radius: 0px; /* 0 = sem cartão; 22px = cartão */
+  }
+  /* Tema Neo Dual (ativo por padrão) */
+  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,ui-monospace,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";color:var(--fg);
+    background: radial-gradient(1200px 900px at 50% -200px, #20163e 0%, #0b0d1a 55%, #070812 100%), #05060c; overflow:auto;}
+  .app{position:relative;min-height:100dvh;display:flex;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
+  header.top{padding:14px 18px 8px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:saturate(130%) blur(8px);
+    background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0));border-bottom:1px solid #ffffff12;}
+  .title{letter-spacing:.18em;font-weight:800;font-size:20px;display:flex;gap:.45ch;align-items:center;}
+  .title .dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 18px var(--acc);display:inline-block}
+  .hdr-actions{display:flex;gap:10px}
+  .icon-btn{width:36px;height:36px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(180deg,#1a1c2c,#0e1122);border:1px solid #ffffff10;box-shadow:var(--shadow);cursor:pointer;position:relative}
+  .badge{position:absolute;right:-2px;top:-2px;width:10px;height:10px;background:var(--mag);border-radius:50%;box-shadow:0 0 10px var(--mag)}
+  main{flex:1;position:relative}
+  section.view{position:absolute;inset:0;padding:18px;padding-bottom:calc(var(--tabsH) + 16px);overflow:auto;display:none;}
+  section.view.active{display:block;animation:fade .22s ease-out}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding-top:6px}
+  .card{background: radial-gradient(120% 120% at 80% 0%, #1c1540aa 0, #0b0e22aa 55%, #0a0d1eaa 100%);
+    border:1px solid #ffffff12;box-shadow:var(--shadow);border-radius:var(--radius);padding:18px 16px;min-height:110px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;isolation:isolate}
+  .card:before{content:"";position:absolute;inset:-1px;border-radius:inherit;z-index:-1;background:conic-gradient(from 30deg at 80% 0%,#a77cff33,#5ed0ff22,#ff5bd422,transparent 60%);filter:blur(18px);opacity:.7}
+  .card .ico{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(180deg,#1b1f37,#0e1228);border:1px solid #ffffff10;box-shadow:inset 0 1px 0 #ffffff20, 0 6px 18px rgba(0,0,0,.4);overflow:hidden}
+  .card h3{margin:12px 0 0;font-size:14px;font-weight:700;letter-spacing:.02em}
+  .card p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+  nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;justify-content:space-around;align-items:center;height:var(--tabsH);
+    padding:10px 14px env(safe-area-inset-bottom);border-top:1px solid #ffffff12;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.04));backdrop-filter:blur(8px);gap:10px}
+  .tab-btn{--size:46px;width:var(--size);height:var(--size);border-radius:16px;display:grid;place-items:center;background:linear-gradient(180deg,#12152a,#0d1124);border:1px solid #ffffff12;box-shadow:var(--shadow);opacity:.85}
+  .tab-btn.active{opacity:1;outline:1px solid var(--ring)}
+  /* CHAT – fullbleed control via CSS vars */
+  #view-chat .app-frame{width:100%;max-width:var(--app-frame-max);margin:0 auto;position:relative;overflow:hidden;background:radial-gradient(1200px 900px at 50% -40%,rgba(255,255,255,.05),transparent 55%);
+    min-height:calc(100dvh - var(--tabsH)); padding:var(--app-frame-padY) var(--app-frame-padX) calc(14px + var(--tabsH)); border-radius:var(--app-frame-radius); box-shadow:0 40px 120px rgba(0,0,0,.45)}
+  #view-chat .header{height:56px;display:flex;align-items:center;gap:10px;padding:8px 10px;position:sticky;top:0;z-index:50;background:linear-gradient(180deg,rgba(10,10,18,.9),rgba(10,10,18,.60) 70%,transparent);backdrop-filter:saturate(110%) blur(8px);border-radius:16px}
+  #view-chat .hbtn{width:34px;height:34px;border-radius:12px;border:1px solid rgba(255,255,255,.06);display:grid;place-items:center;background:linear-gradient(180deg,#1c1d32,#121327);box-shadow:var(--shadow);cursor:pointer;user-select:none}
+  #view-chat .title{margin-left:2px;font-weight:700;letter-spacing:2px}
+  #view-chat .page{display:flex;flex-direction:column;padding:8px;gap:10px}
+  #view-chat .scroll{flex:1;overflow:auto;padding:10px 8px 14px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.00))}
+  #view-chat .row{display:flex;gap:8px;margin:8px 8px;position:relative}
+  #view-chat .row.ai{justify-content:flex-start}
+  #view-chat .row.me{justify-content:flex-end}
+  #view-chat .bubble{max-width:100%; /* era 92% */ padding:12px 14px;border-radius:18px;display:inline-block;position:relative;box-shadow:0 10px 18px rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.05);backdrop-filter:saturate(120%) blur(2px);font-size:16px}
+  #view-chat .bubble .pulse{display:none;margin-top:8px;font-size:12px;color:#cfe2ffbb}
+  #view-chat .bubble .ascii{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:11.5px;line-height:1.1; white-space:pre; color:#cfe2ff99; opacity:.6; margin-top:6px}
+  #view-chat .ai{background:linear-gradient(180deg,rgba(90,60,180,.35),rgba(60,40,120,.35));color:#e6e8ff}
+  #view-chat .me{background:linear-gradient(180deg,rgba(41,211,255,.35),rgba(154,124,255,.35));color:#eafcff}
+  #view-chat .avatar{width:34px;height:34px;border-radius:12px;background:linear-gradient(180deg,#1b1c30,#101124);border:1px solid rgba(255,255,255,.06);display:grid;place-items:center;flex:0 0 auto;box-shadow:var(--shadow)}
+  #view-chat .timestamp{font-size:12px;color:#a3b4c2;margin:2px 12px}
+  #view-chat .composer{position:fixed;left:12px;right:12px;bottom:calc(var(--tabsH) + 6px);z-index:55;margin:0 auto;max-width:900px;padding:10px;border-radius:18px;background:linear-gradient(180deg,#14152a,#101424);display:flex;gap:8px;align-items:center;border:1px solid rgba(255,255,255,.06);box-shadow:var(--shadow)}
+  #view-chat input[type=text]{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 12px;color:var(--fg);outline:none;transition:.2s;min-width:0;font-size:16px}
+  #view-chat .cbtn{width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#1c1d32,#121327);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow);flex:0 0 auto}
+  #view-chat .readout{text-align:center;font-size:12px;color:#cfe9ff99;margin-top:6px;display:flex;align-items:center;gap:6px;justify-content:center;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+  #view-chat .readout .ascii{opacity:.65; white-space:pre; font-size:12px; line-height:1.1}
+  #view-chat .actions{position:absolute;top:-6px;right:0;display:flex;gap:6px;transform:translateY(-100%)}
+  #view-chat .act{font-size:11px;padding:.25rem .5rem;border-radius:10px;background:rgba(20,24,40,.9);border:1px solid rgba(255,255,255,.10);backdrop-filter:blur(8px);cursor:pointer}
+  /* APPS */
+  #view-apps .app-frame{width:100%;max-width:1180px;margin:0 auto;position:relative;overflow:hidden;
+    background:radial-gradient(1200px 900px at 50% -40%,rgba(255,255,255,.05),transparent 55%);
+    min-height:calc(100dvh - var(--tabsH)); padding:14px 14px calc(14px + var(--tabsH));
+    border-radius:22px; box-shadow:0 40px 120px rgba(0,0,0,.45)}
+  #view-apps .header{height:56px;display:flex;align-items:center;gap:10px;padding:8px 10px;position:sticky;top:0;z-index:50;background:linear-gradient(180deg,rgba(10,10,18,.9),rgba(10,10,18,.60) 70%,transparent);backdrop-filter:saturate(110%) blur(8px);border-radius:16px}
+  #view-apps .section{margin:10px 2px 6px;color:#cfe9ffbd;font-weight:800;letter-spacing:.08em;font-size:12px}
+  #view-apps .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  @media (min-width:720px){#view-apps .grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  @media (min-width:1080px){#view-apps .grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+  #view-apps .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border-radius:16px;padding:12px;border:1px solid rgba(255,255,255,.08);display:flex;gap:12px;align-items:center;box-shadow:var(--shadow)}
+  #view-apps .icon{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;overflow:hidden;background:#0f1320;border:1px solid rgba(255,255,255,.10)}
+  #view-apps .title-txt{font-weight:800;margin:0 0 4px}
+  #view-apps .muted{color:var(--muted);font-size:.86rem}
+  #view-apps .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .btn{appearance:none;border:1px solid rgba(255,255,255,.10);border-radius:10px;padding:.5rem .8rem;background:#0f1326;color:#e9ecff;font-weight:800;font-size:12px;cursor:pointer}
+  .btn.star.active{background:rgba(231,198,90,.18);border-color:rgba(231,198,90,.5);color:#ffd86a}
+  .viewer{position:fixed;inset:0;z-index:200;background:#000}
+  .viewer iframe{position:absolute;inset:0;border:0;width:100%;height:100%}
+  #view-apps .viewer.keep-tabs {position:absolute;inset:8px 8px calc(var(--tabsH) + 10px) 8px;z-index:40;border:1px solid rgba(255,255,255,.10);
+    border-radius:18px;background:rgba(0,0,0,.85);backdrop-filter:blur(8px) saturate(130%);box-shadow:0 20px 60px rgba(0,0,0,.55)}
+  #view-apps .viewer.keep-tabs .viewer-footer {position:absolute;right:12px;bottom:12px;display:flex;gap:8px}
+  @media (max-width:480px){
+    #view-chat .app-frame{max-width:100%; padding-left:8px; padding-right:8px; border-radius:0; box-shadow:none}
+    #view-chat .composer{left:8px; right:8px; max-width:100%}
+  }
+  /* Quick layout toggles (JS adiciona/remover classes) */
+  body.fullbleed #view-chat .app-frame{ --app-frame-max:100%; --app-frame-padX:0; --app-frame-padY:0; --app-frame-radius:0; box-shadow:none }
+  body.carded   #view-chat .app-frame{ --app-frame-max:1024px; --app-frame-padX:14px; --app-frame-padY:14px; --app-frame-radius:22px }
+</style>
+</head>
+<body class="fullbleed">
+<div class="app">
+  <header class="top">
+    <div class="title">DUAL <span class="dot"></span> NEO</div>
+    <div class="hdr-actions">
+      <div class="icon-btn" id="btnLayout" title="Alternar Layout" aria-label="Alternar Layout">▭</div>
+      <div class="icon-btn" id="btnMenu" title="Opções" aria-label="Opções">⋯</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="view active" id="view-home">
+      <div class="grid">
+        <button class="card" data-open="lan"><div class="ico">🌐</div><div><h3>LAN Scanner</h3><p>Descobrir dispositivos</p></div></button>
+        <button class="card" data-open="bind"><div class="ico">🔗</div><div><h3>Bind</h3><p>Conectar & parear</p></div></button>
+        <button class="card" data-open="report"><div class="ico">📈</div><div><h3>Relatório</h3><p>Métricas e logs</p></div></button>
+        <button class="card" data-open="memory"><div class="ico">🧠</div><div><h3>Memória</h3><p>Docs & sessões</p></div></button>
+        <button class="card" data-nav="apps"><div class="ico">▦</div><div><h3>Apps</h3><p>Atalhos</p></div></button>
+        <button class="card" data-nav="profile"><div class="ico">👤</div><div><h3>Usuário</h3><p>Preferências</p></div></button>
+      </div>
+    </section>
+
+    <section class="view" id="view-chat">
+      <div class="app-frame">
+        <div class="header">
+          <div class="hbtn" id="chat-btnMore" title="Ações rápidas" aria-label="Ações rápidas">⋯</div>
+          <div class="title">DUAL <span>• CHAT V6</span></div>
+          <div style="flex:1"></div>
+          <div class="hbtn" id="chat-btnTTS" title="TTS: ligado" aria-label="TTS">🗣️</div>
+          <div class="hbtn" id="chat-btnExport" title="Exportar chat" aria-label="Exportar">⤓</div>
+        </div>
+        <div class="page">
+          <div class="scroll" id="chat-list"></div>
+          <div class="readout" id="chat-status"><pre class="ascii" id="status-ascii">╭────────── pulso em expansão ──────────╮
+│ ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁        │
+╰───────────────────────────────────────╯</pre></div>
+        </div>
+        <div class="composer">
+          <button class="cbtn" id="chat-btnMic" title="Ditado" aria-label="Ditado">🎙️</button>
+          <input id="chat-input" type="text" inputmode="text" placeholder="Digite uma mensagem…" autocomplete="off"/>
+          <button class="cbtn" id="chat-btnAttach" title="Anexo" aria-label="Anexo">📎</button>
+          <button class="cbtn" id="chat-btnSend" title="Enviar" aria-label="Enviar">➤</button>
+        </div>
+        <div class="sheet" id="chat-sheet" style="display:none;padding:12px;background:rgba(15,16,32,.92);border:1px solid rgba(255,255,255,.1);border-radius:16px;position:fixed;left:12px;right:12px;bottom:calc(var(--tabsH) + 76px);z-index:59">
+          <div style="text-align:center;opacity:.8">Ações rápidas</div>
+          <div class="row" style="display:flex;gap:8px;margin-top:8px"><div class="btn" data-action="lan">LAN</div><div class="btn" data-action="bind">Bind</div><div class="btn" data-action="report">Relatório</div><div class="btn" data-action="memory">Memória</div><div class="btn" data-action="clear">Limpar</div><div class="btn" data-action="import">Importar</div></div>
+        </div>
+        <div class="sheet" id="menu-sheet" style="display:none;padding:12px;background:rgba(15,16,32,.92);border:1px solid rgba(255,255,255,.1);border-radius:16px;position:fixed;left:12px;right:12px;bottom:calc(var(--tabsH) + 76px);z-index:59">
+          <div style="text-align:center;opacity:.8">Opções</div>
+          <div class="row" style="display:flex;gap:8px;margin-top:8px">
+            <div class="btn" data-nav="home">Início</div><div class="btn" data-nav="brain">Brain</div><div class="btn" data-nav="apps">Apps</div><div class="btn" data-nav="profile">Perfil</div>
+          </div>
+          <div class="row" style="display:flex;gap:8px;margin-top:8px"><div class="btn" data-theme="nebula">NebulaPro</div><div class="btn" data-theme="luxara">Luxara</div><div class="btn" data-theme="ignyra">Ignyra</div><div class="btn" data-theme="elysha">Elysha</div><div class="btn" id="close-menu">Fechar</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-brain">
+      <div class="grid">
+        <div class="card" style="grid-column:1/-1">
+          <div><b>Infodose Brain • Local</b><div style="font-size:12px;color:var(--muted)">Chave prefixo: <code>dual.brain.*</code></div></div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px">
+            <input id="brain-k" placeholder="chave (ex.: prompt)">
+            <button class="btn" id="brain-save">Salvar</button>
+          </div>
+          <textarea id="brain-v" style="width:100%;min-height:120px;margin-top:8px" placeholder="valor..."></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn" id="brain-del">Excluir</button>
+            <button class="btn" id="brain-copy">Copiar tudo</button>
+            <button class="btn" id="brain-export">Exportar .json</button>
+            <input type="file" id="brain-importFile" hidden accept=".json,application/json">
+            <button class="btn" id="brain-importBtn">Importar</button>
+          </div>
+        </div>
+        <div class="card" style="grid-column:1/-1">
+          <div><b>OpenRouter & Treinamento</b></div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <input id="brain-sk" placeholder="sk-or-v1-..." style="flex:1">
+            <button id="brain-saveSK" class="btn">Salvar</button>
+          </div>
+          <textarea id="brain-training" rows="4" placeholder="Cole seu treinamento..." style="width:100%;margin-top:8px"></textarea>
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+            <button id="brain-saveTraining" class="btn">Salvar Treinamento</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-apps">
+      <div class="app-frame">
+        <div class="header"><div class="title">DUAL <span>• APPS</span></div></div>
+        <div class="page" style="display:grid; gap:12px">
+          <div class="card" style="display:grid; gap:8px">
+            <div class="row" style="display:flex; gap:8px; align-items:center">
+              <input id="search" placeholder="Buscar apps..." style="flex:1">
+              <select id="sort" style="width:160px"><option value="az">A–Z</option><option value="za">Z–A</option></select>
+              <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted)"><input id="sameTab" type="checkbox" checked> abrir dentro do hub</label>
+            </div>
+            <div id="countApps" style="font-size:12px;color:var(--muted)">—</div>
+          </div>
+          <div id="content"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-profile">
+      <div style="display:flex;flex-direction:column;gap:14px;padding-top:4px;">
+        <div class="card">
+          <div style="font-size:11px;color:var(--muted)">Nome</div>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <input id="profile-name" placeholder="Seu nome" style="flex:1">
+            <button id="profile-saveName" class="btn">Salvar</button>
+          </div>
+        </div>
+        <div class="card">
+          <div style="font-size:11px;color:var(--muted)">OpenRouter & Treinamento</div>
+          <div class="row" style="display:flex;gap:8px;align-items:center;margin-top:6px">
+            <input id="profile-sk" placeholder="sk-or-v1-..." style="flex:1">
+            <button id="profile-saveSK" class="btn">Salvar</button>
+          </div>
+          <textarea id="profile-training" rows="5" placeholder="Cole seu treinamento..." style="width:100%;margin-top:8px"></textarea>
+          <div class="row" style="display:flex;gap:8px;align-items:center;margin-top:6px">
+            <button id="profile-saveTraining" class="btn">Salvar Treinamento</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    
+  </main>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-nav="home" title="Início" aria-label="Início">⌂</button>
+    <button class="tab-btn" data-nav="chat"  title="Chat" aria-label="Chat">💬</button>
+    <button class="tab-btn" data-nav="brain" title="Brain" aria-label="Brain">🧠</button>
+    <button class="tab-btn" data-nav="apps"  title="Apps" aria-label="Apps">▦</button>
+    <button class="tab-btn" data-nav="profile" title="Perfil" aria-label="Perfil">👤</button>
+    
+  </nav>
+</div>
+<script>
+(function(){
+  const $ = (s,root=document)=>root.querySelector(s);
+  const views = {home:$('#view-home'), chat:$('#view-chat'), brain:$('#view-brain'), apps:$('#view-apps'), profile:$('#view-profile') };
+  function navTo(key){ for(const v in views) views[v]&&views[v].classList.remove('active'); (views[key]||views.home).classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.nav===key));
+    history.replaceState({}, "", "#/"+key);
+    if(key==='apps') setTimeout(loadApps,0);
+  }
+  const h = location.hash.replace("#/",""); if(views[h]) navTo(h);
+  document.querySelectorAll('[data-nav]').forEach(btn=>btn.addEventListener('click', ()=> navTo(btn.dataset.nav)));
+  document.querySelectorAll('[data-open]').forEach(btn=>btn.addEventListener('click', ()=>{ navTo('chat'); chatBubble('Abrir '+btn.dataset.open+'…','me'); setTimeout(()=> chatBubble('Módulo '+btn.dataset.open.toUpperCase()+' pronto. (mock)','ai'), 360); }));
+  // Menu + layout
+  const menuBtn = $('#btnMenu'), menuSheet=$('#menu-sheet');
+  menuBtn.addEventListener('click', ()=> menuSheet.style.display = (menuSheet.style.display==='block'?'none':'block'));
+  $('#close-menu').addEventListener('click', ()=> menuSheet.style.display='none');
+  $('#btnLayout').addEventListener('click', ()=>{
+    const b=document.body;
+    if(b.classList.contains('fullbleed')){ b.classList.remove('fullbleed'); b.classList.add('carded'); }
+    else { b.classList.remove('carded'); b.classList.add('fullbleed'); }
+  });
+  menuSheet.addEventListener('click', (e)=>{
+    const btn=e.target.closest('[data-nav]'); if(btn){ navTo(btn.dataset.nav); menuSheet.style.display='none'; }
+  });
+  // ASCII status animator
+  (function(){
+    const el = document.getElementById('status-ascii');
+    const frames = [
+`╭────────── pulso em expansão ──────────╮
+│ ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁        │
+╰───────────────────────────────────────╯`,
+`╭────────── pulso em expansão ──────────╮
+│   ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁      │
+╰───────────────────────────────────────╯`,
+`╭────────── pulso em expansão ──────────╮
+│     ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁    │
+╰───────────────────────────────────────╯`,
+`╭────────── pulso em expansão ──────────╮
+│       ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁  │
+╰───────────────────────────────────────╯`];
+    let i=0; setInterval(()=>{ if(el) el.textContent = frames[i=(i+1)%frames.length]; }, 900);
+  })();
+  // Chat
+  const list = $("#chat-list"), input=$("#chat-input");
+  const btnSend=$("#chat-btnSend"), btnMic=$("#chat-btnMic"), btnMore=$("#chat-btnMore");
+  const STORAGE_KEY="dual.chat.history"; let TTS_ON=false, msgCounter=0;
+  function chatBubble(text, who='ai'){
+    const id='m'+(++msgCounter);
+    const row=document.createElement('div'); row.className='row '+who; row.dataset.id=id;
+    if(who==='ai'){ const av=document.createElement('div'); av.className='avatar'; av.textContent='🔮'; row.appendChild(av); }
+    const b=document.createElement('div'); b.className='bubble '+who; b.textContent = text;
+    const ascii=document.createElement('pre'); ascii.className='ascii'; ascii.textContent='▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ ▂ ▁'; b.appendChild(ascii);
+    const acts=document.createElement('div'); acts.className='actions';
+    acts.innerHTML = `<button class="act btn" data-act="copy">⎘ Copiar</button>`;
+    b.appendChild(acts); row.appendChild(b);
+    if(who==='me'){ const av=document.createElement('div'); av.className='avatar'; av.textContent='⚡'; row.appendChild(av); }
+    list.appendChild(row); list.scrollTop = list.scrollHeight; persist();
+  }
+  function persist(){
+    const msgs=[...list.querySelectorAll('.row')].map(r=>({who:r.classList.contains('me')?'me':'ai',text:r.querySelector('.bubble').childNodes[0].textContent}));
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs)); }catch(_){}
+  }
+  function restore(){
+    list.innerHTML=''; const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw){ chatBubble("Olá, eu sou o Dual. Como posso te ajudar hoje?", 'ai'); return }
+    try{ JSON.parse(raw).forEach(m=> chatBubble(m.text, m.who)); }catch(e){ chatBubble("Contexto limpo.", 'ai'); }
+    list.scrollTop=list.scrollHeight;
+  }
+  function send(){ const txt=input.value.trim(); if(!txt) return; chatBubble(txt,'me'); input.value=''; }
+  list.addEventListener('click',(e)=>{ const act=e.target.closest('.act'); if(!act) return;
+    const row=e.target.closest('.row'); const txt=row.querySelector('.bubble').childNodes[0].textContent;
+    if(act.dataset.act==='copy'){ navigator.clipboard.writeText(txt); }
+  });
+  btnSend.addEventListener('click', send);
+  input.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ e.preventDefault(); send(); } });
+  btnMic.addEventListener('click', ()=> alert('Ditado (mock)'));
+  btnMore.addEventListener('click', ()=> alert('Sheet (mock)'));
+  // Apps (mock loader; mantém fetch/agrupamento compatível)
+  let RAW=null;
+  async function tryFetch(url){ const res = await fetch(url, {cache:'no-store'}); if(!res.ok) throw new Error('HTTP '+res.status); return res.json(); }
+  async function loadApps(){
+    if(RAW===null){
+      const candidates=['./apps.json','./apps/apps.json','./docs/apps/apps.json','/apps/apps.json'];
+      for(const u of candidates){ try{ RAW = await tryFetch(u); break; }catch(e){} }
+    }
+    const content = document.getElementById('content');
+    if(!RAW){ content.innerHTML='<div class="card"><b>apps.json não encontrado</b></div>'; return; }
+    const list = Array.isArray(RAW.apps)? RAW.apps.slice() : (RAW.groups? Object.values(RAW.groups).flat().filter(Boolean) : []);
+    content.innerHTML = list.map(a=> `<div class="card"><div class="ico">🧩</div><div><h3>${(a.get('title') if isinstance(a, dict) else a.get('title')) if False else (a.get('title') if isinstance(a, dict) else '')}</h3><p>${''}</p></div></div>`).join('');
+  }
+  // Profile sync básico
+  const KEY_BRAIN='infodose:brain', KEY_NAME='infodose:userName', KEY_SK='infodose:userSK';
+  function readBrain(){ try{ return JSON.parse(localStorage.getItem(KEY_BRAIN)||'{}')||{}; }catch(e){ return {}; } }
+  function writeBrain(obj){ try{ localStorage.setItem(KEY_BRAIN, JSON.stringify(obj)); }catch(e){} }
+  document.getElementById('profile-saveName').addEventListener('click', ()=>{ const val=(document.getElementById('profile-name')?.value||'').trim(); if(!val) return; localStorage.setItem(KEY_NAME,val); const b=readBrain(); b.userName=val; writeBrain(b); });
+  document.getElementById('profile-saveSK').addEventListener('click', ()=>{ const val=(document.getElementById('profile-sk')?.value||'').trim(); const b=readBrain(); b.userSK=val; writeBrain(b); localStorage.setItem(KEY_SK,val); });
+  document.getElementById('profile-saveTraining')?.addEventListener('click', ()=>{ const val=(document.getElementById('profile-training')?.value||''); const b=readBrain(); b.training=val; writeBrain(b); });
+  // Trinity (se existir)
+  const triOpen = document.getElementById('trinity-open-dual');
+  if(triOpen){ const host = document.getElementById('trinity-viewer'); const iframe = document.getElementById('trinity-frame');
+    triOpen.addEventListener('click', ()=>{ host.style.display='block'; iframe.src='./index.html'; });
+    document.getElementById('trinity-back').addEventListener('click', ()=>{ host.style.display='none'; iframe.src='about:blank'; });
+  }
+  // Start
+  restore();
+})();
+</script>
+</body>
+</html>
