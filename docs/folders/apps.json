@@ -1,0 +1,14 @@
+{
+  "children": {
+    "audio": {
+      "files": [
+        "Dual_Player.html",
+        "PingPong_Synth.html"
+      ]
+    }
+  },
+  "files": [
+    "README.md",
+    "Dual_Chat_NebulaPro.html"
+  ]
+}
