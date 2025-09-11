@@ -3,7 +3,7 @@ const params = new URLSearchParams(self.location.search);
 const ARCH = params.get('arch') || 'default';
 const VERSION = 'v3_4_1';
 const CACHE = `dual-hubs-${ARCH}-${VERSION}`;
-const CORE = ["./","./index.html","./folders/apps.json"];
+const CORE = ["./","./index.html","./apps/apps.json"];
 
 let HOT = new Map();                 // url -> score
 let SEQ2 = new Map();                // bigram: A -> (B -> score)
