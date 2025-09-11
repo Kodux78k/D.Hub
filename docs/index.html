@@ -3,280 +3,90 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
-<title>DUAL • Nebula Prime — V3.4.1 ULTRA</title>
-<meta name="theme-color" content="#0b0b14">
-<link rel="manifest" href="manifest-horus.webmanifest">
+<title>DUAL • Nebula Hub — Minimal</title>
+<meta name="theme-color" content="#0a0b13">
+<link rel="manifest" href="/docs/manifest.webmanifest">
 <style>
-  :root{
-    --bg:#0a0b13; --bg2:#0b0d1a; --fg:#ecf0ff; --muted:#a6b1d9;
-    --acc:#a77cff; --acc2:#5ed0ff; --ok:#3ff0b6; --danger:#ff5b8a;
-    --ring:rgba(167,124,255,.36); --radius:22px; --shadow:0 18px 60px rgba(0,0,0,.45);
-  }
-  *{box-sizing:border-box} html,body{height:100%}
-  body{
-    margin:0; color:var(--fg);
-    background:
-      radial-gradient(1400px 900px at 75% -10%, #4e2b7e33, transparent 60%),
-      radial-gradient(1100px 600px at -20% 110%, #0fd9ff22, transparent 60%),
-      conic-gradient(from 220deg at 50% 20%, #090a14, #0a0b13, #090a14);
-    font:14px/1.5 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    overflow:hidden;
-  }
-  .app{position:relative;height:100%;display:flex;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-  header.top{padding:14px 18px 8px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:saturate(130%) blur(8px);background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0));border-bottom:1px solid #ffffff12}
-  .title{letter-spacing:.18em;font-weight:800;font-size:20px;display:flex;gap:.45ch;align-items:center}
-  .title .dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 18px var(--acc)}
-
-  main{flex:1;position:relative}
-  section.view{position:absolute;inset:0;padding:18px 18px 94px;overflow:auto;display:none}
-  section.view.active{display:block;animation:fade .28s ease-out}
-  @keyframes fade{from{opacity:0;transform:translateY(8px)}}
-
-  /* Persona transitions (iris/flare/warp/fade) */
-  .trans-iris{ animation: iris .36s ease both } @keyframes iris{ 0%{ clip-path:circle(0% at 50% 50%) } 100%{ clip-path:circle(140% at 50% 50%) } }
-  .trans-flare{ animation: flare .36s ease both } @keyframes flare{ 0%{ filter:brightness(1.2) saturate(1.1) } 60%{ filter:brightness(1.5) saturate(1.2) } 100%{ filter:brightness(1) } }
-  .trans-warp{ animation: warp .36s ease both } @keyframes warp{ 0%{ transform:translateY(8px) scale(.98) } 100%{ transform:none } }
-  .trans-fade{ animation: fadeIn .28s ease both } @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
-
-  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding-top:6px}
-  .card{background: radial-gradient(120% 120% at 80% 0%, #1c1540aa 0, #0b0e22aa 55%, #0a0d1eaa 100%);
-    border:1px solid #ffffff12;box-shadow:var(--shadow);border-radius:var(--radius);padding:18px 16px;min-height:110px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;isolation:isolate}
-  .card:before{content:"";position:absolute;inset:-1px;border-radius:inherit;z-index:-1;background:conic-gradient(from 30deg at 80% 0%,#a77cff33,#5ed0ff22,#ff5bd422,transparent 60%);filter:blur(18px);opacity:.7}
-  .card .ico{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(180deg,#1b1f37,#0e1228);border:1px solid #ffffff10;box-shadow:inset 0 1px 0 #ffffff20, 0 6px 18px rgba(0,0,0,.4)}
-
-  nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;justify-content:space-around;align-items:center;height:72px;
-    padding:10px 14px env(safe-area-inset-bottom);border-top:1px solid #ffffff12;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.04));backdrop-filter:blur(8px);gap:10px}
-  .tab-btn{--size:46px;width:var(--size);height:var(--size);border-radius:16px;display:grid;place-items:center;background:linear-gradient(180deg,#12152a,#0d1124);border:1px solid #ffffff12;box-shadow:var(--shadow);opacity:.9}
-  .tab-btn.active{opacity:1;outline:1px solid var(--ring)}
-
-  .orb-dock{display:flex; gap:12px; flex-wrap:wrap; padding:10px; border:1px solid #1a1f33; border-radius:16px; background:#0c1030aa; margin-top:8px}
-  .arb{width:42px;height:42px;border-radius:50%;box-shadow:0 0 18px #0008,inset 0 0 0 1px #ffffff16; cursor:pointer; position:relative; transition:.25s ease}
-  .arb:hover{transform:translateY(-2px); box-shadow:0 6px 28px #000a,inset 0 0 0 1px #ffffff26}
-  .arb::after{content:attr(data-id); position:absolute; left:50%; transform:translateX(-50%); bottom:-18px; font-size:10px; color:var(--muted); opacity:.8}
-  .arb.luxara {background:conic-gradient(#ff5bd4, #a77cff, #5ed0ff, #ff5bd4)}
-  .arb.ignyra {background:conic-gradient(#ff784e, #ff2f92, #ffbf3f, #ff784e)}
-  .arb.kaion  {background:conic-gradient(#3ff0b6, #29d3ff, #8a5cff, #3ff0b6)}
-  .arb.nova   {background:conic-gradient(#b7ffea, #7fd2ff, #d7b5ff, #b7ffea)}
-  .arb.elysha {background:conic-gradient(#39ffb6, #a77cff, #e8e2ff, #39ffb6)}
-  .arb.kaos   {background:conic-gradient(#ff3355, #ff00ff, #00ffff, #ff3355)}
-  .arb.genus  {background:conic-gradient(#7cf2ff, #b0ffa6, #ffd27c, #7cf2ff)}
-  .arb.lumine {background:conic-gradient(#fff19e, #ffd7a6, #ffc1f3, #fff19e)}
-  .arb.aion   {background:conic-gradient(#9ad4ff, #84ffd4, #c2b7ff, #9ad4ff)}
-  .arb.rhea   {background:conic-gradient(#ffb1b1, #ffd3a6, #e6ffd1, #ffb1b1)}
-  .arb.horus  {background:conic-gradient(#a77cff, #5ed0ff, #3ff0b6, #a77cff)}
-  .arb.atlas  {background:conic-gradient(#9bb3ff, #8a5cff, #29d3ff, #9bb3ff)}
+  :root{--bg:#0a0b13;--fg:#e9ecff;--muted:#9aa4c7;--card:#0e1224cc;--ring:#a77cff88}
+  html,body{height:100%;margin:0;background:radial-gradient(60% 60% at 50% 30%, #17192d 0,#0a0b13 65%, #04060e 100%);color:var(--fg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto}
+  header{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:.75rem;padding:12px 14px;background:linear-gradient(180deg,#0b0f1ccc 0,#0b0f1c66 100%);backdrop-filter:blur(10px);border-bottom:1px solid #ffffff15}
+  .dot{width:8px;height:8px;border-radius:999px;background:#a77cff;box-shadow:0 0 16px #a77cff}
+  .title{font-weight:800;letter-spacing:.18em}
+  main{max-width:980px;margin:0 auto;padding:14px}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  @media (max-width:640px){.grid{grid-template-columns:1fr}}
+  .card{display:flex;gap:12px;align-items:center;background:linear-gradient(180deg,#14172b,#0c0f22);border:1px solid #ffffff22;border-radius:16px;padding:12px;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+  .icon{width:56px;height:56px;border-radius:14px;display:grid;place-items:center;overflow:hidden;background:#0f1320;border:1px solid #ffffff22}
+  .name{font-weight:800}
+  .muted{color:var(--muted);font-size:12px;margin-top:2px}
+  .row{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+  .btn{appearance:none;border:1px solid #ffffff22;cursor:pointer;background:rgba(255,255,255,.06);color:#fff;padding:.64rem .9rem;border-radius:999px;font-weight:800}
+  .btn.primary{background:linear-gradient(90deg,#9f7cff,#29d3ff);border-color:transparent}
 </style>
 </head>
 <body>
-<div class="app" id="app">
-  <header class="top">
-    <div class="title">NEBULA PRIME <span class="dot"></span></div>
-    <div class="hdr-actions">
-      <button class="tab-btn" id="btnDevDocs" title="Dev Docs" aria-label="Dev Docs">🛠</button>
+  <header>
+    <div class="dot"></div><div class="title">DUAL • NEBULA HUB</div>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button id="installBtn" class="btn">Instalar Hub</button>
     </div>
   </header>
-
   <main>
-    <!-- HOME -->
-    <section class="view active" id="view-home">
-      <div class="grid">
-        <button class="card" data-open="lan"><div class="ico">🌐</div><div><h3>LAN Scanner</h3><p>Descobrir dispositivos</p></div></button>
-        <button class="card" data-open="bind"><div class="ico">🔗</div><div><h3>Bind</h3><p>Conectar & parear</p></div></button>
-        <button class="card" data-open="report"><div class="ico">📈</div><div><h3>Relatório</h3><p>Métricas e logs</p></div></button>
-        <button class="card" data-open="memory"><div class="ico">🧠</div><div><h3>Memória</h3><p>Docs & sessões</p></div></button>
-      </div>
-
-      <section class="card" style="margin-top:12px">
-        <h3 style="margin-top:0">Arquétipos</h3>
-        <div class="orb-dock" id="orbDock">
-          <div class="arb luxara" data-id="luxara" title="Luxara"></div>
-          <div class="arb ignyra" data-id="ignyra" title="Ignyra"></div>
-          <div class="arb kaion"  data-id="kaion"  title="Kaion"></div>
-          <div class="arb nova"   data-id="nova"   title="Nova"></div>
-          <div class="arb elysha" data-id="elysha" title="Elysha"></div>
-          <div class="arb kaos"   data-id="kaos"   title="Kaos"></div>
-          <div class="arb genus"  data-id="genus"  title="Genus"></div>
-          <div class="arb lumine" data-id="lumine" title="Lumine"></div>
-          <div class="arb aion"   data-id="aion"   title="Aion"></div>
-          <div class="arb rhea"   data-id="rhea"   title="Rhea"></div>
-          <div class="arb horus"  data-id="horus"  title="Horus"></div>
-          <div class="arb atlas"  data-id="atlas"  title="Atlas"></div>
-        </div>
-      </section>
-    </section>
-
-    <!-- CHAT -->
-    <section class="view" id="view-chat">
-      <div id="chat-list" style="padding-bottom:84px"></div>
-      <div class="composer" style="position:fixed;left:12px;right:12px;bottom:80px;display:flex;gap:8px">
-        <button class="tab-btn" id="chat-btnMic">🎙</button>
-        <input id="chat-input" type="text" placeholder="Digite uma mensagem…" style="flex:1;border-radius:12px;border:1px solid #ffffff18;background:#101425;color:#ecf0ff;padding:12px 12px">
-        <button class="tab-btn" id="chat-btnSend">➤</button>
-      </div>
-    </section>
-
-    <!-- APPS -->
-    <section class="view" id="view-apps">
-      <div class="grid" id="apps-grid"></div>
-    </section>
-
-    <!-- PROFILE -->
-    <section class="view" id="view-profile">
-      <div class="grid" style="grid-template-columns:1fr">
-        <div class="card">
-          <div style="font-size:11px;color:var(--muted)">Assinatura</div>
-          <select id="signature" style="width:100%;background:transparent;border:0;outline:0;color:var(--fg);font-size:14px;padding:6px 0 2px;">
-            <option>Uno</option><option>Dual</option><option selected>Trinity</option>
-          </select>
-        </div>
-        <div class="card">
-          <div style="font-size:11px;color:var(--muted)">Avatar</div>
-          <div id="profile-avatar" style="width:84px;height:84px;border-radius:50%;display:grid;place-items:center;overflow:hidden;cursor:pointer;background:radial-gradient(120% 120% at 70% 0%,#231a52,#0d122a);border:1px solid #ffffff18;box-shadow:var(--shadow);">
-            👁️
-          </div>
-          <input type="file" id="avatarFile" accept="image/*" hidden>
-        </div>
-      </div>
-    </section>
+    <div class="grid" id="appsGrid"></div>
   </main>
 
-  <nav class="tabs">
-    <button class="tab-btn active" data-nav="home" title="Início" aria-label="Início">⌂</button>
-    <button class="tab-btn" data-nav="chat" title="Chat" aria-label="Chat">💬</button>
-    <button class="tab-btn" data-nav="apps" title="Apps" aria-label="Apps">🗂</button>
-    <button class="tab-btn" data-nav="profile" title="Perfil" aria-label="Perfil">⚙</button>
-  </nav>
-</div>
+<script type="module">
+// SW para o Hub
+if ('serviceWorker' in navigator){ try{ await navigator.serviceWorker.register('/docs/js/service-worker.js', {scope: '/'});}catch{} }
 
-<!-- DevDocs + Trinity HUD -->
-<div id="devPanel" style="display:none;position:fixed;right:12px;top:12px;bottom:12px;width:560px;max-width:92vw;padding:12px;overflow:auto;background:linear-gradient(180deg,rgba(10,10,16,.9),rgba(10,10,16,.95));border:1px solid rgba(255,255,255,.06);border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6);z-index:9998;color:#dfe9ff">
-  <h3 style="margin:0 0 8px 0">Nebula Prime • DevDocs (V3.4.1)</h3>
-  <p style="opacity:.85;margin:4px 0 12px 0">Ferramentas client-side: HUD (telemetria), export/minify, persona & SW.</p>
-
-  <h4>Trinity HUD</h4>
-  <div id="hud" style="font-family:ui-monospace,monospace;font-size:12px;background:#07102b;padding:8px;border-radius:8px;white-space:pre;overflow:auto">—</div>
-  <div style="display:flex;gap:8px;margin:8px 0">
-    <button class="tab-btn" id="hudRefresh">↻</button>
-    <button class="tab-btn" id="hudClear">✕</button>
-    <button class="tab-btn" id="hudPurge" title="Purge cache por persona">🧹</button>
-  </div>
-
-  <h4>Export / Minify</h4>
-  <div style="display:flex;gap:8px;margin:6px 0">
-    <button class="tab-btn" id="dlAnn" title="Download annotated">⬇ A</button>
-    <button class="tab-btn" id="dlMin" title="Download minified">⬇ M</button>
-    <button class="tab-btn" id="showMin" title="Preview minified">👁</button>
-  </div>
-  <pre id="minPrev" style="display:none;height:220px;overflow:auto;background:#061025;color:#cfe9ff;padding:8px;border-radius:6px"></pre>
-</div>
-
-<script>
-if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js?arch=horus').catch(console.error) }
-const vibrate=(p)=>{ if(navigator.vibrate) navigator.vibrate(p) }
-function markUsed(u){ if(navigator.serviceWorker?.controller){ navigator.serviceWorker.controller.postMessage({type:'used', url:u}); } }
-
-// Persona mapping (theme + transition + route anim sync)
-const PERSONAS={
-  luxara:{vars:{'--acc':'#ff5bd4','--acc2':'#a77cff','--ok':'#5ed0b6'}, trans:'trans-flare'},
-  ignyra:{vars:{'--acc':'#ff2f92','--acc2':'#ff784e','--ok':'#ffbf3f'}, trans:'trans-flare'},
-  kaion :{vars:{'--acc':'#8a5cff','--acc2':'#29d3ff','--ok':'#3ff0b6'}, trans:'trans-warp'},
-  nova  :{vars:{'--acc':'#b7ffea','--acc2':'#7fd2ff','--ok':'#d7b5ff'}, trans:'trans-fade'},
-  elysha:{vars:{'--acc':'#39ffb6','--acc2':'#a77cff','--ok':'#e8e2ff'}, trans:'trans-fade'},
-  kaos  :{vars:{'--acc':'#ff00ff','--acc2':'#00ffff','--ok':'#ff3355'}, trans:'trans-warp'},
-  genus :{vars:{'--acc':'#7cf2ff','--acc2':'#b0ffa6','--ok':'#ffd27c'}, trans:'trans-warp'},
-  lumine:{vars:{'--acc':'#ffc1f3','--acc2':'#ffd7a6','--ok':'#fff19e'}, trans:'trans-flare'},
-  aion  :{vars:{'--acc':'#9ad4ff','--acc2':'#84ffd4','--ok':'#c2b7ff'}, trans:'trans-iris'},
-  rhea  :{vars:{'--acc':'#ffd3a6','--acc2':'#ffb1b1','--ok':'#e6ffd1'}, trans:'trans-fade'},
-  horus :{vars:{'--acc':'#a77cff','--acc2':'#5ed0ff','--ok':'#3ff0b6'}, trans:'trans-iris'},
-  atlas :{vars:{'--acc':'#9bb3ff','--acc2':'#29d3ff','--ok':'#8a5cff'}, trans:'trans-warp'}
-};
-let ACTIVE_TRANS='trans-iris';
-function setPersona(id){
-  const p=PERSONAS[id]; if(!p) return;
-  Object.entries(p.vars).forEach(([k,v])=> document.documentElement.style.setProperty(k, v));
-  ACTIVE_TRANS = p.trans || 'trans-iris';
-  const link=document.querySelector('link[rel="manifest"]'); if(link) link.href = `manifest-${id}.webmanifest`;
-  if('serviceWorker' in navigator){ navigator.serviceWorker.register(`./sw.js?arch=${encodeURIComponent(id)}`) }
-}
-document.getElementById('orbDock').addEventListener('click', (e)=>{
-  const el=e.target.closest('.arb'); if(!el) return; setPersona(el.dataset.id); markUsed('#/persona/'+el.dataset.id);
+// Instalação (beforeinstallprompt)
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault(); deferredPrompt=e;
+  const b=document.getElementById('installBtn');
+  b.onclick=async()=>{ deferredPrompt?.prompt(); await deferredPrompt?.userChoice; deferredPrompt=null; };
 });
 
-// Router + per-route animations synced to persona
-const views={home:document.getElementById('view-home'), chat:document.getElementById('view-chat'), apps:document.getElementById('view-apps'), profile:document.getElementById('view-profile')};
-function animate(el){ el.classList.add(ACTIVE_TRANS); setTimeout(()=> el.classList.remove(ACTIVE_TRANS), 420); }
-function navTo(key){
-  for(const k in views){ views[k].classList.remove('active') }
-  const v=views[key]||views.home; v.classList.add('active'); animate(v);
-  document.querySelectorAll('.tab-btn').forEach(b=> b.classList.toggle('active', b.dataset.nav===key));
-  location.hash='#/'+key; markUsed('#/'+key);
+const appsGrid = document.getElementById('appsGrid');
+
+function card(app){
+  const div=document.createElement('div'); div.className='card';
+  const icon = app.icons?.png_192 || app.icon || '/docs/icons/ppplayer/png/icon-192-pp6.png';
+  const title = app.name || app.title || app.id || 'App';
+  const desc = app.description || app.desc || '';
+  div.innerHTML = \`
+    <div class="icon"><img src="\${icon}" alt="" width="56" height="56"></div>
+    <div style="flex:1">
+      <div class="name">\${title}</div>
+      <div class="muted">\${desc}</div>
+      <div class="row">
+        <button class="btn primary">Abrir (Wrapper)</button>
+        <button class="btn outline">Instalar (via Wrapper)</button>
+      </div>
+    </div>\`;
+  // Abrir via wrapper com query params
+  const href = app.href || app.url || '/docs/apps/ppplayer_app.html';
+  const manifest = app.manifest || '/docs/manifests/ppplayer/manifest.json';
+  const openWrapper = ()=>{
+    const url = \`/docs/apps/wrapper.html?id=\${encodeURIComponent(app.id||title.toLowerCase())}&title=\${encodeURIComponent(title)}&src=\${encodeURIComponent(href)}&manifest=\${encodeURIComponent(manifest)}\`;
+    location.href = url;
+  };
+  div.querySelector('.primary').addEventListener('click', openWrapper);
+  div.querySelector('.outline').addEventListener('click', openWrapper); // wrapper expõe o botão Instalar
+  return div;
 }
-document.querySelectorAll('[data-nav]').forEach(b=> b.addEventListener('click', ()=> navTo(b.dataset.nav)));
-document.querySelectorAll('[data-open]').forEach(b=> b.addEventListener('click', ()=> navTo('chat')));
-const h = location.hash.replace('#/',''); if(views[h]) navTo(h);
 
-// Apps loader (simple)
-(async function loadApps(){
-  const grid=document.getElementById('apps-grid');
-  async function tryFetch(u){ const r=await fetch(u,{cache:'no-store'}); if(!r.ok) throw 0; markUsed(u); return r.json(); }
-  const cands=['./apps.json','./apps/apps.json','./folders/apps.json','/apps/apps.json'];
-  let data=null; for(const u of cands){ try{ data=await tryFetch(u); break; }catch(e){} }
-  if(!data){ grid.innerHTML='<div class="card">Sem apps.json — usando ./folders/apps.json</div>'; data=await tryFetch('./folders/apps.json'); }
-  const list=(data.apps||[]); grid.innerHTML='';
-  list.forEach(app=>{
-    const c=document.createElement('div'); c.className='card';
-    c.innerHTML=`<div class="ico">🗂</div><h3>${app.title||'App'}</h3><p>${app.desc||''}</p>`;
-    c.onclick=()=>{ try{ window.open(app.url,'_blank'); }catch{ location.href=app.url } markUsed(app.url); };
-    grid.appendChild(c);
-  });
-})();
-
-// Chat (simple)
-const list=document.getElementById('chat-list'), input=document.getElementById('chat-input');
-function chatBubble(text, who='ai'){
-  const row=document.createElement('div'); row.style.margin='8px'; row.style.display='flex'; row.style.gap='8px';
-  const bubble=document.createElement('div'); bubble.style.cssText='max-width:82%;padding:12px 14px;border-radius:18px;background:linear-gradient(180deg,rgba(41,211,255,.35),rgba(154,124,255,.35));border:1px solid #ffffff22';
-  bubble.textContent=text; row.appendChild(bubble); list.appendChild(row); list.scrollTop=list.scrollHeight;
-}
-document.getElementById('chat-btnSend').onclick=()=>{ const t=input.value.trim(); if(!t) return; chatBubble(t,'me'); input.value=''; setTimeout(()=> chatBubble('Eco: '+t,'ai'), 350); };
-
-// DevDocs (HUD + Export + Purge)
-const panel=document.getElementById('devPanel'); document.getElementById('btnDevDocs').onclick=()=> panel.style.display = (panel.style.display==='none'?'block':'none');
-function minify(html){ return html.replace(/<!--[\s\S]*?-->/g,'').replace(/>\s+</g,'><').replace(/\s{2,}/g,' ').trim(); }
-document.getElementById('dlAnn').onclick=()=>{ const blob=new Blob(['<!doctype html>\n'+document.documentElement.outerHTML],{type:'text/html'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='NebulaPrime_V3_4_1_annotated.html'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),500); };
-document.getElementById('dlMin').onclick=()=>{ const txt=minify('<!doctype html>\n'+document.documentElement.outerHTML); const blob=new Blob([txt],{type:'text/html'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='NebulaPrime_V3_4_1_minified.html'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),500); };
-document.getElementById('showMin').onclick=()=>{ const prev=document.getElementById('minPrev'); if(prev.style.display==='none'){ prev.textContent=minify('<!doctype html>\n'+document.documentElement.outerHTML).slice(0,200000); prev.style.display='block' } else { prev.style.display='none' } };
-
-async function refreshHUD(){
-  try{
-    const r = await fetch('./__hud.json', {cache:'no-store'});
-    const j = await r.json();
-    document.getElementById('hud').textContent = JSON.stringify(j, null, 2);
-  }catch(e){
-    document.getElementById('hud').textContent = 'HUD indisponível — abra via HTTP(s) e aguarde SW registrar.';
+async function load(){
+  const candidates = ['/docs/apps/apps.json','/docs/apps.json','/apps/apps.json'];
+  let data=null;
+  for(const u of candidates){
+    try{ const r=await fetch(u,{cache:'no-store'}); if(r.ok){ data=await r.json(); break; } }catch(e){}
   }
+  if(!data){ appsGrid.innerHTML='<div class="muted">apps.json não encontrado em /docs/apps/apps.json</div>'; return; }
+  let list = Array.isArray(data.apps)? data.apps : (data.groups? Object.values(data.groups).flat() : []);
+  appsGrid.innerHTML=''; list.forEach(app=> appsGrid.appendChild(card(app)));
 }
-document.getElementById('hudRefresh').onclick=refreshHUD;
-document.getElementById('hudClear').onclick=()=>{ document.getElementById('hud').textContent='—' };
-document.getElementById('hudPurge').onclick=()=>{ if(navigator.serviceWorker?.controller){ navigator.serviceWorker.controller.postMessage({type:'purge'}) } };
-setTimeout(refreshHUD, 1000);
-
-// Avatar (persist local)
-(function(){
-  const AVATAR_KEY = 'dual.profile.avatar';
-  const avatar = document.getElementById('profile-avatar');
-  const fileInp = document.getElementById('avatarFile');
-  function apply(dataUrl){
-    if(!avatar) return; avatar.innerHTML=''; const img=document.createElement('img'); img.src=dataUrl; img.alt='avatar';
-    img.style.width='100%'; img.style.height='100%'; img.style.objectFit='cover'; avatar.appendChild(img);
-  }
-  try{ const saved=localStorage.getItem(AVATAR_KEY); if(saved) apply(saved) }catch(e){}
-  avatar?.addEventListener('click', ()=> fileInp?.click());
-  fileInp?.addEventListener('change', ()=>{
-    const f=fileInp.files && fileInp.files[0]; if(!f) return;
-    const reader=new FileReader(); reader.onload=()=>{ const dataUrl=reader.result; try{localStorage.setItem(AVATAR_KEY,dataUrl)}catch(e){} apply(dataUrl) }; reader.readAsDataURL(f);
-  });
-})();
+load();
 </script>
 </body>
 </html>
