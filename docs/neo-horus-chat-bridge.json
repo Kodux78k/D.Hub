@@ -1,0 +1,7 @@
+{
+  "id": "neo-horus-chat-bridge",
+  "priority": 42,
+  "enabled": true,
+  "css": "",
+  "js": "(function(){\n  if (window.__NEO_HORUS_CHAT_BRIDGE__) return; window.__NEO_HORUS_CHAT_BRIDGE__=true;\n\n  function getDualAppFrame(){\n    const v = document.querySelector('.viewer iframe'); if (v) return v.contentWindow;\n    const frames = document.querySelectorAll('iframe'); for(const f of frames){ try{ if(f && f.src && /dual/i.test(f.src)) return f.contentWindow; }catch(_){} }\n    return null;\n  }\n  function pushToDualApp(text){\n    const w = getDualAppFrame(); if(!w) return false;\n    try{ w.postMessage({ type:'DUALCHAT_PUSH', text: String(text||'') }, '*'); return true; }catch(_){ return false; }\n  }\n  window.addEventListener('message', (ev)=>{\n    const d = ev.data||{};\n    if(d.type==='DUALCHAT_PUSH_TO_MONOLITH' && typeof window.chatBubble==='function'){\n      window.chatBubble(String(d.text||''),'ai',{});\n    }\n  });\n  (function hookChat(){\n    if (typeof window.chatBubble!=='function' || window.chatBubble.__horus) return;\n    const prev = window.chatBubble;\n    window.chatBubble = function(text, who, meta){\n      const out = prev.call(this, text, who, meta);\n      if((who||'ai')==='ai'){ pushToDualApp(text); }\n      return out;\n    };\n    window.chatBubble.__horus = true;\n  })();\n  setTimeout(()=>{ try{ const w=getDualAppFrame(); w && w.postMessage({type:'DUALCHAT_ANNOUNCE'}, '*'); }catch(_){ } }, 1200);\n})();"
+}
