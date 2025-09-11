@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="g1" cx="35%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#3ff0b6"/><stop offset="60%" stop-color="#a77cff"/><stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+    <linearGradient id="g2" x1="0%" x2="100%">
+      <stop offset="0%" stop-color="#a77cff"/><stop offset="50%" stop-color="#5ed0ff"/><stop offset="100%" stop-color="#3ff0b6"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" ry="96" fill="#0b0b14"/>
+  <circle cx="256" cy="256" r="180" fill="url(#g1)"/>
+  <circle cx="256" cy="256" r="140" fill="none" stroke="url(#g2)" stroke-width="22"/>
+  <circle cx="256" cy="256" r="18" fill="#3ff0b6"/>
+  <text x="28" y="484" font-family="Inter, system-ui" font-size="40" fill="#ecf0ff" opacity="0.85">Horus</text>
+</svg>
