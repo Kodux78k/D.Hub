@@ -1172,20 +1172,22 @@ document.getElementById('btnIntegrator').addEventListener('click', ()=>{
 </script>
 
 <script>
-// Desativa loader simples e delega render ao motor completo
+// Desativa loader simples e passa a chamar load() para Apps
 (function(){
   // Mantemos a função loadApps para retrocompatibilidade, mas ela não faz nada.
   async function loadApps(){}
-  // Ao navegar para Apps, disparar render() do motor agrupado
+  // Ao navegar para Apps, disparar load() do motor agrupado
   document.querySelectorAll('[data-nav]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      if(btn.dataset.nav==='apps'){ try{ load(); }catch(_){} }
+      if(btn.dataset.nav==='apps'){
+        try{ load(); }catch(_){}
+      }
     });
   });
-  // Se a URL já aponta para apps, dispara render()
+  // Se a URL já aponta para apps, dispara load()
   if(location.hash && location.hash.toLowerCase().includes('apps')){
-  try{ load(); }catch(_){}
-}
+    try{ load(); }catch(_){}
+  }
 })();
 </script>
 
@@ -1465,64 +1467,47 @@ let RAW = null;
 let DEFAULTS = null;
 
 async function tryFetch(url){
-  const res = await fetch(url, {cache:'no-store'}
-function tryInline(){
-  try{
-    const el = document.getElementById('apps-inline');
-    if(!el) return null;
-    return JSON.parse(el.textContent||el.innerText||'null');
-  }catch{ return null }
-}
-
-);
+  const res = await fetch(url, {cache:'no-store'});
   if(!res.ok) throw new Error('HTTP '+res.status);
   return res.json();
 }
 async function load(){
-      const candidates = [
-        './apps.json',
-        './apps/apps.json',
-        './docs/apps/apps.json',
-        '/apps/apps.json'
-      ];
-      let data=null, lastErr=null;
-      for(const u of candidates){
-        try{ data = await tryFetch(u); break; }
-        catch(e){ lastErr=e; }
-      }
-      if(!data){
-        data = tryInline();
-      }
-      if(!data){
-        console.error('Falha apps.json', lastErr);
-        const target = document.getElementById('content') || document.body;
-        target.innerHTML = `
-          <section class="section">
-            <div class="card">
-              <div class="icon">⚠️</div>
-              <div>
-                <div class="title">Apps não carregados</div>
-                <div class="muted">Coloque o <code>apps.json</code> em <code>./apps/apps.json</code> ou adicione um bloco inline:
-<pre><code>&lt;script id="apps-inline" type="application/json"&gt;{ "groups": { "meus_apps": [ {"key":"demo","title":"Demo","url":"./demo.html"} ] } }&lt;/script&gt;</code></pre>
-                </div>
-              </div>
-            </div>
-          </section>`;
-        const $count = document.getElementById('countApps');
-        if($count) $count.textContent = 'Erro ao carregar apps.json';
-        return;
-      }
-      RAW = data;
-      DEFAULTS = data.defaultIcons || data.groups?.defaultIcons || {
-        base: FALLBACK_ICONS.base,
-        chats: FALLBACK_ICONS.chats,
-        editors: FALLBACK_ICONS.editors,
-        indexrs: FALLBACK_ICONS.indexrs,
-        index_hubs: FALLBACK_ICONS.indexrs
-      };
-      render();
-      setTimeout(tryAutoOpen, 0);
-
+  const candidates = [
+    './apps.json',
+    './apps/apps.json',
+    './docs/apps/apps.json',
+    '/apps/apps.json'
+  ];
+  let data=null, lastErr=null;
+  for(const u of candidates){
+    try{ data = await tryFetch(u); break; }
+    catch(e){ lastErr=e; }
+  }
+  if(!data){
+    console.error('Falha apps.json', lastErr);
+    $content.innerHTML = `
+      <section class="section">
+        <div class="card">
+          <div class="icon">⚠️</div>
+          <div>
+            <div class="title">Falha ao carregar apps</div>
+            <div class="muted">Tente colocar o arquivo em ./apps/apps.json (ou docs/apps/apps.json).</div>
+          </div>
+        </div>
+      </section>`;
+    if($count) $count.textContent = 'Erro no apps.json';
+    return;
+  }
+  RAW = data;
+  DEFAULTS = data.defaultIcons || data.groups?.defaultIcons || {
+    base: FALLBACK_ICONS.base,
+    chats: FALLBACK_ICONS.chats,
+    editors: FALLBACK_ICONS.editors,
+    indexrs: FALLBACK_ICONS.indexrs,
+    index_hubs: FALLBACK_ICONS.indexrs
+  };
+  render();
+  setTimeout(tryAutoOpen, 0);
 }
 function allApps(){
   const locals = localsAsApps();
@@ -1760,15 +1745,8 @@ let VIEWER_OPEN=false;
 function openApp(app){
   try{ localStorage.setItem('infodose:lastView', JSON.stringify(app)); }catch{}
   addToMem(app);
-  // verifica checkbox de mesma aba com fallback seguro
+  // força abrir dentro do hub sempre via iFrame (ignora sameTab)
   const sameTab = true;
-  // abre em nova aba se a preferência de mesma aba estiver desativada
-  if(!sameTab){
-    const lref = getLocalByUrl(app.url);
-    const targetUrl = lref ? blobUrlFromLocal(lref) : app.url;
-    window.open(targetUrl, '_blank', 'noopener');
-    return;
-  }
   // Caso contrário monta o viewer dentro de Apps (se presente) ou fallback no body
   unlockAudioOnce();
   speak('Abrindo ' + (app.title||'aplicativo'));
