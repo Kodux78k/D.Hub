@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>App Wrapper • Hub</title>
+<meta name="theme-color" content="#0a0b13">
+<link id="dynamic-manifest" rel="manifest" href="">
+<style>
+  :root{--bg:#0a0b13;--fg:#e9ecff;--muted:#a9b0cf;--card:#0e1224cc;--acc:#a77cff;--ok:#5bffcf;}
+  html,body{height:100%;margin:0;background:radial-gradient(60% 60% at 50% 40%, #151a2b 0%, #0a0b13 60%, #06080d 100%);color:var(--fg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto;}
+  .topbar{position:fixed;inset:0 0 auto 0;height:56px;display:flex;align-items:center;gap:.5rem;padding:0 .75rem;background:linear-gradient(180deg,#0b0f1ccc 0,#0b0f1c66 100%);backdrop-filter:blur(8px);border-bottom:1px solid #1e2440;}
+  .topbar .title{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;letter-spacing:.2px}
+  .btn{display:inline-flex;align-items:center;gap:.5rem;border:1px solid #2a3160;background:#0e1224cc;color:var(--fg);padding:.5rem .75rem;border-radius:12px;cursor:pointer}
+  .btn:hover{border-color:#4350a0}
+  .frame{position:fixed;inset:56px 0 0 0;border:0;width:100%;height:calc(100% - 56px);background:#000}
+  .pill{font-size:.75rem;color:var(--muted);border:1px solid #283056;background:#0b0f1ccc;padding:.25rem .5rem;border-radius:999px}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <span class="pill" id="status">PWA</span>
+    <div class="title" id="title">Abrindo…</div>
+    <button class="btn" id="installBtn" hidden>Instalar</button>
+    <button class="btn" id="saveBtn">Salvar no Hub</button>
+    <button class="btn" id="backBtn">Voltar</button>
+  </div>
+  <iframe id="frame" class="frame" src="about:blank" allow="autoplay; clipboard-read; clipboard-write; fullscreen; microphone; camera"></iframe>
+<script type="module">
+  // Parse query
+  const params = new URLSearchParams(location.search);
+  const src = params.get('src') || '/docs/apps/example.html';
+  const title = params.get('title') || 'App';
+  const manifest = params.get('manifest') || '';
+  const appId = params.get('id') || crypto.randomUUID();
+
+  document.getElementById('title').textContent = title;
+  const frame = document.getElementById('frame');
+  frame.src = src;
+
+  // Dynamically attach manifest (must be same-origin to install)
+  if (manifest) {
+    const link = document.getElementById('dynamic-manifest');
+    link.href = manifest;
+  }
+
+  // Register SW for this wrapper scope
+  if ('serviceWorker' in navigator) {
+    try { await navigator.serviceWorker.register('/docs/js/service-worker.js', {scope: '/'}); } catch {}
+  }
+
+  // Install button logic (beforeinstallprompt)
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('installBtn').hidden = false;
+  });
+
+  document.getElementById('installBtn').addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    document.getElementById('installBtn').hidden = true;
+    console.log('Install prompt outcome:', outcome);
+  });
+
+  // iOS hint (no beforeinstallprompt)
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (isIOS) {
+    document.getElementById('status').textContent = 'iOS: Compartilhar → Adic. à Tela';
+  }
+
+  // Save into Hub (localStorage)
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    const key = 'dual.hub.installed';
+    const list = JSON.parse(localStorage.getItem(key) || '[]');
+    const exists = list.find(x => x.id === appId);
+    const entry = { id: appId, title, src, manifest, savedAt: Date.now() };
+    if (exists) {
+      Object.assign(exists, entry);
+    } else {
+      list.push(entry);
+    }
+    localStorage.setItem(key, JSON.stringify(list));
+    document.getElementById('status').textContent = 'Salvo no Hub';
+    document.getElementById('status').classList.add('pill');
+  });
+
+  // Back
+  document.getElementById('backBtn').addEventListener('click', () => history.back());
+</script>
+</body>
+</html>
