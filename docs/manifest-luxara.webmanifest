@@ -1,0 +1,16 @@
+{
+  "name": "Dual • Luxara — Nebula Prime 3.4.1+",
+  "short_name": "Luxara",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0b0b14",
+  "theme_color": "#ff5bd4",
+  "icons": [
+    {
+      "src": "icons/icon-512-luxara.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

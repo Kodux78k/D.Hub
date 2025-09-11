@@ -1,0 +1,16 @@
+{
+  "name": "Dual • Kaion — Nebula Prime 3.4.1+",
+  "short_name": "Kaion",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0b0b14",
+  "theme_color": "#8a5cff",
+  "icons": [
+    {
+      "src": "icons/icon-512-kaion.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
