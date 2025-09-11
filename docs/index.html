@@ -3,60 +3,53 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
-<title>DUAL • Nebula Pro — Archetype Hubs (V3.2)</title>
+<title>DUAL • Nebula Prime — V3.4.1 ULTRA</title>
 <meta name="theme-color" content="#0b0b14">
 <link rel="manifest" href="manifest-horus.webmanifest">
 <style>
   :root{
     --bg:#0a0b13; --bg2:#0b0d1a; --fg:#ecf0ff; --muted:#a6b1d9;
     --acc:#a77cff; --acc2:#5ed0ff; --ok:#3ff0b6; --danger:#ff5b8a;
-    --glass:rgba(255,255,255,0.06); --glass2:rgba(255,255,255,0.08);
-    --ring:rgba(167,124,255,0.32);
-    --radius:18px; --shadow:0 10px 40px rgba(0,0,0,0.35);
+    --ring:rgba(167,124,255,.36); --radius:22px; --shadow:0 18px 60px rgba(0,0,0,.45);
   }
   *{box-sizing:border-box} html,body{height:100%}
   body{
-    margin:0; background:
-      radial-gradient(1200px 700px at 80% -10%, #472b6e33, transparent 60%),
-      radial-gradient(900px 600px at -10% 110%, #0fd9ff22, transparent 60%),
-      linear-gradient(180deg, var(--bg), #090a12 60%, #080910);
-    color:var(--fg); font:14px/1.5 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    margin:0; color:var(--fg);
+    background:
+      radial-gradient(1400px 900px at 75% -10%, #4e2b7e33, transparent 60%),
+      radial-gradient(1100px 600px at -20% 110%, #0fd9ff22, transparent 60%),
+      conic-gradient(from 220deg at 50% 20%, #090a14, #0a0b13, #090a14);
+    font:14px/1.5 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    overflow:hidden;
   }
-  .app{max-width:1150px; margin:0 auto; padding:16px 16px 64px}
+  .app{position:relative;height:100%;display:flex;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  header.top{padding:14px 18px 8px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:saturate(130%) blur(8px);background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0));border-bottom:1px solid #ffffff12}
+  .title{letter-spacing:.18em;font-weight:800;font-size:20px;display:flex;gap:.45ch;align-items:center}
+  .title .dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 18px var(--acc)}
 
-  /* Router transitions */
-  .route{opacity:0; transform:translateY(6px); transition:opacity .28s ease, transform .28s ease; will-change:opacity,transform; contain:paint}
-  .route.active{opacity:1; transform:none}
-  .fade-enter{opacity:0; transform:translateY(8px)}
-  .fade-enter-active{opacity:1; transform:none; transition:opacity .28s ease, transform .28s ease}
-  .fade-exit{opacity:1}
-  .fade-exit-active{opacity:0; transform:translateY(-8px); transition:opacity .28s ease, transform .28s ease}
+  main{flex:1;position:relative}
+  section.view{position:absolute;inset:0;padding:18px 18px 94px;overflow:auto;display:none}
+  section.view.active{display:block;animation:fade .28s ease-out}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}}
 
-  header{position:sticky; top:0; z-index:5; backdrop-filter: blur(8px); background: linear-gradient(180deg, #0b0d17dd, #0b0d1700); padding:14px 8px 10px; margin:-16px -16px 16px; border-bottom:1px solid #1a1f33}
-  .row{display:flex; gap:12px; align-items:center; justify-content:space-between}
-  .brand{display:flex; gap:10px; align-items:center; padding:8px 12px; border-radius:999px; background:linear-gradient(180deg, #12152a, #0e1224); border:1px solid #171c33; box-shadow: var(--shadow)}
-  .orb{ width:14px; height:14px; border-radius:50%; background:conic-gradient(from 0deg, #a77cff, #5ed0ff, #3ff0b6, #a77cff); box-shadow:0 0 14px #a77cff88, inset 0 0 12px #5ed0ff44; animation:spin 6s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .title{font-weight:700; letter-spacing:.3px}
-  .selector{ display:flex; gap:8px; align-items:center; padding:6px; border-radius:999px; background:#0e1224; border:1px solid #1c2041}
-  .selector select{ appearance:none; background:transparent; color:var(--fg); border:none; outline:0; padding:8px 12px; font-weight:600; border-radius:999px}
-  .user{ display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:14px; background:#0e1224; border:1px solid #1c2041; cursor:pointer}
-  .user .avatar{ width:26px; height:26px; border-radius:50%; background: radial-gradient(circle at 30% 30%, #5ed0ff, #a77cff); box-shadow:0 0 10px #5ed0ff55}
+  /* Persona transitions (iris/flare/warp/fade) */
+  .trans-iris{ animation: iris .36s ease both } @keyframes iris{ 0%{ clip-path:circle(0% at 50% 50%) } 100%{ clip-path:circle(140% at 50% 50%) } }
+  .trans-flare{ animation: flare .36s ease both } @keyframes flare{ 0%{ filter:brightness(1.2) saturate(1.1) } 60%{ filter:brightness(1.5) saturate(1.2) } 100%{ filter:brightness(1) } }
+  .trans-warp{ animation: warp .36s ease both } @keyframes warp{ 0%{ transform:translateY(8px) scale(.98) } 100%{ transform:none } }
+  .trans-fade{ animation: fadeIn .28s ease both } @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
 
-  main{display:grid; gap:16px}
-  .grid{display:grid; gap:14px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr))}
-  .card{ background: linear-gradient(180deg, #0f1330cc, #0a0f20cc); border:1px solid #1a1f33; border-radius:var(--radius); padding:14px; box-shadow:var(--shadow); position:relative; overflow:hidden }
-  .card h3{margin:0 0 8px; font-size:16px}
-  .muted{color:var(--muted)} .pill{ display:inline-flex; gap:8px; align-items:center; padding:8px 12px; border-radius:999px; background:#12183a; border:1px solid #1b2150; font-weight:600; cursor:pointer; user-select:none }
-  .pill:hover{outline:1px solid var(--ring)} .row.wrap{flex-wrap:wrap} .toolbar{display:flex; gap:8px; flex-wrap:wrap}
-  .loader{ display:none; place-items:center; padding:14px; border:1px dashed #27305c; border-radius:12px; background: #0c1130cc } .loader.show{display:grid}
-  .path{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; padding:8px 12px; border:1px solid #1a1f33; background:#0d1130; border-radius:10px }
-  .crumb{padding:4px 8px; border-radius:8px; background:#12183a; border:1px solid #1b2150; cursor:pointer}
-  .list{display:grid; gap:10px} .item{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border:1px solid #1a1f33; background:#0e1228; border-radius:10px }
-  .item .name{font-weight:600} .item .meta{color:var(--muted); font-size:12px} .hint{font-size:12px; color:var(--muted)} footer{opacity:.7; margin-top:28px; text-align:center}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding-top:6px}
+  .card{background: radial-gradient(120% 120% at 80% 0%, #1c1540aa 0, #0b0e22aa 55%, #0a0d1eaa 100%);
+    border:1px solid #ffffff12;box-shadow:var(--shadow);border-radius:var(--radius);padding:18px 16px;min-height:110px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;isolation:isolate}
+  .card:before{content:"";position:absolute;inset:-1px;border-radius:inherit;z-index:-1;background:conic-gradient(from 30deg at 80% 0%,#a77cff33,#5ed0ff22,#ff5bd422,transparent 60%);filter:blur(18px);opacity:.7}
+  .card .ico{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(180deg,#1b1f37,#0e1228);border:1px solid #ffffff10;box-shadow:inset 0 1px 0 #ffffff20, 0 6px 18px rgba(0,0,0,.4)}
 
-  /* Archetype Dock */
-  .orb-dock{display:flex; gap:12px; flex-wrap:wrap; padding:10px; border:1px solid #1a1f33; border-radius:16px; background:#0c1030aa}
+  nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;justify-content:space-around;align-items:center;height:72px;
+    padding:10px 14px env(safe-area-inset-bottom);border-top:1px solid #ffffff12;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.04));backdrop-filter:blur(8px);gap:10px}
+  .tab-btn{--size:46px;width:var(--size);height:var(--size);border-radius:16px;display:grid;place-items:center;background:linear-gradient(180deg,#12152a,#0d1124);border:1px solid #ffffff12;box-shadow:var(--shadow);opacity:.9}
+  .tab-btn.active{opacity:1;outline:1px solid var(--ring)}
+
+  .orb-dock{display:flex; gap:12px; flex-wrap:wrap; padding:10px; border:1px solid #1a1f33; border-radius:16px; background:#0c1030aa; margin-top:8px}
   .arb{width:42px;height:42px;border-radius:50%;box-shadow:0 0 18px #0008,inset 0 0 0 1px #ffffff16; cursor:pointer; position:relative; transition:.25s ease}
   .arb:hover{transform:translateY(-2px); box-shadow:0 6px 28px #000a,inset 0 0 0 1px #ffffff26}
   .arb::after{content:attr(data-id); position:absolute; left:50%; transform:translateX(-50%); bottom:-18px; font-size:10px; color:var(--muted); opacity:.8}
@@ -72,275 +65,218 @@
   .arb.rhea   {background:conic-gradient(#ffb1b1, #ffd3a6, #e6ffd1, #ffb1b1)}
   .arb.horus  {background:conic-gradient(#a77cff, #5ed0ff, #3ff0b6, #a77cff)}
   .arb.atlas  {background:conic-gradient(#9bb3ff, #8a5cff, #29d3ff, #9bb3ff)}
-
-  .arb-panel{position:fixed; inset:0; display:none; place-items:center; background:rgba(3,5,12,.6); backdrop-filter:blur(8px); z-index:99}
-  .arb-panel.show{display:grid}
-  .arb-card{width:min(520px,92vw); border-radius:22px; border:1px solid #1a1f33; background:linear-gradient(180deg,#0f1330ec,#0a0f20ec); box-shadow:0 20px 60px #000a; padding:16px}
-  .arb-hero{display:flex; gap:14px; align-items:center}
-  .arb-hero .dot{width:56px;height:56px;border-radius:50%;box-shadow:0 0 24px #fff4,inset 0 0 0 1px #ffffff22}
-  .arb-actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
-  .arb-actions .pill{padding:10px 14px}
-
-  /* Radial Menu */
-  .radial{ position:fixed; right:20px; bottom:24px; width:68px; height:68px; z-index:7 }
-  .radial .core{ width:68px; height:68px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #5ed0ff, #a77cff); box-shadow:0 0 22px #5ed0ff66; display:grid; place-items:center; cursor:pointer }
-  .radial .core span{font-weight:800}
-  .radial .ring{ position:absolute; inset:-36px; display:grid; place-items:center; pointer-events:none }
-  .radial .btn{ position:absolute; width:50px; height:50px; border-radius:50%; background:#0e1224; border:1px solid #1b2150; display:grid; place-items:center; pointer-events:auto; opacity:0; transform:scale(.6); transition:.25s ease }
-  .radial.open .btn{ opacity:1; transform:scale(1) }
-  .radial .btn:hover{ outline:1px solid var(--ring) }
-  .radial .b1{ right:70px; bottom:0 }  /* Apps */
-  .radial .b2{ right:48px; bottom:62px } /* Ritual */
-  .radial .b3{ right:-8px; bottom:90px } /* Root */
-  .radial .b4{ right:-62px; bottom:62px } /* Prev */
-  .radial .b5{ right:-84px; bottom:0 } /* Next */
 </style>
 </head>
 <body>
 <div class="app" id="app">
-  <header>
-    <div class="row">
-      <div class="brand"><div class="orb"></div><div class="title">DUAL • Nebula Pro</div></div>
-      <div class="selector"><span class="hint">Hub:</span><select id="hubSelect" aria-label="Selecionar hub"></select></div>
-      <div class="user" id="userBtn" title="Alterar avatar"><div class="avatar"></div><div>@Kodux</div></div>
+  <header class="top">
+    <div class="title">NEBULA PRIME <span class="dot"></span></div>
+    <div class="hdr-actions">
+      <button class="tab-btn" id="btnDevDocs" title="Dev Docs" aria-label="Dev Docs">🛠</button>
     </div>
   </header>
-  <main id="main">
-    <section class="card route active" data-route="archs">
-      <h3 style="margin-top:0">Arquétipos</h3>
-      <div class="orb-dock" id="orbDock">
-        <div class="arb luxara" data-id="luxara" title="Luxara"></div>
-        <div class="arb ignyra" data-id="ignyra" title="Ignyra"></div>
-        <div class="arb kaion"  data-id="kaion"  title="Kaion"></div>
-        <div class="arb nova"   data-id="nova"   title="Nova"></div>
-        <div class="arb elysha" data-id="elysha" title="Elysha"></div>
-        <div class="arb kaos"   data-id="kaos"   title="Kaos"></div>
-        <div class="arb genus"  data-id="genus"  title="Genus"></div>
-        <div class="arb lumine" data-id="lumine" title="Lumine"></div>
-        <div class="arb aion"   data-id="aion"   title="Aion"></div>
-        <div class="arb rhea"   data-id="rhea"   title="Rhea"></div>
-        <div class="arb horus"  data-id="horus"  title="Horus"></div>
-        <div class="arb atlas"  data-id="atlas"  title="Atlas"></div>
+
+  <main>
+    <!-- HOME -->
+    <section class="view active" id="view-home">
+      <div class="grid">
+        <button class="card" data-open="lan"><div class="ico">🌐</div><div><h3>LAN Scanner</h3><p>Descobrir dispositivos</p></div></button>
+        <button class="card" data-open="bind"><div class="ico">🔗</div><div><h3>Bind</h3><p>Conectar & parear</p></div></button>
+        <button class="card" data-open="report"><div class="ico">📈</div><div><h3>Relatório</h3><p>Métricas e logs</p></div></button>
+        <button class="card" data-open="memory"><div class="ico">🧠</div><div><h3>Memória</h3><p>Docs & sessões</p></div></button>
+      </div>
+
+      <section class="card" style="margin-top:12px">
+        <h3 style="margin-top:0">Arquétipos</h3>
+        <div class="orb-dock" id="orbDock">
+          <div class="arb luxara" data-id="luxara" title="Luxara"></div>
+          <div class="arb ignyra" data-id="ignyra" title="Ignyra"></div>
+          <div class="arb kaion"  data-id="kaion"  title="Kaion"></div>
+          <div class="arb nova"   data-id="nova"   title="Nova"></div>
+          <div class="arb elysha" data-id="elysha" title="Elysha"></div>
+          <div class="arb kaos"   data-id="kaos"   title="Kaos"></div>
+          <div class="arb genus"  data-id="genus"  title="Genus"></div>
+          <div class="arb lumine" data-id="lumine" title="Lumine"></div>
+          <div class="arb aion"   data-id="aion"   title="Aion"></div>
+          <div class="arb rhea"   data-id="rhea"   title="Rhea"></div>
+          <div class="arb horus"  data-id="horus"  title="Horus"></div>
+          <div class="arb atlas"  data-id="atlas"  title="Atlas"></div>
+        </div>
+      </section>
+    </section>
+
+    <!-- CHAT -->
+    <section class="view" id="view-chat">
+      <div id="chat-list" style="padding-bottom:84px"></div>
+      <div class="composer" style="position:fixed;left:12px;right:12px;bottom:80px;display:flex;gap:8px">
+        <button class="tab-btn" id="chat-btnMic">🎙</button>
+        <input id="chat-input" type="text" placeholder="Digite uma mensagem…" style="flex:1;border-radius:12px;border:1px solid #ffffff18;background:#101425;color:#ecf0ff;padding:12px 12px">
+        <button class="tab-btn" id="chat-btnSend">➤</button>
       </div>
     </section>
 
-    <section class="route" data-route="hub">
-      <h2>Hub Atual</h2><div id="hubGrid" class="grid"></div>
+    <!-- APPS -->
+    <section class="view" id="view-apps">
+      <div class="grid" id="apps-grid"></div>
     </section>
 
-    <section class="card route" data-route="folder">
-      <div class="row" style="justify-content:space-between">
-        <h3>Folder Controls • <span class="muted">apps/</span></h3>
-        <div class="toolbar">
-          <button class="pill" id="btnUp">⬆️ Subir</button>
-          <button class="pill" id="btnReload">↻ Recarregar</button>
-          <button class="pill" id="btnOpenAsHub">✨ Abrir como Sub-Hub</button>
+    <!-- PROFILE -->
+    <section class="view" id="view-profile">
+      <div class="grid" style="grid-template-columns:1fr">
+        <div class="card">
+          <div style="font-size:11px;color:var(--muted)">Assinatura</div>
+          <select id="signature" style="width:100%;background:transparent;border:0;outline:0;color:var(--fg);font-size:14px;padding:6px 0 2px;">
+            <option>Uno</option><option>Dual</option><option selected>Trinity</option>
+          </select>
+        </div>
+        <div class="card">
+          <div style="font-size:11px;color:var(--muted)">Avatar</div>
+          <div id="profile-avatar" style="width:84px;height:84px;border-radius:50%;display:grid;place-items:center;overflow:hidden;cursor:pointer;background:radial-gradient(120% 120% at 70% 0%,#231a52,#0d122a);border:1px solid #ffffff18;box-shadow:var(--shadow);">
+            👁️
+          </div>
+          <input type="file" id="avatarFile" accept="image/*" hidden>
         </div>
       </div>
-      <div class="path" id="pathBar"></div>
-      <div id="folderLoader" class="loader"><div>Carregando lista de arquivos…</div></div>
-      <div id="folderList" class="list"></div>
-      <div class="hint" style="margin-top:8px">Clique em pastas para entrar. Clique em <span class="kbd">*.html</span> para abrir. “Abrir como Sub-Hub” renderiza a pasta como grade.</div>
     </section>
-
-    <section class="route" data-route="subhub">
-      <div class="row" style="justify-content:space-between">
-        <h2>Sub-Hub (render da pasta atual)</h2>
-        <div class="toolbar"><button class="pill" id="btnSubHubPrev">◀</button><button class="pill" id="btnSubHubNext">▶</button></div>
-      </div>
-      <div id="subHubGrid" class="grid"></div>
-    </section>
-
-    <footer class="route" data-route="footer">Sempre único, sempre seu.</footer>
   </main>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-nav="home" title="Início" aria-label="Início">⌂</button>
+    <button class="tab-btn" data-nav="chat" title="Chat" aria-label="Chat">💬</button>
+    <button class="tab-btn" data-nav="apps" title="Apps" aria-label="Apps">🗂</button>
+    <button class="tab-btn" data-nav="profile" title="Perfil" aria-label="Perfil">⚙</button>
+  </nav>
 </div>
 
-<div class="arb-panel" id="arbPanel">
-  <div class="arb-card">
-    <div class="row" style="justify-content:space-between">
-      <div class="arb-hero">
-        <div class="dot" id="arbDot"></div>
-        <div>
-          <div id="arbTitle" style="font-weight:800; letter-spacing:.3px">Arquétipo</div>
-          <div id="arbDesc" class="muted" style="margin-top:2px">Descrição simbólica + mood</div>
-        </div>
-      </div>
-      <button class="pill" id="arbClose">✕ Fechar</button>
-    </div>
-    <div class="arb-actions">
-      <button class="pill" id="actTheme">🎨 Aplicar tema</button>
-      <button class="pill" id="actHub">◎ Ir para Hub do arquétipo</button>
-      <button class="pill" id="actInstall">⬇️ Instalar PWA deste arquétipo</button>
-    </div>
-  </div>
-</div>
+<!-- DevDocs + Trinity HUD -->
+<div id="devPanel" style="display:none;position:fixed;right:12px;top:12px;bottom:12px;width:560px;max-width:92vw;padding:12px;overflow:auto;background:linear-gradient(180deg,rgba(10,10,16,.9),rgba(10,10,16,.95));border:1px solid rgba(255,255,255,.06);border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6);z-index:9998;color:#dfe9ff">
+  <h3 style="margin:0 0 8px 0">Nebula Prime • DevDocs (V3.4.1)</h3>
+  <p style="opacity:.85;margin:4px 0 12px 0">Ferramentas client-side: HUD (telemetria), export/minify, persona & SW.</p>
 
-<!-- Radial menu -->
-<div class="radial" id="radial">
-  <div class="core" id="radialCore"><span>◎</span></div>
-  <div class="ring">
-    <button class="btn b1" id="rApps" title="Apps">🗂</button>
-    <button class="btn b2" id="rRitual" title="Ritual">✦</button>
-    <button class="btn b3" id="rRoot" title="Root">⌂</button>
-    <button class="btn b4" id="rPrev" title="SubHub Prev">◀</button>
-    <button class="btn b5" id="rNext" title="SubHub Next">▶</button>
+  <h4>Trinity HUD</h4>
+  <div id="hud" style="font-family:ui-monospace,monospace;font-size:12px;background:#07102b;padding:8px;border-radius:8px;white-space:pre;overflow:auto">—</div>
+  <div style="display:flex;gap:8px;margin:8px 0">
+    <button class="tab-btn" id="hudRefresh">↻</button>
+    <button class="tab-btn" id="hudClear">✕</button>
+    <button class="tab-btn" id="hudPurge" title="Purge cache por persona">🧹</button>
   </div>
+
+  <h4>Export / Minify</h4>
+  <div style="display:flex;gap:8px;margin:6px 0">
+    <button class="tab-btn" id="dlAnn" title="Download annotated">⬇ A</button>
+    <button class="tab-btn" id="dlMin" title="Download minified">⬇ M</button>
+    <button class="tab-btn" id="showMin" title="Preview minified">👁</button>
+  </div>
+  <pre id="minPrev" style="display:none;height:220px;overflow:auto;background:#061025;color:#cfe9ff;padding:8px;border-radius:6px"></pre>
 </div>
 
 <script>
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js?arch=horus').catch(console.error) }
 const vibrate=(p)=>{ if(navigator.vibrate) navigator.vibrate(p) }
+function markUsed(u){ if(navigator.serviceWorker?.controller){ navigator.serviceWorker.controller.postMessage({type:'used', url:u}); } }
 
-// Dynamic theme by hour (BR/São Paulo ~ fallback local time)
-(function dynamicTheme(){
-  const h = (new Date()).getHours();
-  // Dawn (5-8), Day (9-17), Dusk (18-20), Night (21-4)
-  let acc='#a77cff', acc2='#5ed0ff', ok='#3ff0b6';
-  if(h>=5&&h<=8){ acc='#ffb86b'; acc2='#ffd27c'; ok='#b7ffea'; }
-  else if(h>=9&&h<=17){ acc='#5ed0ff'; acc2='#29d3ff'; ok='#3ff0b6'; }
-  else if(h>=18&&h<=20){ acc='#ff5bd4'; acc2:'#a77cff'; ok:'#7fd2ff'; }
-  else{ acc='#8a5cff'; acc2:'#29d3ff'; ok:'#b7ffea'; }
-  const root=document.documentElement.style; root.setProperty('--acc',acc); root.setProperty('--acc2',acc2); root.setProperty('--ok',ok);
+// Persona mapping (theme + transition + route anim sync)
+const PERSONAS={
+  luxara:{vars:{'--acc':'#ff5bd4','--acc2':'#a77cff','--ok':'#5ed0b6'}, trans:'trans-flare'},
+  ignyra:{vars:{'--acc':'#ff2f92','--acc2':'#ff784e','--ok':'#ffbf3f'}, trans:'trans-flare'},
+  kaion :{vars:{'--acc':'#8a5cff','--acc2':'#29d3ff','--ok':'#3ff0b6'}, trans:'trans-warp'},
+  nova  :{vars:{'--acc':'#b7ffea','--acc2':'#7fd2ff','--ok':'#d7b5ff'}, trans:'trans-fade'},
+  elysha:{vars:{'--acc':'#39ffb6','--acc2':'#a77cff','--ok':'#e8e2ff'}, trans:'trans-fade'},
+  kaos  :{vars:{'--acc':'#ff00ff','--acc2':'#00ffff','--ok':'#ff3355'}, trans:'trans-warp'},
+  genus :{vars:{'--acc':'#7cf2ff','--acc2':'#b0ffa6','--ok':'#ffd27c'}, trans:'trans-warp'},
+  lumine:{vars:{'--acc':'#ffc1f3','--acc2':'#ffd7a6','--ok':'#fff19e'}, trans:'trans-flare'},
+  aion  :{vars:{'--acc':'#9ad4ff','--acc2':'#84ffd4','--ok':'#c2b7ff'}, trans:'trans-iris'},
+  rhea  :{vars:{'--acc':'#ffd3a6','--acc2':'#ffb1b1','--ok':'#e6ffd1'}, trans:'trans-fade'},
+  horus :{vars:{'--acc':'#a77cff','--acc2':'#5ed0ff','--ok':'#3ff0b6'}, trans:'trans-iris'},
+  atlas :{vars:{'--acc':'#9bb3ff','--acc2':'#29d3ff','--ok':'#8a5cff'}, trans:'trans-warp'}
+};
+let ACTIVE_TRANS='trans-iris';
+function setPersona(id){
+  const p=PERSONAS[id]; if(!p) return;
+  Object.entries(p.vars).forEach(([k,v])=> document.documentElement.style.setProperty(k, v));
+  ACTIVE_TRANS = p.trans || 'trans-iris';
+  const link=document.querySelector('link[rel="manifest"]'); if(link) link.href = `manifest-${id}.webmanifest`;
+  if('serviceWorker' in navigator){ navigator.serviceWorker.register(`./sw.js?arch=${encodeURIComponent(id)}`) }
+}
+document.getElementById('orbDock').addEventListener('click', (e)=>{
+  const el=e.target.closest('.arb'); if(!el) return; setPersona(el.dataset.id); markUsed('#/persona/'+el.dataset.id);
+});
+
+// Router + per-route animations synced to persona
+const views={home:document.getElementById('view-home'), chat:document.getElementById('view-chat'), apps:document.getElementById('view-apps'), profile:document.getElementById('view-profile')};
+function animate(el){ el.classList.add(ACTIVE_TRANS); setTimeout(()=> el.classList.remove(ACTIVE_TRANS), 420); }
+function navTo(key){
+  for(const k in views){ views[k].classList.remove('active') }
+  const v=views[key]||views.home; v.classList.add('active'); animate(v);
+  document.querySelectorAll('.tab-btn').forEach(b=> b.classList.toggle('active', b.dataset.nav===key));
+  location.hash='#/'+key; markUsed('#/'+key);
+}
+document.querySelectorAll('[data-nav]').forEach(b=> b.addEventListener('click', ()=> navTo(b.dataset.nav)));
+document.querySelectorAll('[data-open]').forEach(b=> b.addEventListener('click', ()=> navTo('chat')));
+const h = location.hash.replace('#/',''); if(views[h]) navTo(h);
+
+// Apps loader (simple)
+(async function loadApps(){
+  const grid=document.getElementById('apps-grid');
+  async function tryFetch(u){ const r=await fetch(u,{cache:'no-store'}); if(!r.ok) throw 0; markUsed(u); return r.json(); }
+  const cands=['./apps.json','./apps/apps.json','./folders/apps.json','/apps/apps.json'];
+  let data=null; for(const u of cands){ try{ data=await tryFetch(u); break; }catch(e){} }
+  if(!data){ grid.innerHTML='<div class="card">Sem apps.json — usando ./folders/apps.json</div>'; data=await tryFetch('./folders/apps.json'); }
+  const list=(data.apps||[]); grid.innerHTML='';
+  list.forEach(app=>{
+    const c=document.createElement('div'); c.className='card';
+    c.innerHTML=`<div class="ico">🗂</div><h3>${app.title||'App'}</h3><p>${app.desc||''}</p>`;
+    c.onclick=()=>{ try{ window.open(app.url,'_blank'); }catch{ location.href=app.url } markUsed(app.url); };
+    grid.appendChild(c);
+  });
 })();
 
-const ARCHS = {
-  luxara:{ name:'Luxara', desc:'Glow + tríades — estética Luxara', vars:{'--acc':'#ff5bd4','--acc2':'#a77cff','--ok':'#5ed0ff'} , orbClass:'luxara'},
-  ignyra:{ name:'Ignyra', desc:'Fogo neon — paixão aplicada', vars:{'--acc':'#ff2f92','--acc2':'#ff784e','--ok':'#ffbf3f'} , orbClass:'ignyra'},
-  kaion :{ name:'Kaion' , desc:'Fluxo técnico — precisão', vars:{'--acc':'#8a5cff','--acc2':'#29d3ff','--ok':'#3ff0b6'} , orbClass:'kaion'},
-  nova  :{ name:'Nova'  , desc:'Luz branda + visão', vars:{'--acc':'#b7ffea','--acc2':'#7fd2ff','--ok':'#d7b5ff'}, orbClass:'nova'},
-  elysha:{ name:'Elysha', desc:'Clareza + intuição', vars:{'--acc':'#39ffb6','--acc2':'#a77cff','--ok':'#e8e2ff'}, orbClass:'elysha'},
-  kaos  :{ name:'Kaos'  , desc:'Ruptura criativa', vars:{'--acc':'#ff00ff','--acc2':'#00ffff','--ok':'#ff3355'}, orbClass:'kaos'},
-  genus :{ name:'Genus' , desc:'Sistemas vivos', vars:{'--acc':'#7cf2ff','--acc2':'#b0ffa6','--ok':'#ffd27c'}, orbClass:'genus'},
-  lumine:{ name:'Lumine', desc:'Iluminação suave', vars:{'--acc':'#ffc1f3','--acc2':'#ffd7a6','--ok':'#fff19e'}, orbClass:'lumine'},
-  aion  :{ name:'Aion'  , desc:'Tempo espiral', vars:{'--acc':'#9ad4ff','--acc2':'#84ffd4','--ok':'#c2b7ff'}, orbClass:'aion'},
-  rhea  :{ name:'Rhea'  , desc:'Cuidado e ritmo', vars:{'--acc':'#ffd3a6','--acc2':'#ffb1b1','--ok':'#e6ffd1'}, orbClass:'rhea'},
-  horus :{ name:'Horus' , desc:'Olho que vê — central', vars:{'--acc':'#a77cff','--acc2':'#5ed0ff','--ok':'#3ff0b6'}, orbClass:'horus'},
-  atlas :{ name:'Atlas' , desc:'Força e estrutura', vars:{'--acc':'#9bb3ff','--acc2':'#29d3ff','--ok':'#8a5cff'}, orbClass:'atlas'},
-};
-
-const state={hubs:[], currentHubId:null, folder:{base:null, path:[]}, subHubPage:0};
-const $=(s,e=document)=>e.querySelector(s);
-function setHash(h){ location.hash=h; if(navigator.serviceWorker?.controller){ navigator.serviceWorker.controller.postMessage({type:'used', url:location.origin+h}); } }
-function getHash(){ return location.hash.slice(1) }
-function toHubHash(id){ return '/hub/'+encodeURIComponent(id) } function toFolderHash(root='apps',p=[]){ return '/folder/'+root+'/'+encodeURIComponent(p.join('/')) }
-
-// router transitions
-function showRoute(name){
-  document.querySelectorAll('.route').forEach(el=>{
-    el.classList.remove('active');
-    if(el.dataset.route===name) el.classList.add('active');
-  });
+// Chat (simple)
+const list=document.getElementById('chat-list'), input=document.getElementById('chat-input');
+function chatBubble(text, who='ai'){
+  const row=document.createElement('div'); row.style.margin='8px'; row.style.display='flex'; row.style.gap='8px';
+  const bubble=document.createElement('div'); bubble.style.cssText='max-width:82%;padding:12px 14px;border-radius:18px;background:linear-gradient(180deg,rgba(41,211,255,.35),rgba(154,124,255,.35));border:1px solid #ffffff22';
+  bubble.textContent=text; row.appendChild(bubble); list.appendChild(row); list.scrollTop=list.scrollHeight;
 }
+document.getElementById('chat-btnSend').onclick=()=>{ const t=input.value.trim(); if(!t) return; chatBubble(t,'me'); input.value=''; setTimeout(()=> chatBubble('Eco: '+t,'ai'), 350); };
 
-// Hubs
-async function loadHubs(){ const res=await fetch('./hubs.json'); state.hubs=await res.json(); navigator.serviceWorker?.controller?.postMessage({type:'used', url:'./hubs.json'}); }
-function fillHubSelector(){ const sel=$('#hubSelect'); sel.innerHTML=''; state.hubs.forEach(h=>{const o=document.createElement('option'); o.value=h.id;o.textContent=h.title; sel.appendChild(o)});
-  if(!state.currentHubId && state.hubs.length) state.currentHubId=state.hubs[0].id; sel.value=state.currentHubId;
-  sel.onchange=()=>{ vibrate(10); state.currentHubId=sel.value; setHash(toHubHash(state.currentHubId)); renderCurrentHub(); showRoute('hub') } }
-function renderCurrentHub(){ const hub=state.hubs.find(h=>h.id===state.currentHubId), grid=$('#hubGrid'); grid.innerHTML='';
-  if(!hub){ grid.innerHTML='<div class="muted">Nenhum hub.</div>'; return } hub.items.forEach(card=>{ const el=document.createElement('div'); el.className='card';
-    el.innerHTML=`<h3>${card.title}</h3><div class="muted">${card.desc||''}</div><div class="row wrap" style="margin-top:10px">${(card.links||[]).map(l=>`<a class="pill" href="${l.href}" target="${l.target||'_self'}">${l.label}</a>`).join('')}</div>`; grid.appendChild(el) }) }
+// DevDocs (HUD + Export + Purge)
+const panel=document.getElementById('devPanel'); document.getElementById('btnDevDocs').onclick=()=> panel.style.display = (panel.style.display==='none'?'block':'none');
+function minify(html){ return html.replace(/<!--[\s\S]*?-->/g,'').replace(/>\s+</g,'><').replace(/\s{2,}/g,' ').trim(); }
+document.getElementById('dlAnn').onclick=()=>{ const blob=new Blob(['<!doctype html>\n'+document.documentElement.outerHTML],{type:'text/html'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='NebulaPrime_V3_4_1_annotated.html'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),500); };
+document.getElementById('dlMin').onclick=()=>{ const txt=minify('<!doctype html>\n'+document.documentElement.outerHTML); const blob=new Blob([txt],{type:'text/html'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='NebulaPrime_V3_4_1_minified.html'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),500); };
+document.getElementById('showMin').onclick=()=>{ const prev=document.getElementById('minPrev'); if(prev.style.display==='none'){ prev.textContent=minify('<!doctype html>\n'+document.documentElement.outerHTML).slice(0,200000); prev.style.display='block' } else { prev.style.display='none' } };
 
-// Multi-fallback apps.json
-async function fetchFirst(urls){
-  for(const u of urls){
-    try{ const r=await fetch(u); if(r.ok){ navigator.serviceWorker?.controller?.postMessage({type:'used', url:u}); return await r.json() } }catch(e){}
-  }
-  return {"files":[],"children":{}};
-}
-async function loadFolder(){
-  document.querySelector('#folderLoader').classList.add('show');
-  if(!state.folder.base){
-    state._folderRoot = await fetchFirst(['/apps/apps.json','./apps/apps.json','./folders/apps.json','./apps.json']);
-    state.folder.base='__IN_MEMORY__';
-  }
-  const root = state._folderRoot || {"files":[],"children":{}};
-  const path = state.folder.path; let node=root;
-  for(const seg of path){ if(!node.children || !node.children[seg]) break; node=node.children[seg] }
-  renderPathBar(path); renderFolderList(node);
-  document.querySelector('#folderLoader').classList.remove('show');
-  showRoute('folder');
-}
-function renderPathBar(path){ const bar=document.querySelector('#pathBar'); bar.innerHTML=''; const rootCrumb=document.createElement('div'); rootCrumb.className='crumb'; rootCrumb.textContent='apps';
-  rootCrumb.onclick=()=>{ vibrate(5); state.folder.path=[]; setHash(toFolderHash('apps',[])); loadFolder() }; bar.appendChild(rootCrumb);
-  path.forEach((seg,i)=>{ const c=document.createElement('div'); c.className='crumb'; c.textContent=seg; c.onclick=()=>{ vibrate(5); state.folder.path=path.slice(0,i+1); setHash(toFolderHash('apps',state.folder.path)); loadFolder() }; bar.appendChild(c) }) }
-function renderFolderList(node){ const list=document.querySelector('#folderList'); list.innerHTML=''; const children=node.children||{}; const files=node.files||[];
-  Object.keys(children).sort().forEach(name=>{ const it=document.createElement('div'); it.className='item'; it.innerHTML=`<div class="name">📁 ${name}</div><div class="meta">pasta</div>`;
-    it.onclick=()=>{ vibrate(8); state.folder.path.push(name); setHash(toFolderHash('apps',state.folder.path)); loadFolder() }; list.appendChild(it) });
-  files.sort().forEach(name=>{ const it=document.createElement('div'); it.className='item'; it.innerHTML=`<div class="name">📄 ${name}</div><div class="meta">${name.endsWith('.html')?'HTML':'arquivo'}</div>`;
-    it.onclick=()=>{ vibrate(8); const p=['.','apps'].concat(state.folder.path).concat([name]).join('/'); if(navigator.serviceWorker?.controller){ navigator.serviceWorker.controller.postMessage({type:'used', url:p}); } if(name.endsWith('.html')) window.open(p,'_blank') }; list.appendChild(it) }) }
-
-function currentFolderToCards(rootNode, basePath){ const items=[]; const files=rootNode.files||[]; files.forEach(f=>{ if(f.endsWith('.html')) items.push({title:f.replace('.html',''),desc:'app embutido',links:[{label:'Abrir',href:basePath+'/'+f,target:'_blank'}]}) });
-  const children=rootNode.children||{}; Object.keys(children).forEach(ch=>{ items.push({title:'📁 '+ch, desc:'subpasta', links:[{label:'Entrar', href:'#'+toFolderHash('apps', state.folder.path.concat([ch]))}]}) }); return items }
-async function renderSubHub(page=0){ const root=state._folderRoot||{"files":[],"children":{}}; let node=root; for(const seg of state.folder.path){ if(!node.children||!node.children[seg]) break; node=node.children[seg] }
-  const basePath=['.','apps'].concat(state.folder.path).join('/'); const cards=currentFolderToCards(node, basePath); const perPage=12; const start=page*perPage, end=start+perPage;
-  const grid=document.querySelector('#subHubGrid'); grid.innerHTML=''; cards.slice(start,end).forEach(card=>{ const el=document.createElement('div'); el.className='card';
-    el.innerHTML=`<h3>${card.title}</h3><div class="muted">${card.desc||''}</div><div class="row wrap" style="margin-top:10px">${(card.links||[]).map(l=>`<a class="pill" href="${l.href}" target="${l.target||'_self'}" onclick="navigator.serviceWorker?.controller?.postMessage({{type:'used',url:'${l.href}'}})">${l.label}</a>`).join('')}</div>`; grid.appendChild(el) }) }
-document.getElementById('btnUp').onclick=()=>{ vibrate(5); state.folder.path.pop(); setHash(toFolderHash('apps',state.folder.path)); loadFolder(); renderSubHub(state.subHubPage=0) };
-document.getElementById('btnReload').onclick=()=>{ vibrate(5); state.folder.base=null; loadFolder(); renderSubHub(state.subHubPage=0) };
-document.getElementById('btnOpenAsHub').onclick=()=>{ vibrate(5); renderSubHub(state.subHubPage=0); showRoute('subhub') };
-document.getElementById('btnSubHubPrev').onclick=()=>{ vibrate(10); state.subHubPage=Math.max(0,state.subHubPage-1); renderSubHub(state.subHubPage) };
-document.getElementById('btnSubHubNext').onclick=()=>{ vibrate(10); state.subHubPage+=1; renderSubHub(state.subHubPage) };
-document.getElementById('userBtn').onclick=async()=>{ vibrate(10); const file=await new Promise(res=>{ const i=document.createElement('input'); i.type='file'; i.accept='image/*'; i.onchange=()=>res(i.files[0]||null); i.click() }); if(file){ const url=URL.createObjectURL(file); document.querySelector('.user .avatar').style.background=`center/cover no-repeat url('${url}')` } };
-
-function applyRoute(){ const h=getHash(); const mHub=h.match(/^\/hub\/([^\/]+)$/); const mFolder=h.match(/^\/folder\/apps\/?(.*)$/);
-  if(mHub){ state.currentHubId=decodeURIComponent(mHub[1]); document.querySelector('#hubSelect').value=state.currentHubId; renderCurrentHub(); showRoute('hub'); return }
-  if(mFolder){ const p=decodeURIComponent(mFolder[1]||'').split('/').filter(Boolean); state.folder.path=p; loadFolder(); renderSubHub(state.subHubPage=0); return }
-}
-window.addEventListener('hashchange', applyRoute);
-
-// Panel + install
-const panel   = document.getElementById('arbPanel');
-const arbDot  = document.getElementById('arbDot');
-const arbTitle= document.getElementById('arbTitle');
-const arbDesc = document.getElementById('arbDesc');
-const btnClose= document.getElementById('arbClose');
-const btnTheme= document.getElementById('actTheme');
-const btnHub  = document.getElementById('actHub');
-const btnInst = document.getElementById('actInstall');
-let currentArch=null; let deferredPrompt=null;
-window.addEventListener('beforeinstallprompt',(e)=>{ e.preventDefault(); deferredPrompt=e });
-function openPanel(id){ const a=ARCHS[id]; if(!a) return; currentArch=id; arbTitle.textContent=a.name; arbDesc.textContent=a.desc; arbDot.className='dot '+a.orbClass; panel.classList.add('show') }
-document.getElementById('arbClose').onclick=()=>panel.classList.remove('show');
-document.getElementById('orbDock').addEventListener('click',(ev)=>{ const el=ev.target.closest('.arb'); if(!el) return; openPanel(el.dataset.id) });
-btnTheme.onclick=()=>{ if(!currentArch) return; const vars=ARCHS[currentArch].vars||{}; const root=document.documentElement.style; Object.entries(vars).forEach(([k,v])=>root.setProperty(k,v)); localStorage.setItem('dual.theme.arch', currentArch) };
-// Após aplicar tema, envia ao Monólito (Trinity) o novo arquétipo
-  if(typeof notifyTrinity === 'function') notifyTrinity(currentArch);
-btnHub.onclick=()=>{ if(!currentArch) return; setHash(toHubHash(currentArch)); showRoute('hub') };
-  // Comunica ao Monólito o arquétipo selecionado
-  if(typeof notifyTrinity === 'function') notifyTrinity(currentArch);
-async function swapManifestAndSW(arch){ const link=document.querySelector('link[rel="manifest"]'); if(link) link.setAttribute('href', `manifest-${arch}.webmanifest`); if('serviceWorker' in navigator){ try{ await navigator.serviceWorker.register(`./sw.js?arch=${encodeURIComponent(arch)}`) }catch(e){} } }
-btnInst.onclick=async()=>{ if(!currentArch) return; await swapManifestAndSW(currentArch); if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt=null } else { alert('Use “Adicionar à Tela Inicial”.') } };
-
-// Trinity: envia tema/vars/manifest ao Monólito via postMessage
-function notifyTrinity(arch){
+async function refreshHUD(){
   try{
-    const a = ARCHS[arch]; if(!a) return;
-    const payload = {
-      __TRINITY__:1,
-      type:'ARCH_MANIFEST',
-      data:{
-        arch: arch,
-        vars: a.vars || {},
-        tts:{ preset:'natural' },
-        pwa:{ manifest: `manifest-${arch}.webmanifest` }
-      }
-    };
-    window.parent?.postMessage(payload, '*');
-  }catch(e){}
+    const r = await fetch('./__hud.json', {cache:'no-store'});
+    const j = await r.json();
+    document.getElementById('hud').textContent = JSON.stringify(j, null, 2);
+  }catch(e){
+    document.getElementById('hud').textContent = 'HUD indisponível — abra via HTTP(s) e aguarde SW registrar.';
+  }
 }
-(function restoreTheme(){ const saved=localStorage.getItem('dual.theme.arch'); if(saved && ARCHS[saved]){ Object.entries(ARCHS[saved].vars).forEach(([k,v])=>document.documentElement.style.setProperty(k,v)); const link=document.querySelector('link[rel="manifest"]'); if(link) link.setAttribute('href', `manifest-${saved}.webmanifest`); if('serviceWorker' in navigator){ navigator.serviceWorker.register(`./sw.js?arch=${encodeURIComponent(saved)}`) } } })();
+document.getElementById('hudRefresh').onclick=refreshHUD;
+document.getElementById('hudClear').onclick=()=>{ document.getElementById('hud').textContent='—' };
+document.getElementById('hudPurge').onclick=()=>{ if(navigator.serviceWorker?.controller){ navigator.serviceWorker.controller.postMessage({type:'purge'}) } };
+setTimeout(refreshHUD, 1000);
 
-// Radial
-const radial=document.getElementById('radial'); const core=document.getElementById('radialCore');
-core.onclick=()=>{ vibrate(8); radial.classList.toggle('open') };
-document.getElementById('rApps').onclick=()=>{ vibrate(10); setHash(toFolderHash('apps',[])); state.folder.path=[]; loadFolder(); renderSubHub(state.subHubPage=0) };
-document.getElementById('rRitual').onclick=()=>{ vibrate(10); setHash(toHubHash('ritual')) };
-document.getElementById('rRoot').onclick=()=>{ vibrate(10); setHash(toHubHash('root')) };
-document.getElementById('rPrev').onclick=()=>{ vibrate(10); document.getElementById('btnSubHubPrev').click() };
-document.getElementById('rNext').onclick=()=>{ vibrate(10); document.getElementById('btnSubHubNext').click() };
-
-(async function boot(){ await loadHubs(); fillHubSelector(); renderCurrentHub(); })();
+// Avatar (persist local)
+(function(){
+  const AVATAR_KEY = 'dual.profile.avatar';
+  const avatar = document.getElementById('profile-avatar');
+  const fileInp = document.getElementById('avatarFile');
+  function apply(dataUrl){
+    if(!avatar) return; avatar.innerHTML=''; const img=document.createElement('img'); img.src=dataUrl; img.alt='avatar';
+    img.style.width='100%'; img.style.height='100%'; img.style.objectFit='cover'; avatar.appendChild(img);
+  }
+  try{ const saved=localStorage.getItem(AVATAR_KEY); if(saved) apply(saved) }catch(e){}
+  avatar?.addEventListener('click', ()=> fileInp?.click());
+  fileInp?.addEventListener('change', ()=>{
+    const f=fileInp.files && fileInp.files[0]; if(!f) return;
+    const reader=new FileReader(); reader.onload=()=>{ const dataUrl=reader.result; try{localStorage.setItem(AVATAR_KEY,dataUrl)}catch(e){} apply(dataUrl) }; reader.readAsDataURL(f);
+  });
+})();
 </script>
 </body>
 </html>

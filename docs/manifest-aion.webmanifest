@@ -1,13 +1,13 @@
 {
-  "name": "Dual • Horus — Nebula Prime 3.4.1",
-  "short_name": "Horus",
+  "name": "Dual • Aion — Nebula Prime 3.4.1",
+  "short_name": "Aion",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#0b0b14",
-  "theme_color": "#a77cff",
+  "theme_color": "#9ad4ff",
   "icons": [
     {
-      "src": "icons/icon-512-horus.svg",
+      "src": "icons/icon-512-aion.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"

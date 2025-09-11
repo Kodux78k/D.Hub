@@ -1,2 +1,129 @@
-// SW Ultra-Plus (min) — trigram + HUD + purge + SWR
-const p=new URLSearchParams(self.location.search),A=p.get("arch")||"default",V="v3_4_1_plus",C=`dual-hubs-${A}-${V}`,CORE=["./","./index.html","./folders/apps.json"];let HOT=new Map,SEQ2=new Map,SEQ3=new Map,lastURL=null,prevURL=null,lastFetches=[],latencySum=0,latencyCount=0;const now=()=>Date.now();function rec(u,m){lastFetches.unshift({url:u,ms:m,t:new Date().toISOString()}),lastFetches.length>10&&lastFetches.pop(),latencySum+=m,latencyCount++}async function save(){const c=await caches.open(C);const s=m=>Array.from(m.entries()).map(([k,v])=>[k,Array.from(v.entries())]);await c.put("hot.json",new Response(JSON.stringify(Array.from(HOT.entries())),{headers:{"content-type":"application/json"}})),await c.put("seq2.json",new Response(JSON.stringify(s(SEQ2)),{headers:{"content-type":"application/json"}})),await c.put("seq3.json",new Response(JSON.stringify(s(SEQ3)),{headers:{"content-type":"application/json"}})),await c.put("telemetry.json",new Response(JSON.stringify({latencySum,latencyCount,lastFetches}),{headers:{"content-type":"application/json"}}))}async function load(){try{const c=await caches.open(C),h=await c.match("hot.json");h&&(HOT=new Map(await h.json()));const s2=await c.match("seq2.json");if(s2){const a=await s2.json();SEQ2=new Map(a.map(([k,v])=>[k,new Map(v)]))}const s3=await c.match("seq3.json");if(s3){const a=await s3.json();SEQ3=new Map(a.map(([k,v])=>[k,new Map(v)]))}const t=await c.match("telemetry.json");if(t){const j=await t.json();latencySum=j.latencySum||0,latencyCount=j.latencyCount||0,lastFetches=j.lastFetches||[]}}catch(e){}}self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(CORE)))}),self.addEventListener("activate",e=>{e.waitUntil(async()=>{const k=await caches.keys();await Promise.all(k.map(x=>x!==C&&caches.delete(x))),await load()})});self.addEventListener("message",e=>{const{type:t,url:u}=e.data||{};"used"===t&&u&&(HOT.set(u,(HOT.get(u)||0)+1),lastURL&&(SEQ2.set(lastURL,(SEQ2.get(lastURL)||new Map).set(u,(SEQ2.get(lastURL)?.get(u)||0)+1)),prevURL&&(SEQ3.set(prevURL+"||"+lastURL,(SEQ3.get(prevURL+"||"+lastURL)||new Map).set(u,(SEQ3.get(prevURL+"||"+lastURL)?.get(u)||0)+1))),prevURL=lastURL,lastURL=u,save(),prefetch(u).catch(()=>{})),"purge"===t&&e.waitUntil(async()=>{const k=await caches.keys();await Promise.all(k.filter(x=>x.startsWith("dual-hubs-")).map(x=>caches.delete(x))),HOT=new Map,SEQ2=new Map,SEQ3=new Map,lastFetches=[],latencySum=0,latencyCount=0,await save()})});async function prefetch(u){const c=await caches.open(C),hot=Array.from(HOT.entries()).sort((a,b)=>b[1]-a[1]).slice(0,6).map(x=>x[0]),m2=SEQ2.get(u)||new Map,p2=Array.from(m2.entries()).sort((a,b)=>b[1]-a[1]).slice(0,6).map(x=>x[0]),m3=SEQ3.get((prevURL||"")+"||"+(lastURL||""))||new Map,p3=Array.from(m3.entries()).sort((a,b)=>b[1]-a[1]).slice(0,6).map(x=>x[0]),tgt=Array.from(new Set([...p3,...p2,...hot])).slice(0,10);await Promise.all(tgt.map(async x=>{try{const t0=now(),r=await fetch(x,{cache:"no-store"}),ms=now()-t0;rec(x,ms),r.ok&&await c.put(x,r.clone())}catch(e){}}))}self.addEventListener("fetch",e=>{const r=e.request;if("GET"===r.method){const u=new URL(r.url);if(u.pathname.endsWith("/__hud.json"))return void e.respondWith(async()=>{const c=await caches.open(C),k=await c.keys(),avg=latencyCount?latencySum/latencyCount:0;return new Response(JSON.stringify({arch:A,version:V,cacheSize:k.length,hotTop:Array.from(HOT.entries()).sort((a,b)=>b[1]-a[1]).slice(0,10),seq2Top:Array.from(SEQ2.entries()).slice(0,6).map(([a,b])=>[a,Array.from(b.entries()).sort((x,y)=>y[1]-x[1]).slice(0,6)]),seq3Top:Array.from(SEQ3.entries()).slice(0,6).map(([p,b])=>[p,Array.from(b.entries()).sort((x,y)=>y[1]-x[1]).slice(0,6)]),lastFetches,avgLatencyMs:Math.round(avg)},null,2),{headers:{"content-type":"application/json"}})})}e.respondWith(async()=>{const t0=now();try{const r=await fetch(e.request),ms=now()-t0;rec(e.request.url,ms);const c=r.clone();return caches.open(C).then(x=>x.put(e.request,c)),r}catch(_){const c=await caches.match(e.request);return c||Response.error()}finally{save()}}())});
+// SW V3.4.1 Ultra — HUD + SWR + per-arch + trigram + purge
+const params = new URLSearchParams(self.location.search);
+const ARCH = params.get('arch') || 'default';
+const VERSION = 'v3_4_1';
+const CACHE = `dual-hubs-${ARCH}-${VERSION}`;
+const CORE = ["./","./index.html","./folders/apps.json"];
+
+let HOT = new Map();                 // url -> score
+let SEQ2 = new Map();                // bigram: A -> (B -> score)
+let SEQ3 = new Map();                // trigram: A,B -> (C -> score)
+let lastURL = null, prevURL = null;  // for trigram
+let lastFetches = [];                // [{url, ms, t} ... last 10]
+let latencySum = 0, latencyCount = 0;
+
+function now(){ return Date.now() }
+function pushFetch(url, ms){
+  lastFetches.unshift({url, ms, t: new Date().toISOString()});
+  if(lastFetches.length > 10) lastFetches.pop();
+  latencySum += ms; latencyCount += 1;
+}
+
+async function saveState(){
+  const cache = await caches.open(CACHE);
+  const ser = (m) => Array.from(m.entries()).map(([k,v])=>[k, Array.from(v.entries())]);
+  await cache.put('hot.json', new Response(JSON.stringify(Array.from(HOT.entries())), {headers:{'content-type':'application/json'}}));
+  await cache.put('seq2.json', new Response(JSON.stringify(ser(SEQ2)), {headers:{'content-type':'application/json'}}));
+  await cache.put('seq3.json', new Response(JSON.stringify(ser(SEQ3)), {headers:{'content-type':'application/json'}}));
+  await cache.put('telemetry.json', new Response(JSON.stringify({latencySum, latencyCount, lastFetches}), {headers:{'content-type':'application/json'}}));
+}
+async function loadState(){
+  try{
+    const cache = await caches.open(CACHE);
+    const h = await cache.match('hot.json'); if(h){ HOT = new Map(await h.json()) }
+    const s2 = await cache.match('seq2.json'); if(s2){ const a=await s2.json(); SEQ2 = new Map(a.map(([k,v])=>[k,new Map(v)]) ) }
+    const s3 = await cache.match('seq3.json'); if(s3){ const a=await s3.json(); SEQ3 = new Map(a.map(([k,v])=>[k,new Map(v)]) ) }
+    const tel = await cache.match('telemetry.json'); if(tel){ const t=await tel.json(); latencySum=t.latencySum||0; latencyCount=t.latencyCount||0; lastFetches=t.lastFetches||[] }
+  }catch(e){}
+}
+
+self.addEventListener('install', (e)=>{
+  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)));
+});
+self.addEventListener('activate', (e)=>{
+  e.waitUntil((async()=>{
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k=>k!==CACHE && caches.delete(k)));
+    await loadState();
+  })());
+});
+
+self.addEventListener('message', (e)=>{
+  const {type, url} = e.data || {};
+  if(type === 'used' && url){
+    HOT.set(url, (HOT.get(url)||0)+1);
+    if(lastURL){
+      const m = SEQ2.get(lastURL) || new Map(); m.set(url, (m.get(url)||0)+1); SEQ2.set(lastURL, m);
+      if(prevURL){
+        const key = prevURL + "||" + lastURL;
+        const m3 = SEQ3.get(key) || new Map(); m3.set(url, (m3.get(url)||0)+1); SEQ3.set(key, m3);
+      }
+    }
+    prevURL = lastURL; lastURL = url;
+    saveState();
+    prefetchSmart(url).catch(()=>{});
+  }
+  if(type === 'purge'){
+    e.waitUntil((async()=>{
+      const keys = await caches.keys();
+      await Promise.all(keys.filter(k=>k.startsWith('dual-hubs-')).map(k=>caches.delete(k)));
+      HOT = new Map(); SEQ2 = new Map(); SEQ3 = new Map();
+      lastFetches = []; latencySum=0; latencyCount=0;
+      await saveState();
+    })());
+  }
+});
+
+async function prefetchSmart(current){
+  const cache = await caches.open(CACHE);
+  const hotTop = Array.from(HOT.entries()).sort((a,b)=>b[1]-a[1]).slice(0,6).map(x=>x[0]);
+  const m2 = SEQ2.get(current) || new Map();
+  const pred2 = Array.from(m2.entries()).sort((a,b)=>b[1]-a[1]).slice(0,6).map(x=>x[0]);
+  const m3 = SEQ3.get((prevURL||'') + "||" + (lastURL||'')) || new Map();
+  const pred3 = Array.from(m3.entries()).sort((a,b)=>b[1]-a[1]).slice(0,6).map(x=>x[0]);
+  const targets = Array.from(new Set([...pred3, ...pred2, ...hotTop])).slice(0,10);
+  await Promise.all(targets.map(async (u)=>{
+    try{ const t0 = now(); const res = await fetch(u, {cache:'no-store'}); const ms = now()-t0; pushFetch(u, ms);
+      if(res && res.ok){ await cache.put(u, res.clone()); } }catch(e){}
+  }));
+}
+
+// HUD endpoint
+self.addEventListener('fetch', (event)=>{
+  const req = event.request;
+  if(req.method === 'GET'){
+    const url = new URL(req.url);
+    if(url.pathname.endsWith('/__hud.json')){
+      event.respondWith((async()=>{
+        const cache = await caches.open(CACHE);
+        const keys = await cache.keys();
+        const avg = latencyCount ? (latencySum/latencyCount) : 0;
+        return new Response(JSON.stringify({
+          arch: ARCH, version: VERSION, cacheSize: keys.length,
+          hotTop: Array.from(HOT.entries()).sort((a,b)=>b[1]-a[1]).slice(0,10),
+          seq2Top: Array.from(SEQ2.entries()).slice(0,5).map(([a,b])=>[a, Array.from(b.entries()).sort((x,y)=>y[1]-x[1]).slice(0,5)]),
+          seq3Top: Array.from(SEQ3.entries()).slice(0,5).map(([p,b])=>[p, Array.from(b.entries()).sort((x,y)=>y[1]-x[1]).slice(0,5)]),
+          lastFetches, avgLatencyMs: Math.round(avg)
+        }, null, 2), {headers:{'content-type':'application/json'}});
+      })());
+      return;
+    }
+  }
+  // measure latency for normal fetches
+  if(req.method === 'GET'){
+    event.respondWith((async()=>{
+      const t0 = now();
+      try{
+        const res = await fetch(req);
+        const ms = now()-t0; pushFetch(req.url, ms);
+        const copy = res.clone(); caches.open(CACHE).then(c=>c.put(req, copy));
+        return res;
+      }catch(_){
+        const cached = await caches.match(req);
+        return cached || Response.error();
+      }finally{
+        saveState();
+      }
+    })());
+  }
+});
