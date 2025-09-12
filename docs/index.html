@@ -1,692 +1,479 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>Dual Hub — Nebula Pro (Espelho • Launcher • Brain • Trinity)</title>
-<meta name="theme-color" content="#0b0b13">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>HUB Dual — Variante A</title>
+<link rel="icon" href="icons/others/favicon.svg" type="image/svg+xml"/>
+<meta name="theme-color" content="#00ffff"/>
 <style>
-/* ========= Nebula Pro (42° #f0f → #0ff) ========= */
-:root{
-  --nebula-a:#ff00ff; --nebula-b:#00ffff; --angle:42deg;
-  --bg-0:#0b0b13; --bg-1:#0f0f19; --bg-2:#151525; --card:#0f1220;
-  --txt:#e9eef7; --muted:#a7b1c6; --accent:#9d7dff; --ok:#39FFB6; --warn:#ffd166; --err:#ff5c7a;
-  --border:rgba(255,255,255,.08); --shadow:rgba(0,0,0,.5);
-}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0; color:var(--txt); background:
-  radial-gradient(1200px 600px at 70% -10%, rgba(157,125,255,.25), transparent 60%),
-  linear-gradient(var(--angle), var(--nebula-a), var(--nebula-b));
-  background-attachment: fixed;
-  min-height:100%;
-  font: 14px/1.45 "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-}
-a{color:var(--ok); text-decoration:none}
-button{cursor:pointer}
-.hidden{display:none!important}
-.row{display:flex; gap:.75rem}
-.col{display:flex; flex-direction:column; gap:.75rem}
-
-/* ======= Shell ======= */
-.app{
-  display:flex; flex-direction:column; min-height:100dvh;
-  backdrop-filter: blur(6px);
-}
-.header{
-  position:sticky; top:0; z-index:10;
-  display:flex; align-items:center; gap:.5rem;
-  padding:.6rem .8rem; background:color-mix(in oklab, var(--bg-0) 80%, transparent);
-  border-bottom:1px solid var(--border);
-  box-shadow: 0 6px 18px -12px var(--shadow);
-}
-.brand{
-  display:flex; align-items:center; gap:.6rem; font-weight:700; letter-spacing:.2px;
-}
-.brand .logo{
-  width:28px; height:28px; border-radius:50%;
-  background: conic-gradient(from 0turn, var(--nebula-a), var(--nebula-b), var(--nebula-a));
-  position:relative; box-shadow:0 0 0 2px rgba(255,255,255,.08) inset, 0 0 18px rgba(0,0,0,.25);
-}
-.brand .logo:after{
-  content:""; position:absolute; inset:4px; border-radius:50%;
-  background: radial-gradient(circle at 50% 40%, rgba(255,255,255,.35), rgba(255,255,255,0) 55%);
-  animation: breathe 3.6s ease-in-out infinite;
-}
-@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
-.nav{
-  margin-left:auto; display:flex; gap:.35rem; overflow:auto hidden; padding-bottom:.25rem;
-}
-.btn{
-  display:inline-flex; align-items:center; gap:.5rem;
-  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-  border:1px solid var(--border); color:var(--txt);
-  padding:.5rem .7rem; border-radius:14px; white-space:nowrap;
-}
-.btn.ghost{background:transparent}
-.btn.primary{
-  border-color: color-mix(in oklab, var(--ok) 30%, var(--border));
-  box-shadow: 0 8px 20px -12px rgba(57,255,182,.7);
-}
-.dot{
-  width:10px; height:10px; border-radius:50%;
-  background: var(--ok);
-  box-shadow:0 0 0 0 rgba(57,255,182,.5);
-  animation: dotPulse 2.4s ease-out infinite;
-}
-@keyframes dotPulse{0%{box-shadow:0 0 0 0 rgba(57,255,182,.6)}70%{box-shadow:0 0 0 10px rgba(57,255,182,0)}100%{box-shadow:0 0 0 0 rgba(57,255,182,0)}}
-
-.main{flex:1; display:grid; grid-template-rows:auto 1fr;}
-
-/* Tabs */
-.tabs{display:flex; gap:.4rem; padding:.6rem .8rem; border-bottom:1px solid var(--border); background:color-mix(in oklab, var(--bg-0) 70%, transparent)}
-.tab{padding:.45rem .7rem; border:1px solid transparent; border-radius:12px; color:var(--muted)}
-.tab.active{border-color:var(--border); color:var(--txt); background:rgba(255,255,255,.04)}
-
-/* Surfaces */
-.surface{
-  padding:clamp(.8rem, 1.6vw, 1.2rem);
-  display:grid; gap:1rem;
-}
-
-/* ====== Espelho Dual (Home) ====== */
-.portal{
-  display:grid; place-items:center; min-height:58dvh;
-}
-.portal-card{
-  width:min(980px, 92vw);
-  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-  border:1px solid var(--border); border-radius:20px; padding:1.1rem;
-  box-shadow: 0 30px 80px -40px var(--shadow);
-}
-.portal-hero{
-  display:grid; grid-template-columns:1.1fr .9fr; gap:1rem; align-items:center;
-}
-@media (max-width:900px){ .portal-hero{grid-template-columns:1fr;}}
-.canvas{
-  aspect-ratio:1/1; border-radius:24px; background:radial-gradient(circle at 50% 60%, rgba(255,255,255,.08), transparent 65%);
-  display:grid; place-items:center; position:relative; isolation:isolate; overflow:hidden; border:1px solid var(--border);
-}
-.mirror{
-  width:74%; aspect-ratio:1/1; border-radius:50%;
-  background:
-   radial-gradient(120px 60px at 50% 30%, rgba(255,255,255,.28), transparent 60%),
-   conic-gradient(from 0turn, rgba(255,255,255,.08), rgba(255,255,255,.0) 30%, rgba(255,255,255,.08) 60%, rgba(255,255,255,.0) 100%),
-   linear-gradient(var(--angle), color-mix(in oklab, var(--nebula-a) 70%, white 8%), color-mix(in oklab, var(--nebula-b) 70%, white 8%));
-  box-shadow:
-   0 0 0 2px rgba(255,255,255,.08) inset,
-   0 40px 120px -40px rgba(0,0,0,.5),
-   0 0 120px 20px color-mix(in oklab, var(--nebula-b) 20%, transparent);
-  position:relative;
-  animation: spin 24s linear infinite;
-}
-.mirror:after{
-  content:""; position:absolute; inset:0; border-radius:50%;
-  background: radial-gradient(300px 140px at 50% 10%, rgba(255,255,255,.15), transparent 50%);
-  mix-blend-mode:screen;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-.pulse{
-  position:absolute; inset:-20%; border-radius:50%;
-  background: radial-gradient(circle at 50% 50%, rgba(157,125,255,.15), rgba(157,125,255,0) 55%);
-  filter: blur(20px); animation: halo 5.2s ease-in-out infinite;
-}
-@keyframes halo{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
-
-.kicker{opacity:.75; font-size:.86rem}
-.title{font-size: clamp(1.2rem, 2.4vw, 1.8rem); font-weight:800; letter-spacing:.2px}
-.lead{color:var(--muted); margin:.4rem 0 1rem}
-.actions{display:flex; flex-wrap:wrap; gap:.5rem}
-.badge{font-size:.75rem; padding:.25rem .5rem; border:1px solid var(--border); border-radius:999px; background:rgba(255,255,255,.04)}
-
-/* ===== Launcher ===== */
-.grid{
-  display:grid; gap:.75rem;
-  grid-template-columns: repeat( auto-fill, minmax(160px, 1fr) );
-}
-.card{
-  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-  border:1px solid var(--border); border-radius:16px; padding:.75rem; display:flex; flex-direction:column; gap:.5rem;
-}
-.app-icon{
-  width:48px; height:48px; border-radius:12px; background:rgba(255,255,255,.06);
-  display:grid; place-items:center; border:1px solid var(--border);
-}
-.app-icon svg{width:26px; height:26px; opacity:.9}
-.meta{font-size:.8rem; color:var(--muted)}
-.row-btns{display:flex; gap:.4rem; margin-top:auto}
-.btn.sm{padding:.38rem .6rem; border-radius:10px; font-size:.82rem}
-
-/* ===== Brain ===== */
-.field{display:grid; gap:.35rem}
-.input, .textarea, .select{
-  width:100%; color:var(--txt); background:rgba(255,255,255,.04);
-  border:1px solid var(--border); border-radius:12px; padding:.55rem .7rem;
-}
-.textarea{min-height:120px; resize:vertical}
-.kv{display:grid; grid-template-columns:1fr auto; align-items:center; gap:.5rem}
-.loader-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 rgba(157,125,255,.6);animation:dotPulse 2.6s ease-out infinite}
-
-/* ===== Viewer ===== */
-.viewer-wrap{position:relative}
-.viewer{
-  width:100%; height:min(70dvh, 70vh);
-  border:1px solid var(--border); border-radius:16px; background:#0a0c16;
-}
-.viewer-controls{
-  position:absolute; right:.6rem; top:.6rem; display:flex; gap:.4rem;
-}
-.badge-float{
-  position:fixed; right:.9rem; bottom:4.2rem; z-index:50;
-  display:none; align-items:center; gap:.5rem;
-}
-
-/* ===== Trinity ===== */
-.tri-grid{display:grid; gap:.75rem; grid-template-columns:1fr 1fr}
-@media (max-width:1000px){.tri-grid{grid-template-columns:1fr}}
-.tri-box{min-height:240px; border:1px solid var(--border); border-radius:16px; background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); padding:.75rem}
-.small{font-size:.85rem; color:var(--muted)}
-hr.sep{border:0; height:1px; background:var(--border); margin:.5rem 0}
-
-/* ===== Chips ===== */
-.chips{display:flex; gap:.4rem; flex-wrap:wrap}
-.chip{padding:.25rem .55rem; border-radius:999px; border:1px solid var(--border); background:rgba(255,255,255,.04); font-size:.78rem}
-
-.footer{
-  padding:.7rem; display:flex; justify-content:space-between; align-items:center;
-  border-top:1px solid var(--border); background:color-mix(in oklab, var(--bg-0) 80%, transparent)
-}
-.minibar{display:flex; gap:.5rem; align-items:center}
-.minibar .btn{padding:.4rem .6rem}
+  :root{
+    --bg1:#ff43ff; --bg2:#25f7ff;
+    --ink:#f4f7ff; --ink-dim:#d7e4ff; --ink-muted:#a7b9d6;
+    --edge:#ffffff16; --glass:#0b0b0fdd; --glass2:#0a0a14cc; --glass3:#0a0a12f2;
+    --h:72px; --f:82px; --radius:26px; --radius-sm:18px; --pad:14px; --gap:12px;
+    --shadow:0 14px 34px rgba(0,0,0,.38);
+    --blur:16px;
+    --sm:13px; --md:15px; --lg:18px; --xl:26px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font:400 var(--md)/1.45 ui-sans-serif,system-ui,Inter,Segoe UI,Roboto,Arial;
+    color:var(--ink);
+    background:
+      radial-gradient(1000px 900px at 8% -10%, #ff67ff29, transparent 60%),
+      radial-gradient(1000px 900px at 110% 110%, #6ff9ff29, transparent 60%),
+      linear-gradient(42deg,var(--bg1),var(--bg2));
+    background-attachment:fixed;
+  }
+  .glass{background:var(--glass); backdrop-filter:blur(var(--blur)); -webkit-backdrop-filter:blur(var(--blur)); border:1px solid var(--edge)}
+  header{
+    position:fixed; inset:0 0 auto 0; height:var(--h); padding:0 16px; z-index:30;
+    display:flex; align-items:center; gap:12px; box-shadow:0 10px 30px rgba(0,0,0,.25);
+    border-bottom:1px solid var(--edge);
+  }
+  .hTitle{font-weight:800; letter-spacing:.2px; font-size:28px}
+  .grow{flex:1}
+  .iconbtn{width:40px;height:40px;border-radius:14px;border:1px solid var(--edge);display:grid;place-content:center;background:#0c0c16aa;cursor:pointer}
+  .iconbtn:active{transform:scale(.96)}
+  .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(180deg,#222,#111);border:1px solid var(--edge);display:grid;place-content:center}
+  main{padding:calc(var(--h) + 14px) 14px calc(var(--f) + 14px)}
+  .card{border-radius:22px;padding:14px;box-shadow:var(--shadow);border:1px solid var(--edge);background:var(--glass2)}
+  .muted{color:var(--ink-muted)}
+  .divider{height:1px;background:var(--edge);margin:10px 0}
+  /* Apps */
+  .appsGrid{display:grid;gap:12px}
+  .appRow{display:flex;gap:12px;align-items:center;border:1px solid var(--edge);background:#090914cc;border-radius:18px;padding:10px}
+  .appRow img,.appRow .ico{width:34px;height:34px;border-radius:10px;border:1px solid var(--edge);background:#080812}
+  .row{display:flex;gap:10px;align-items:center}
+  .growMin{flex:1;min-width:0}
+  .title{font-weight:700}
+  .desc{font-size:13px;color:var(--ink-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .btn{font-size:13px;color:var(--ink);border:1px solid var(--edge);background:#0c0c18cc;padding:8px 12px;border-radius:12px;cursor:pointer}
+  .btn.pri{background:linear-gradient(42deg,#4ef5ffcc,#c996ffcc)}
+  .btn.star[data-on="true"]{background:linear-gradient(42deg,#ffd36ecc,#ff8f6ecc);color:#2c1200}
+  /* Sessions empilhadas */
+  .session{margin:14px 0;border-radius:22px;border:1px solid var(--edge);overflow:hidden;background:#080811f2;box-shadow:var(--shadow)}
+  .sHead{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#0a0a14ea}
+  .sBody{height:440px;border-top:1px solid var(--edge);background:#07070e}
+  .sBody iframe{width:100%;height:100%;border:0}
+  .sBtns{display:flex;gap:8px;margin-left:auto}
+  .sBtn{width:34px;height:34px;border-radius:10px;border:1px solid var(--edge);display:grid;place-content:center;background:#0c0c18cc;cursor:pointer}
+  /* Footer dock (flutuante) */
+  footer{
+    position:fixed; inset:auto 12px 12px 12px; height:var(--f); border-radius:26px;
+    padding:10px 14px; z-index:35; display:flex; align-items:center; gap:12px;
+    box-shadow:var(--shadow); border:1px solid var(--edge);
+  }
+  .dockL,.dockR{display:flex;gap:10px;align-items:center}
+  .quick{flex:1;display:flex;gap:8px;overflow:auto;scrollbar-width:none}
+  .quick::-webkit-scrollbar{display:none}
+  .mini{display:inline-flex;gap:8px;align-items:center;background:#0e0e19cc;border:1px solid var(--edge);border-radius:999px;padding:6px 10px}
+  .dot{width:9px;height:9px;border-radius:50%;background:linear-gradient(42deg,#7ff,#f9f);box-shadow:0 0 12px #7ff}
+  /* Brain popover */
+  #brain{position:fixed; top:calc(var(--h) + 10px); right:12px; width:min(92vw,420px); z-index:50}
+  .popover{border-radius:22px;padding:12px;background:var(--glass3);border:1px solid var(--edge);backdrop-filter:blur(var(--blur))}
+  .menuItem{display:flex;gap:12px;align-items:center;border:1px solid var(--edge);background:#0c0c17cc;border-radius:14px;padding:12px}
+  .menuItem + .menuItem{margin-top:8px}
+  .input{display:flex;gap:8px;align-items:center;background:#0a0a15;border:1px solid var(--edge);border-radius:12px;padding:8px 10px}
+  .input input,.input select{flex:1;background:transparent;border:0;outline:0;color:var(--ink);font-size:13px}
+  .notice{font-size:12px;color:var(--ink-muted)}
+  .hide{display:none!important}
+  svg{display:block}
 </style>
 </head>
 <body>
-<div class="app" id="app">
-  <!-- Header -->
-  <header class="header">
-    <div class="brand">
-      <div class="logo" aria-hidden="true"></div>
-      <div>Dual Hub</div>
-      <span class="badge">Nebula Pro</span>
-    </div>
-    <div class="nav" id="topNav">
-      <button class="btn tabBtn" data-tab="home">Espelho</button>
-      <button class="btn tabBtn" data-tab="launcher">Launcher</button>
-      <button class="btn tabBtn" data-tab="brain">Dual Brain</button>
-      <button class="btn tabBtn" data-tab="trinity">Trinity</button>
-      <button class="btn tabBtn" data-tab="viewer">Viewer</button>
-      <button class="btn ghost" id="statusBtn"><span class="dot" title="Sincronizado"></span></button>
-    </div>
+  <header class="glass">
+    <div class="hTitle">HUB Dual</div>
+    <div class="grow"></div>
+    <button class="iconbtn" id="btnDownload" title="Baixar HTML"><img src="icons/others/hub_download.svg" width="20" height="20" onerror="this.replaceWith(svgDL())" alt=""></button>
+    <div class="avatar" id="btnBrain" title="Brain"><img src="icons/others/hub_perfil.svg" width="18" height="18" onerror="this.replaceWith(svgUser())" alt=""></div>
   </header>
 
-  <!-- Tabs (breadcrumb-ish) -->
-  <div class="tabs">
-    <button class="tab active" data-tab="home">Home</button>
-    <button class="tab" data-tab="launcher">Launcher</button>
-    <button class="tab" data-tab="brain">Brain</button>
-    <button class="tab" data-tab="trinity">Trinity</button>
-    <button class="tab" data-tab="viewer">Viewer</button>
-  </div>
+  <main>
+    <section id="sessionsAnchor"></section>
 
-  <!-- Content Surfaces -->
-  <main class="main">
-    <!-- HOME / ESPELHO -->
-    <section class="surface" data-panel="home">
-      <div class="portal">
-        <div class="portal-card">
-          <div class="portal-hero">
-            <div class="canvas">
-              <div class="pulse"></div>
-              <div class="mirror" aria-hidden="true"></div>
-            </div>
-            <div class="col">
-              <div class="kicker">✨ Espelho Dual</div>
-              <div class="title">Portal Místico · Intenção → Toques → Ativações</div>
-              <p class="lead">Abra o Hub e já reflita o pulso: registre intenções, toque o centro, acione arquétipos. O espelho conversa com seu Brain e com o Launcher.</p>
-              <div class="actions">
-                <button class="btn primary" data-goto="launcher">Abrir Launcher</button>
-                <button class="btn" data-goto="brain">Ir ao Dual Brain</button>
-                <span class="badge">⚡️ Tríade ativa: <span id="triade">⚡️ ⭕️ ⚡️</span></span>
-              </div>
-              <div class="chips" id="intentsChips"></div>
-              <small class="small">Dica: toque o status (ponto verde) para ver perfis/sincronização.</small>
-            </div>
-          </div>
+    <section class="card">
+      <div class="row" style="justify-content:space-between">
+        <div>
+          <div class="title">Home</div>
+          <div class="desc">Abra apps empilhados; minimize e reabra pelo dock.</div>
         </div>
+        <div class="row muted"><img src="icons/others/hub_lightning.svg" width="18" height="18" onerror="this.replaceWith(svgBolt(18))" alt=""> Nebula Pro</div>
       </div>
-
-      <!-- Quick Intention -->
-      <div class="card">
-        <div class="row" style="align-items:center; justify-content:space-between;">
-          <div class="row" style="align-items:center;">
-            <strong>Registrar intenção</strong>
-            <span class="badge">localStorage</span>
-          </div>
-          <div class="row">
-            <button class="btn sm" id="btnIntentSample">Gerar exemplo</button>
-          </div>
-        </div>
-        <div class="row">
-          <input class="input" id="intentInput" placeholder="Escreva uma intenção…"/>
-          <button class="btn sm primary" id="intentAdd">Salvar</button>
-        </div>
+      <div class="divider"></div>
+      <div id="favoritesWrap" class="hide">
+        <div class="row" style="justify-content:space-between"><div class="title">Favoritos</div><div class="desc">seus fixados</div></div>
+        <div id="favoritesList" class="appsGrid"></div>
+        <div class="divider"></div>
       </div>
+      <div id="groupsWrap" class="appsGrid"></div>
     </section>
 
-    <!-- LAUNCHER -->
-    <section class="surface hidden" data-panel="launcher">
-      <div class="row" style="flex-wrap:wrap; align-items:center; justify-content:space-between">
-        <div class="row" style="align-items:center">
-          <strong>Launcher</strong>
-          <span class="badge">Apps por grupos • Favoritos • Recentes</span>
-        </div>
-        <div class="row">
-          <label class="btn sm">
-            Importar apps.json
-            <input type="file" id="appsImport" accept=".json" hidden>
-          </label>
-          <label class="btn sm">
-            Upload HTML
-            <input type="file" id="htmlUpload" accept=".html,.htm" hidden>
-          </label>
-          <button class="btn sm" id="appsReset">Reset defaults</button>
-        </div>
+    <section class="card">
+      <div class="row" style="justify-content:space-between">
+        <div class="title">Minimizados</div><div class="desc" id="miniCount">0</div>
       </div>
-
-      <div class="row" style="flex-wrap:wrap; gap:.5rem">
-        <select class="select" id="groupFilter" style="max-width:220px">
-          <option value="">Todos os grupos</option>
-        </select>
-        <input class="input" id="searchApps" placeholder="Buscar apps… (nome, tags)"/>
-      </div>
-
-      <div id="appsGrid" class="grid"></div>
-
-      <h4>Favoritos</h4>
-      <div id="favGrid" class="grid"></div>
-
-      <h4>Recentes</h4>
-      <div id="recentGrid" class="grid"></div>
+      <div id="miniWrap" class="row" style="flex-wrap:wrap"></div>
     </section>
 
-    <!-- BRAIN -->
-    <section class="surface hidden" data-panel="brain">
-      <div class="grid" style="grid-template-columns:1.1fr .9fr">
-        <!-- Perfil -->
-        <div class="card">
-          <strong>Perfil</strong>
-          <div class="field">
-            <label>Nome</label>
-            <input class="input" id="profileName" placeholder="Seu nome…">
-          </div>
-          <div class="field">
-            <label>SK (OpenRouter)</label>
-            <input class="input" id="profileSK" placeholder="sk-or-v1-…">
-          </div>
-          <div class="row" style="align-items:center; justify-content:space-between">
-            <div class="row" style="align-items:center; gap:.5rem">
-              <span class="loader-dot" title="autosave"></span>
-              <small class="small">AutoSave</small>
-            </div>
-            <div class="row">
-              <button class="btn sm" id="brainExport">Exportar Brain</button>
-              <label class="btn sm">Importar Brain<input type="file" id="brainImport" accept=".json" hidden></label>
-              <button class="btn sm" id="brainReset">Reset</button>
-            </div>
-          </div>
-          <hr class="sep"/>
-          <div class="field">
-            <label>Treinamento (JSON/Texto)</label>
-            <textarea class="textarea" id="training"></textarea>
-          </div>
-        </div>
-
-        <!-- Arquétipos -->
-        <div class="card">
-          <strong>Ativações — 12 Arquétipos</strong>
-          <div class="chips" id="archetypesChips"></div>
-          <hr class="sep"/>
-          <div class="row" style="align-items:center; justify-content:space-between">
-            <div class="row" style="align-items:center">
-              <span class="badge">Ritual cues</span>
-              <small class="small">Cliques discretos entre blocos</small>
-            </div>
-            <div class="row">
-              <button class="btn sm" id="playCue">Tocar cue</button>
-              <button class="btn sm" id="triadeGen">Gerar Tríade</button>
-            </div>
-          </div>
-          <div class="row">
-            <input class="input" id="triadeOut" readonly value="⚡️ ⭕️ ⚡️"/>
-          </div>
-        </div>
+    <!-- Chat offline / validação -->
+    <section class="card" id="chatCard">
+      <div class="row" style="justify-content:space-between">
+        <div class="title">Chat</div>
+        <div class="desc">Validação offline — ecoa sua mensagem</div>
       </div>
-    </section>
-
-    <!-- TRINITY -->
-    <section class="surface hidden" data-panel="trinity">
-      <div class="tri-grid">
-        <div class="tri-box">
-          <strong>Host (Hub)</strong>
-          <p class="small">O Host sincroniza tema/ações via <code>postMessage</code> com os viewers.</p>
-          <div class="row">
-            <button class="btn sm" id="triSyncTheme">Sync Tema</button>
-            <button class="btn sm" id="triSendPing">Ping</button>
-          </div>
-          <hr class="sep"/>
-          <div class="row">
-            <textarea class="textarea" id="triLog" placeholder="Logs do Trinity…" style="min-height:120px"></textarea>
-          </div>
-        </div>
-        <div class="col">
-          <div class="tri-box">
-            <strong>Viewer A</strong>
-            <iframe id="triA" class="viewer" title="Trinity A"></iframe>
-            <div class="small">Carrega apps/HTMLs locais; recebe pings/tema.</div>
-          </div>
-          <div class="tri-box">
-            <strong>Viewer B</strong>
-            <iframe id="triB" class="viewer" title="Trinity B"></iframe>
-            <div class="small">Segundo canal para experimentos/Chat.</div>
-          </div>
-        </div>
+      <div class="divider"></div>
+      <div class="row" style="align-items:flex-start">
+        <textarea id="chatInput" rows="3" style="flex:1; min-height:68px; background:var(--glass2); color:var(--ink); border-radius:12px; padding:8px; border:1px solid var(--edge); resize:vertical" placeholder="Escreva aqui..."></textarea>
+        <button class="btn pri" id="chatSend">Enviar</button>
       </div>
-    </section>
-
-    <!-- VIEWER -->
-    <section class="surface hidden" data-panel="viewer">
-      <div class="viewer-wrap">
-        <iframe id="appViewer" class="viewer" title="App Viewer" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
-        <div class="viewer-controls">
-          <button class="btn sm" id="viewerBack">⬅ Hub</button>
-          <button class="btn sm" id="viewerMin">— Minimizar</button>
-          <button class="btn sm" id="viewerReload">⟳ Recarregar</button>
-        </div>
-      </div>
+      <div class="divider"></div>
+      <div id="chatLog" style="max-height:200px; overflow:auto; font:13px/1.4 ui-monospace,monospace; color:var(--ink-muted); white-space:pre-wrap"></div>
     </section>
   </main>
 
-  <!-- Footer / Minibar -->
-  <footer class="footer">
-    <div class="minibar">
-      <span class="badge">Toque o pulso com intenção</span>
-      <span id="miniIntent" class="small"></span>
+  <footer class="glass">
+    <div class="dockL">
+      <button class="iconbtn" id="btnHome" title="Home"><img src="icons/others/hub_home.svg" width="20" height="20" onerror="this.replaceWith(svgHome())" alt=""></button>
+      <button class="iconbtn" id="btnApps" title="Apps"><img src="icons/others/hub_apps.svg" width="20" height="20" onerror="this.replaceWith(svgApps())" alt=""></button>
     </div>
-    <div class="row">
-      <button class="btn" data-goto="home">Espelho</button>
-      <button class="btn" data-goto="launcher">Launcher</button>
-      <button class="btn" data-goto="brain">Brain</button>
-      <button class="btn" data-goto="trinity">Trinity</button>
-      <button class="btn" data-goto="viewer">Viewer</button>
+    <div class="quick" id="quickBadges"></div>
+    <div class="dockR">
+      <button class="iconbtn" id="btnLogs" title="Logs"><img src="icons/others/hub_relatorio.svg" width="20" height="20" onerror="this.replaceWith(svgList())" alt=""></button>
     </div>
   </footer>
 
-  <div id="reopenBadge" class="badge-float">
-    <span class="badge">◐ Reabrir App</span>
-    <button class="btn sm" id="viewerOpen">Abrir</button>
+  <!-- Brain -->
+  <div id="brain" class="hide">
+    <div class="popover">
+      <div class="menuItem" style="cursor:default">
+        <img class="ico" src="icons/others/hub_memoria.svg" width="22" height="22" onerror="this.replaceWith(svgUser())" alt="">
+        <div class="growMin"><div class="title">Perfil</div><div class="notice">Nome e rótulo do seu Dual</div></div>
+      </div>
+      <div class="input" style="margin-top:8px"><input id="inpName" placeholder="Seu nome"></div>
+      <div class="input" style="margin-top:8px"><input id="inpDual" placeholder="Nome do seu Dual"></div>
+
+      <div class="menuItem" style="cursor:default; margin-top:8px">
+        <img src="icons/others/hub_cloud.svg" width="22" height="22" onerror="this.replaceWith(svgKey())" alt="">
+        <div class="growMin"><div class="title">Chave SK (OpenRouter)</div><div class="notice">Guardada localmente</div></div>
+      </div>
+      <div class="input" style="margin-top:8px">
+        <input id="inpSK" placeholder="sk-..."><button class="btn" id="btnSaveSK">Salvar</button>
+      </div>
+
+      <div class="menuItem" style="cursor:default; margin-top:8px">
+        <img src="icons/others/hub_health.svg" width="22" height="22" onerror="this.replaceWith(svgPerf())" alt="">
+        <div class="growMin"><div class="title">Performance</div><div class="notice" id="perfLabel">Med</div></div>
+      </div>
+      <div class="input" style="margin-top:8px">
+        <select id="selPerf"><option value="low">Low</option><option value="med" selected>Med</option><option value="high">High</option></select>
+        <button class="btn" id="btnPerf">Aplicar</button>
+      </div>
+
+      <div class="menuItem" style="cursor:default; margin-top:8px">
+        <img src="icons/others/hub_bind.svg" width="22" height="22" onerror="this.replaceWith(svgVoice())" alt="">
+        <div class="growMin"><div class="title">Vozes / TTS</div><div class="notice">menu por arquétipo (placeholder)</div></div>
+      </div>
+      <div class="input" style="margin-top:8px">
+        <select id="selVoice"><option>Nova</option><option>Elysha</option><option>Kaion</option><option>Serena</option></select>
+        <button class="btn" id="btnVoice">Salvar</button>
+      </div>
+
+      <div class="menuItem" id="btnClear" style="margin-top:8px">
+        <img src="icons/others/hub_memoria.svg" width="22" height="22" onerror="this.replaceWith(svgTrash())" alt="">
+        <div class="growMin"><div class="title">Limpar Memória</div><div class="notice">apaga preferências e favoritos</div></div>
+      </div>
+
+      <div class="menuItem" style="cursor:default; margin-top:8px">
+        <img src="icons/others/hub_relatorio.svg" width="22" height="22" onerror="this.replaceWith(svgList())" alt="">
+        <div class="growMin"><div class="title">Logs</div><div class="notice">eventos recentes</div></div>
+      </div>
+      <div class="card" style="margin-top:8px;max-height:140px;overflow:auto"><pre id="logs" style="margin:0;font:12px/1.4 ui-monospace,monospace;color:var(--ink-muted)"></pre></div>
+    </div>
   </div>
-</div>
 
 <script>
-/* =========== State / Storage Helpers =========== */
-const S = {
-  get(k, fallback){ try{ return JSON.parse(localStorage.getItem(k)) ?? fallback }catch(e){ return fallback }},
-  set(k, v){ localStorage.setItem(k, JSON.stringify(v)) }
+const $ = s=>document.querySelector(s);
+function svgWrap(s){const x=document.createElement('span');x.innerHTML=s.trim();return x.firstChild}
+function svgDL(s=20){return svgWrap(`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><rect x="4" y="19" width="16" height="2" rx="1" fill="currentColor"/></svg>`)}
+function svgUser(s=20){return svgWrap(`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>`)}
+function svgKey(s=20){return svgWrap(`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="8" cy="15" r="4"/><path d="M12 15h10l-2 2 2 2-2 2"/></svg>`)}
+function svgPerf(s=20){return svgWrap(`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19a8 8 0 1 1 16 0"/><path d="M12 12v4"/><path d="M7 12v2"/><path d="M17 12v3"/></svg>`)}
+function svgVoice(s=20){return svgWrap(`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4"/></svg>`)}
+function svgTrash(s=20){return svgWrap(`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><rect x="6" y="6" width="12" height="14" rx="2"/></svg>`)}
+function svgHome(s=20){return svgWrap(`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 11L12 3l9 8"/><path d="M5 10v10h14V10"/></svg>`)}
+function svgApps(s=20){return svgWrap(`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>`)}
+function svgList(s=20){return svgWrap(`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4" cy="6" r="1.6"/><circle cx="4" cy="12" r="1.6"/><circle cx="4" cy="18" r="1.6"/></svg>`)}
+function svgBolt(s=18){return svgWrap(`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="currentColor"><path d="M13 3L4 14h6l-1 7 9-11h-6l1-7z"/></svg>`)}
+const state = {
+  sessions: [], minimized: [], favorites: new Set(JSON.parse(localStorage.getItem('hub.favs')||'[]')),
+  profile: JSON.parse(localStorage.getItem('hub.profile')||'{}'),
+  perf: localStorage.getItem('hub.perf') || 'med',
+  voice: localStorage.getItem('hub.voice') || 'Nova',
+  sk: localStorage.getItem('hub.sk') || '', logs:[]
 };
-const qs = (sel, el=document)=>el.querySelector(sel);
-const qsa = (sel, el=document)=>[...el.querySelectorAll(sel)];
-const panels = {};
-
-/* =========== Tabs / Routing (hashless simple) =========== */
-function showTab(key){
-  qsa('.tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===key));
-  qsa('[data-panel]').forEach(p=>p.classList.toggle('hidden', p.dataset.panel!==key));
-  // If viewer tab -> ensure badge hidden
-  if(key==='viewer'){ badge(false) }
+function log(m){const l=`[${new Date().toLocaleTimeString()}] ${m}`;state.logs.unshift(l);$('#logs').textContent=state.logs.slice(0,60).join('\n')}
+function loadProfileUI(){
+  $('#inpName').value = state.profile.name||''; $('#inpDual').value = state.profile.dual||'';
+  $('#inpSK').value = state.sk; $('#selPerf').value = state.perf; $('#perfLabel').textContent = state.perf.toUpperCase();
+  $('#selVoice').value = state.voice;
 }
-qsa('.tab').forEach(b=>b.addEventListener('click', ()=>showTab(b.dataset.tab)));
-qsa('[data-goto]').forEach(b=>b.addEventListener('click', ()=>showTab(b.dataset.goto)));
-qsa('.tabBtn').forEach(b=>b.addEventListener('click', ()=>showTab(b.dataset.tab)));
-showTab('home');
-
-/* =========== Espelho: Intenções =========== */
-const intentsKey='dual.intents';
-function renderIntents(){
-  const chips=qs('#intentsChips'); chips.innerHTML='';
-  const list=S.get(intentsKey,[]);
-  list.slice(-12).reverse().forEach(txt=>{
-    const s=document.createElement('span'); s.className='chip'; s.textContent=txt; chips.appendChild(s);
-  });
-  qs('#miniIntent').textContent=list.at(-1) || '';
-}
-qs('#intentAdd').addEventListener('click', ()=>{
-  const v = qs('#intentInput').value.trim(); if(!v) return;
-  const list=S.get(intentsKey,[]); list.push(v); S.set(intentsKey,list); qs('#intentInput').value='';
-  renderIntents();
-});
-qs('#btnIntentSample').addEventListener('click', ()=>{
-  const samples=['Respirar no centro','Hoje eu avanço 1%','Somar beleza ao essencial','Fluxo leve e profundo','Ligação com o mestre interior'];
-  qs('#intentInput').value = samples[Math.floor(Math.random()*samples.length)];
-});
-renderIntents();
-
-/* =========== Defaults: Apps + Archetypes =========== */
-const archetypeList = ['Atlas','Nova','Kaion','Elysha','Serena','Artemis','Lumine','Genus','Vitalis','Aion','Rhea','Horus'];
-const appsDefault = [
-  {id:'chat', name:'Dual Chat', grupo:'Core', url:'about:blank', tags:['ai','chat'], icon:'chat'},
-  {id:'editor', name:'Editor HTML/CSS/JS', grupo:'Criação', url:'about:blank', tags:['code','editor'], icon:'code'},
-  {id:'dual', name:'Dual (Home)', grupo:'Core', url:'about:blank', tags:['hub'], icon:'dual'},
-  {id:'twitter', name:'Twitter/YouTube', grupo:'Social', url:'https://twitter.com', tags:['social'], icon:'social'},
-  {id:'nlst', name:'Next Level Sound Tracks', grupo:'Áudio', url:'about:blank', tags:['audio','gen'], icon:'sound'},
-  {id:'koblox', name:'KOBLOX Player', grupo:'Áudio', url:'about:blank', tags:['player'], icon:'player'},
-  {id:'books', name:'Dual Books', grupo:'Conteúdo', url:'about:blank', tags:['text','speech'], icon:'book'},
-  {id:'brain', name:'Dual Brain', grupo:'Core', url:'about:blank', tags:['brain'], icon:'brain'}
-];
-
-/* =========== Icons (try icons/others/* fallback to inline) =========== */
-function iconSVG(name){
-  // Fallback minimal SVG set (monoline)
-  const map = {
-    chat:'<path d="M4 5h16v10H8l-4 4V5z" fill="none" stroke="currentColor" stroke-width="1.6"/>',
-    code:'<path d="M9 5l-6 7 6 7M15 5l6 7-6 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>',
-    dual:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v18M3 12h18" stroke="currentColor" stroke-width="1.6"/>',
-    social:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6 14c2 2 10 2 12-2" stroke="currentColor" stroke-width="1.6"/>',
-    sound:'<path d="M4 10h4l5-4v12l-5-4H4zM18 9a3 3 0 010 6M20 7a5 5 0 010 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
-    player:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 9l6 3-6 3z" fill="currentColor"/>',
-    book:'<path d="M5 5h8a3 3 0 013 3v11H8a3 3 0 01-3-3V5z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M16 8h3v11h-3" fill="none" stroke="currentColor" stroke-width="1.6"/>',
-    brain:'<path d="M9 7a3 3 0 00-6 1v6a3 3 0 006 1m6-8a3 3 0 116 1v6a3 3 0 01-6 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'}
-  return `<svg viewBox="0 0 24 24" aria-hidden="true">${map[name]||map.dual}</svg>`;
-}
-
-/* =========== Launcher Render =========== */
-const appsKey='dual.apps', favKey='dual.favorites', recKey='dual.recents';
+$('#btnBrain').addEventListener('click',()=>$('#brain').classList.toggle('hide'));
+document.addEventListener('click',e=>{const b=$('#brain'); if(!b.classList.contains('hide') && !b.contains(e.target) && !$('#btnBrain').contains(e.target)) b.classList.add('hide')});
+['inpName','inpDual'].forEach(id=>$('#'+id).addEventListener('change',()=>{state.profile.name=$('#inpName').value.trim();state.profile.dual=$('#inpDual').value.trim();localStorage.setItem('hub.profile',JSON.stringify(state.profile));log('Perfil atualizado')}))
+$('#btnSaveSK').addEventListener('click',()=>{state.sk=$('#inpSK').value.trim();localStorage.setItem('hub.sk',state.sk);log('SK salva')})
+$('#btnPerf').addEventListener('click',()=>{state.perf=$('#selPerf').value;localStorage.setItem('hub.perf',state.perf);$('#perfLabel').textContent=state.perf.toUpperCase();log('Performance: '+state.perf)})
+$('#btnVoice').addEventListener('click',()=>{state.voice=$('#selVoice').value;localStorage.setItem('hub.voice',state.voice);log('Voz padrão: '+state.voice)})
+$('#btnDownload').addEventListener('click',()=>{fetch(location.href).then(r=>r.text()).then(t=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/html'}));a.download='HUB_Dual_VarA.html';a.click();URL.revokeObjectURL(a.href);log('HTML baixado')}).catch(()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([document.documentElement.outerHTML],{type:'text/html'}));a.download='HUB_Dual_VarA_runtime.html';a.click();URL.revokeObjectURL(a.href);log('HTML baixado (runtime)')})})
+/* apps.json */
+const groupsWrap = $('#groupsWrap'); const favoritesWrap = $('#favoritesWrap'); const favoritesList = $('#favoritesList');
 async function loadApps(){
-  let apps = S.get(appsKey, null);
-  if(!apps){
-    // Try fetch /apps/apps.json (optional)
-    try{
-      const r = await fetch('apps/apps.json', {cache:'no-store'});
-      if(r.ok){ apps = await r.json(); S.set(appsKey, apps); }
-    }catch(e){}
-  }
-  if(!apps){ apps = appsDefault; S.set(appsKey, appsDefault); }
-  populateGroups(apps); renderApps(apps); renderFav(); renderRecent();
-}
-function populateGroups(apps){
-  const sel=qs('#groupFilter'); const groups=[...new Set(apps.map(a=>a.grupo).filter(Boolean))].sort();
-  sel.innerHTML='<option value="">Todos os grupos</option>'+groups.map(g=>`<option>${g}</option>`).join('');
-}
-function matchApp(app, term){ 
-  if(!term) return true; term=term.toLowerCase();
-  return app.name.toLowerCase().includes(term) || (app.tags||[]).some(t=>t.toLowerCase().includes(term));
-}
-function renderApps(apps){
-  const wrap=qs('#appsGrid'); wrap.innerHTML='';
-  const group=qs('#groupFilter').value; const term=qs('#searchApps').value;
-  const favs=new Set(S.get(favKey,[]));
-  apps.filter(a=>!group||a.grupo===group).filter(a=>matchApp(a,term)).forEach(a=>{
-    const card=document.createElement('div'); card.className='card';
-    const icon=document.createElement('div'); icon.className='app-icon'; icon.innerHTML=iconSVG(a.icon);
-    const title=document.createElement('div'); title.innerHTML=`<strong>${a.name}</strong>`;
-    const meta=document.createElement('div'); meta.className='meta'; meta.textContent=a.grupo || '—';
-    const btns=document.createElement('div'); btns.className='row-btns';
-    const btnOpen=btn('Abrir', 'primary sm', ()=>openInViewer(a));
-    const btnFav=btn(favs.has(a.id)?'★ Fav':'☆ Fav', 'sm', ()=>toggleFav(a.id));
-    const btnIns=btn('Injection', 'sm', ()=>injectToTrinity(a));
-    btns.append(btnOpen, btnFav, btnIns);
-    card.append(icon, title, meta, btns);
-    wrap.append(card);
-  });
-}
-function btn(txt, cls, onclick){ const b=document.createElement('button'); b.className='btn '+cls; b.textContent=txt; b.onclick=onclick; return b; }
-function toggleFav(id){ const fav=new Set(S.get(favKey,[])); fav.has(id)?fav.delete(id):fav.add(id); S.set(favKey,[...fav]); renderApps(S.get(appsKey,appsDefault)); renderFav(); }
-function openInViewer(app){
-  const vf=qs('#appViewer');
-  try{ vf.src = app.url || 'about:blank'; }catch(e){ vf.removeAttribute('src'); }
-  showTab('viewer'); addRecent(app.id);
-}
-function addRecent(id){
-  const arr=S.get(recKey,[]); const without=arr.filter(x=>x!==id); without.push(id); S.set(recKey, without.slice(-12)); renderRecent();
-}
-function renderFav(){
-  const wrap=qs('#favGrid'); wrap.innerHTML='';
-  const apps=S.get(appsKey,appsDefault); const fav=new Set(S.get(favKey,[]));
-  apps.filter(a=>fav.has(a.id)).forEach(a=>{
-    const c=document.createElement('div'); c.className='card';
-    c.innerHTML=`<div class="app-icon">${iconSVG(a.icon)}</div><strong>${a.name}</strong><div class="meta">${a.grupo||'—'}</div>`;
-    const open=btn('Abrir','primary sm', ()=>openInViewer(a));
-    c.append(open); wrap.append(c);
-  });
-}
-function renderRecent(){
-  const wrap=qs('#recentGrid'); wrap.innerHTML='';
-  const apps=S.get(appsKey,appsDefault); const ids=S.get(recKey,[]);
-  ids.slice().reverse().forEach(id=>{
-    const a=apps.find(x=>x.id===id); if(!a) return;
-    const c=document.createElement('div'); c.className='card';
-    c.innerHTML=`<div class="app-icon">${iconSVG(a.icon)}</div><strong>${a.name}</strong><div class="meta">${a.grupo||'—'}</div>`;
-    const open=btn('Abrir','primary sm', ()=>openInViewer(a));
-    c.append(open); wrap.append(c);
-  });
-}
-qs('#groupFilter').addEventListener('change', ()=>renderApps(S.get(appsKey,appsDefault)));
-qs('#searchApps').addEventListener('input', ()=>renderApps(S.get(appsKey,appsDefault)));
-qs('#appsReset').addEventListener('click', ()=>{ S.set(appsKey,appsDefault); S.set(favKey,[]); S.set(recKey,[]); loadApps(); });
-
-qs('#appsImport').addEventListener('change', async (e)=>{
-  const f=e.target.files?.[0]; if(!f) return;
-  try{ const apps = JSON.parse(await f.text()); S.set(appsKey,apps); loadApps(); }catch(err){ alert('JSON inválido'); }
-});
-qs('#htmlUpload').addEventListener('change', (e)=>{
-  const f=e.target.files?.[0]; if(!f) return;
-  const url = URL.createObjectURL(f);
-  const temp = {id:'upload-'+Date.now(), name:f.name, grupo:'Uploads', url, tags:['upload'], icon:'dual'};
-  const apps = S.get(appsKey,appsDefault); apps.push(temp); S.set(appsKey,apps); loadApps(); openInViewer(temp);
-});
-
-/* =========== Brain (profile, training) =========== */
-const profKey='dual.brain.profile', trainKey='dual.brain.training', archKey='dual.archetypes';
-function autosaveProfile(){
-  const profile = {
-    name: qs('#profileName').value.trim(),
-    sk: qs('#profileSK').value.trim()
-  };
-  S.set(profKey, profile);
-}
-['#profileName','#profileSK'].forEach(sel=>qs(sel).addEventListener('input', ()=>{ autosaveProfile(); pingStatus(); }));
-qs('#training').addEventListener('input', ()=>S.set(trainKey, qs('#training').value));
-function loadBrain(){
-  const p=S.get(profKey,{name:'',sk:''}); qs('#profileName').value=p.name||''; qs('#profileSK').value=p.sk||'';
-  qs('#training').value = S.get(trainKey,'');
-}
-qs('#brainExport').addEventListener('click', ()=>{
-  const data = {
-    profile:S.get(profKey,{}), training:S.get(trainKey,''), apps:S.get(appsKey,appsDefault),
-    favorites:S.get(favKey,[]), recents:S.get(recKey,[]), archetypes:S.get(archKey, {})
-  };
-  const blob=new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='dual_brain_export.json'; a.click();
-});
-qs('#brainImport').addEventListener('change', async e=>{
-  const f=e.target.files?.[0]; if(!f) return;
   try{
-    const data=JSON.parse(await f.text());
-    if(data.profile) S.set(profKey, data.profile);
-    if('training' in data) S.set(trainKey, data.training);
-    if(Array.isArray(data.apps)) S.set(appsKey, data.apps);
-    if(Array.isArray(data.favorites)) S.set(favKey, data.favorites);
-    if(Array.isArray(data.recents)) S.set(recKey, data.recents);
-    if(data.archetypes) S.set(archKey, data.archetypes);
-    loadBrain(); loadApps(); alert('Brain importado!');
-  }catch(err){ alert('Arquivo inválido'); }
-});
-qs('#brainReset').addEventListener('click', ()=>{
-  [profKey,trainKey,appsKey,favKey,recKey,archKey].forEach(k=>localStorage.removeItem(k));
-  loadBrain(); loadApps(); renderArchetypes(); renderIntents();
-});
+    const res = await fetch('./apps/apps.json',{cache:'no-store'}); const data = await res.json(); const groups = data.groups||{};
+    groupsWrap.innerHTML=''; for(const [name,items] of Object.entries(groups)){
+      const card=document.createElement('div'); card.className='card'; card.innerHTML=`<div class="row" style="justify-content:space-between; margin-bottom:6px"><div class="title">${name.replaceAll('_',' ')}</div><span class="muted">${items.length} apps</span></div><div class="appsGrid"></div>`;
+      const listEl = card.querySelector('.appsGrid');
+      items.forEach(app=>{
+        const row=document.createElement('div'); row.className='appRow';
+        const icon=app.icon || 'icons/others/hub_apps.svg';
+        row.innerHTML = `
+          <img alt="" onerror="this.replaceWith(svgApps(32))" src="${icon}">
+          <div class="growMin"><div class="title">${app.title||app.key}</div><div class="desc" title="${app.desc||''}">${app.desc||''}</div></div>
+          <div class="row"><button class="btn star" data-key="${app.key}" data-on="${state.favorites.has(app.key)}">★</button><button class="btn" onclick="openSession('${app.key}', '${(app.title||app.key).replace(/['\"<>]/g,'')}', '${app.url||''}', '${icon}')">Abrir</button></div>`;
+        listEl.appendChild(row);
+      });
+      groupsWrap.appendChild(card);
+    }
+    renderFavorites(); log('apps.json carregado');
+  }catch(e){
+    groupsWrap.innerHTML = `<div class="desc">Falha ao carregar apps/apps.json</div>`;
+    log('Falha ao carregar apps.json');
+  }
+}
 
-/* =========== Archetypes Chips + Cue + Tríade =========== */
-function renderArchetypes(){
-  const wrap=qs('#archetypesChips'); wrap.innerHTML='';
-  const state=S.get(archKey, {});
-  archetypeList.forEach(name=>{
-    const on=!!state[name]; const el=document.createElement('button');
-    el.className='chip'; el.textContent=(on?'● ':'○ ')+name;
-    el.onclick=()=>{ state[name]=!state[name]; S.set(archKey,state); renderArchetypes(); };
-    wrap.append(el);
+// Função alternativa para carregar apps com tentativas em múltiplos caminhos e suporte a abrir fora
+async function loadAppsRobust(){
+  try{
+    const candidates = [
+      './apps/apps.json',
+      './apps.json',
+      './docs/apps/apps.json',
+      '/apps/apps.json'
+    ];
+    let data = null, lastErr = null;
+    for(const u of candidates){
+      try{
+        const r = await fetch(u, {cache:'no-store'});
+        if(!r.ok) throw new Error('HTTP '+r.status);
+        data = await r.json();
+        log('apps.json carregado de: '+u);
+        break;
+      }catch(err){
+        lastErr = err;
+      }
+    }
+    if(!data){
+      throw lastErr || new Error('apps.json não encontrado nos caminhos conhecidos');
+    }
+    const groups = data.groups || {};
+    groupsWrap.innerHTML = '';
+    for(const [name,items] of Object.entries(groups)){
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="row" style="justify-content:space-between; margin-bottom:6px">
+          <div class="title">${(name||'').replaceAll('_',' ')}</div>
+          <span class="muted">${items.length} apps</span>
+        </div>
+        <div class="appsGrid"></div>`;
+      const listEl = card.querySelector('.appsGrid');
+      items.forEach(app=>{
+        const icon = app.icon || 'icons/others/hub_apps.svg';
+        const safeTitle = (app.title || app.key || 'App').replace(/['"<>]/g,'');
+        const url = app.url || '';
+        const row = document.createElement('div');
+        row.className = 'appRow';
+        row.innerHTML = `
+          <img alt="" onerror="this.replaceWith(svgApps(32))" src="${icon}">
+          <div class="growMin">
+            <div class="title">${safeTitle}</div>
+            <div class="desc" title="${app.desc||''}">${app.desc||''}</div>
+          </div>
+          <div class="row">
+            <button class="btn star" data-key="${app.key}" data-on="${state.favorites.has(app.key)}">★</button>
+            <button class="btn" onclick="openSession('${app.key}', '${safeTitle}', '${url}', '${icon}')">Abrir</button>
+            <button class="btn" onclick="openOutside('${url}')">↗️ Fora</button>
+          </div>`;
+        listEl.appendChild(row);
+      });
+      groupsWrap.appendChild(card);
+    }
+    renderFavorites();
+  }catch(e){
+    console.error(e);
+    groupsWrap.innerHTML = `<div class="desc">Falha ao carregar apps.json. Verifique o caminho ./apps/apps.json</div>`;
+    log('Falha ao carregar apps.json: '+(e?.message||e));
+  }
+}
+document.addEventListener('click', (e)=>{
+  const starBtn = e.target.closest('.btn.star');
+  if(!starBtn) return;
+  const key = starBtn.dataset.key;
+  const on = starBtn.getAttribute('data-on') === 'true';
+  if(on){ state.favorites.delete(key) } else { state.favorites.add(key) }
+  starBtn.setAttribute('data-on', String(!on));
+  localStorage.setItem('hub.favs', JSON.stringify([...state.favorites]));
+  renderFavorites();
+});
+function renderFavorites(){
+  favoritesList.innerHTML = '';
+  const favs = [...state.favorites];
+  favoritesWrap.classList.toggle('hide', favs.length===0);
+  if(!favs.length) return;
+  // procure nos cards renderizados
+  const all = groupsWrap.querySelectorAll('.appRow');
+  favs.forEach(k=>{
+    const row = [...all].find(r => r.querySelector('.btn.star')?.dataset.key === k);
+    if(row){
+      const clone = row.cloneNode(true);
+      clone.querySelector('.btn.star').remove(); // não duplicar toggle aqui
+      favoritesList.appendChild(clone);
+    }
   });
 }
-renderArchetypes();
+/* sessions */
+const sessionsAnchor = $('#sessionsAnchor');
+const miniWrap = $('#miniWrap');
+const miniCount = $('#miniCount');
+const quickBadges = $('#quickBadges');
 
-let audioCtx;
-qs('#playCue').addEventListener('click', ()=>{
-  audioCtx ||= new (window.AudioContext||window.webkitAudioContext)();
-  function click(t=0, f=1600){ const o=audioCtx.createOscillator(), g=audioCtx.createGain();
-    o.type='square'; o.frequency.value=f; o.connect(g); g.connect(audioCtx.destination);
-    const now=audioCtx.currentTime + t; g.gain.setValueAtTime(.0001, now); g.gain.exponentialRampToValueAtTime(.3, now+.005); g.gain.exponentialRampToValueAtTime(.0001, now+.04);
-    o.start(now); o.stop(now+.05);
-  }
-  click(0,1500); click(.12,1200); click(.28,1800);
-});
-
-const triSets = [ ['⚡️','⭕️','⚡️'], ['✦','◐','☼'], ['⚙','🌀','🔮'], ['✨','🫧','⭕️'], ['🔥','🌹','⚡️'] ];
-function genTriade(){ const t=triSets[Math.floor(Math.random()*triSets.length)]; const s=t.join(' '); qs('#triade').textContent=s; qs('#triadeOut').value=s; }
-qs('#triadeGen').addEventListener('click', genTriade);
-
-/* =========== Viewer controls (minimize badge) =========== */
-const badgeEl=qs('#reopenBadge');
-function badge(show){ badgeEl.style.display = show ? 'flex' : 'none'; }
-qs('#viewerMin').addEventListener('click', ()=>{ badge(true); showTab('home'); });
-qs('#viewerOpen').addEventListener('click', ()=>{ badge(false); showTab('viewer'); });
-qs('#viewerBack').addEventListener('click', ()=>showTab('home'));
-qs('#viewerReload').addEventListener('click', ()=>{ const f=qs('#appViewer'); const u=f.src; f.src='about:blank'; setTimeout(()=>f.src=u,100) });
-
-/* =========== Trinity host <-> viewers =========== */
-function injectToTrinity(app){
-  const a=qs('#triA'); const b=qs('#triB');
-  if(!a.src) a.src=app.url; else if(!b.src) b.src=app.url; else a.src=app.url;
-  showTab('trinity');
+function openSession(key,title,url,icon){
+  const id = 'S'+Date.now().toString(36);
+  const el = document.createElement('section');
+  el.className = 'session'; el.id = id;
+  el.innerHTML = `
+    <div class="sHead">
+      <img class="ico" src="${icon}" onerror="this.replaceWith(svgApps(16))" alt="" width="16" height="16"/>
+      <div class="title">${title}</div>
+      <div class="sBtns">
+        <button class="sBtn" title="Minimizar" onclick="minimizeSession('${id}')">${svgWrap('<svg width=18 height=18 viewBox=\'0 0 24 24\' fill=none stroke=currentColor stroke-width=1.6><path d=\'M5 12h14\'/></svg>').outerHTML}</button>
+        <button class="sBtn" title="Fechar" onclick="closeSession('${id}')">${svgWrap('<svg width=18 height=18 viewBox=\'0 0 24 24\' fill=none stroke=currentColor stroke-width=1.6><path d=\'M6 6 18 18\'/><path d=\'M18 6 6 18\'/></svg>').outerHTML}</button>
+      </div>
+    </div>
+    <div class="sBody"><iframe src="${url}"></iframe></div>`;
+  sessionsAnchor.prepend(el);
+  addBadge({id,title});
+  log('Sessão aberta: '+title);
+  window.scrollTo({top:0,behavior:'smooth'});
 }
-function triPost(msg){ [qs('#triA').contentWindow, qs('#triB').contentWindow].forEach(w=>w && w.postMessage({dual:msg}, '*')); }
-qs('#triSyncTheme').addEventListener('click', ()=>triPost({type:'theme', theme:'nebula-pro'}));
-qs('#triSendPing').addEventListener('click', ()=>triPost({type:'ping', at:Date.now()}));
-window.addEventListener('message', (e)=>{
-  if(!e.data?.dual) return;
-  const log = qs('#triLog');
-  log.value += `[msg] ${JSON.stringify(e.data.dual)}\n`;
-  log.scrollTop = log.scrollHeight;
+function minimizeSession(id){
+  const sEl = document.getElementById(id);
+  if(!sEl) return;
+  sEl.classList.add('hide');
+  const title = sEl.querySelector('.title').textContent;
+  addBadge({id,title});
+  renderMinimized();
+  log('Sessão minimizada');
+}
+function closeSession(id){
+  const sEl = document.getElementById(id);
+  if(sEl) sEl.remove();
+  removeBadge(id);
+  renderMinimized();
+  log('Sessão fechada');
+}
+function addBadge(sess){
+  if(quickBadges.querySelector(`[data-id="${sess.id}"]`)) return;
+  const badge = document.createElement('button');
+  badge.className = 'mini';
+  badge.setAttribute('data-id', sess.id);
+  badge.innerHTML = `<span class="dot"></span> <span>${sess.title}</span>`;
+  badge.addEventListener('click', ()=>restoreSession(sess.id));
+  quickBadges.prepend(badge);
+}
+function removeBadge(id){
+  quickBadges.querySelector(`[data-id="${id}"]`)?.remove();
+}
+function renderMinimized(){
+  miniWrap.innerHTML='';
+  const minimized = [...document.querySelectorAll('.session.hide')];
+  minimized.forEach(sEl=>{
+    const t=sEl.querySelector('.title').textContent;
+    const chip=document.createElement('button');
+    chip.className='mini'; chip.innerHTML=`<span class="dot"></span> ${t}`;
+    chip.addEventListener('click',()=>restoreSession(sEl.id));
+    miniWrap.appendChild(chip);
+  });
+  miniCount.textContent = minimized.length;
+}
+
+// helper: abre URL em nova aba quando iframe é bloqueado ou quando preferir abrir fora
+function openOutside(u){
+  if(!u){
+    alert('Este app não tem URL configurada.');
+    return;
+  }
+  const win = window.open(u, '_blank', 'noopener,noreferrer');
+  if(!win){
+    alert('O navegador bloqueou o pop-up. Permita abrir nova aba.');
+  }
+}
+function restoreSession(id){
+  const sEl = document.getElementById(id);
+  if(!sEl) return;
+  sEl.classList.remove('hide');
+  renderMinimized();
+  log('Sessão reaberta');
+}
+$('#btnHome').addEventListener('click', ()=>window.scrollTo({top: sessionsAnchor.offsetTop + 1, behavior:'smooth'}));
+$('#btnApps').addEventListener('click', ()=>{
+  const y = $('#groupsWrap').getBoundingClientRect().top + window.scrollY - 80;
+  window.scrollTo({top:y,behavior:'smooth'});
+});
+$('#btnLogs').addEventListener('click', ()=>{
+  $('#brain').classList.remove('hide');
+  $('#brain').scrollIntoView({behavior:'smooth', block:'nearest'});
 });
 
-/* =========== Status pop (statusBtn) =========== */
-qs('#statusBtn').addEventListener('click', ()=>{
-  const p=S.get(profKey,{});
-  alert(`Perfil:\nNome: ${p.name||'—'}\nSK: ${p.sk?('•••'+p.sk.slice(-6)):'—'}\nApps: ${S.get(appsKey,appsDefault).length}\nFavoritos: ${S.get(favKey,[]).length}`);
-});
-function pingStatus(){ /* purely visual ping on save */ const d=qs('#statusBtn .dot'); d.style.background='var(--warn)'; setTimeout(()=>d.style.background='var(--ok)',350); }
-
-/* =========== Init =========== */
-loadApps(); loadBrain();
+// ====== Chat offline de validação ======
+// Apêndice de linha ao log de chat. role = 'user' ou 'assistant'
+function chatAppend(role, text){
+  const box = document.getElementById('chatLog');
+  if(!box) return;
+  const time = new Date().toLocaleTimeString();
+  const who = role === 'user' ? 'Você' : 'Dual';
+  const line = `[${time}] ${who}: ${text}\n`;
+  box.textContent += line;
+  box.scrollTop = box.scrollHeight;
+}
+// Gera resposta offline ecoando a entrada (placeholder para integração com LLM)
+async function chatReplyOffline(prompt){
+  const reply = 'eco> ' + prompt.replace(/\s+/g,' ').trim();
+  await new Promise(r=>setTimeout(r,120));
+  return reply;
+}
+// Vincula botão e input
+{
+  const chatBtn = document.getElementById('chatSend');
+  const chatInp = document.getElementById('chatInput');
+  if(chatBtn && chatInp){
+    chatBtn.addEventListener('click', async ()=>{
+      const q = (chatInp.value||'').trim();
+      if(!q) return;
+      chatAppend('user', q);
+      chatInp.value = '';
+      const ans = await chatReplyOffline(q);
+      chatAppend('assistant', ans);
+    });
+  }
+}
+/* init */
+loadProfileUI();
+// utilize a versão robusta do loader para garantir que apps.json seja encontrado em múltiplos caminhos
+loadAppsRobust();
+log('Hub iniciado');
 </script>
 </body>
 </html>
