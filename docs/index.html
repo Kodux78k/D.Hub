@@ -164,6 +164,51 @@
   .tab.active{ box-shadow:0 0 0 2px rgba(120,135,255,.10) }
   .bubble{ background:#5863ff }
   .update-btn{ background:linear-gradient(90deg,#5863ff,#29d3ff); color:#0a0d1f }
+  /* 1) Viewer atrás (header e tabbar por cima) */
+.masthead{ z-index: 200; }
+.tabbar{   z-index: 200; }
+
+/* o viewer fica ABAIXO deles e já ocupa o espaço útil */
+.viewer{
+  position: fixed;
+  /* respeita alturas do header e da tabbar sem sobrepor */
+  top: 78px;                    /* altura do header */
+  left: 0; right: 0;
+  bottom: calc(88px + 24px);    /* altura da tabbar + gap solto (24px) */
+  z-index: 100;                 /* atrás do header/tabbar */
+  display: none;
+}
+.viewer.open{ display: block; }
+.viewer .frame{ position:absolute; inset:12px 16px; border-radius:18px; overflow:hidden }
+
+/* 2) Tabbar solta (desgrudada do bottom) */
+.tabbar{
+  position: fixed;
+  left: 0; right: 0;
+  /* flutua acima do fundo ~24px, ainda respeitando a área segura */
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+  height: 78px;
+  padding: 6px 14px;
+}
+
+/* centraliza a cápsula e dá “respiro” lateral */
+.tabbar .container{
+  margin: 0 16px;               /* “solta” das bordas curvas */
+  border-radius: 24px;
+  box-shadow: 0 16px 40px rgba(0,0,0,.35);
+}
+
+/* 3) Quick-actions acompanham a tabbar solta */
+.quick-actions{
+  right: calc(16px + env(safe-area-inset-right,0));
+  bottom: calc(24px + 78px + env(safe-area-inset-bottom,0) + 12px); /* gap + altura tabbar + safe-area + respiro */
+}
+
+/* 4) Remova o hide do header/footer ao abrir o viewer (se houver) */
+body.viewer-open .masthead,
+body.viewer-open .tabbar{
+  opacity: 1; pointer-events: auto; transform: none; /* neutraliza regras antigas */
+}
 </style>
 
 </head>
