@@ -1,190 +1,245 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<link rel="manifest" href="./manifest.json"/>
-<title>Hub Dual — Nebula Pro (Expandido)</title>
-<style>
-:root{
-  --grad-a:#ff52e5; --grad-b:#00c5e5;
-  --text:#f5f7ff; --muted:rgba(245,247,255,.75);
-  --surface:rgba(15,17,32,.45); --surface-strong:rgba(15,17,32,.88);
-  --border:1px solid rgba(255,255,255,.12);
-  --r:22px; --r-lg:28px; --shadow:0 10px 30px rgba(0,0,0,.35);
-  --gold:#F2C75C;
-}
-*{box-sizing:border-box;min-width:0}
-html,body{height:100%;margin:0}
-body{
-  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-  background:linear-gradient(42deg,var(--grad-a),var(--grad-b)) fixed;
-  color:var(--text); overflow-x:hidden; -webkit-text-size-adjust:100%;
-}
-a{color:#7fd}
-.mast{position:fixed;inset:env(safe-area-inset-top,0) 0 auto 0;height:76px;
-  display:flex;align-items:center;gap:12px;padding:0 14px;z-index:100;
-  backdrop-filter:blur(16px) saturate(120%)}
-.title{flex:1;text-align:center;line-height:1.1}
-.title h1{margin:0;font-size:20px;font-weight:900;letter-spacing:.06em}
-.title small{display:block;font-size:12px;letter-spacing:.08em;color:var(--muted)}
-.icon-btn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
-  background:var(--surface);border:var(--border);box-shadow:var(--shadow);color:var(--text);cursor:pointer}
-main{padding:92px 16px 100px;max-width:860px;margin:0 auto}
-footer.tabbar{position:fixed;inset:auto 0 env(safe-area-inset-bottom,0) 0;height:80px;display:flex;align-items:center;justify-content:center}
-footer .container{width:100%;max-width:520px;background:var(--surface);border:var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow);display:flex;justify-content:space-around;align-items:center;padding:10px 16px}
-footer .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);font-size:11px;font-weight:800;cursor:pointer;padding:6px;border-radius:14px}
-footer .tab.active{color:var(--text);background:rgba(255,255,255,.08)}
-.card{background:var(--surface);border:var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
-.btn{appearance:none;border:var(--border);background:linear-gradient(42deg,var(--grad-a),var(--grad-b));
-  color:#fff;border-radius:999px;padding:.72rem 1.05rem;font-weight:900;cursor:pointer}
-.badge{padding:.3rem .6rem;border:var(--border);border-radius:999px}
-.loader{--size:52px;position:relative;width:var(--size);height:var(--size)}
-.loader .ring{position:absolute;inset:0;border:2px solid var(--gold);border-radius:50%;animation:spin 6s linear infinite}
-.loader .bar{position:absolute;left:50%;top:50%;width:62%;height:2px;background:var(--gold);
-  transform:translate(-50%,-50%);border-radius:999px;animation:breathe 2.4s ease-in-out infinite}
-@keyframes spin{to{transform:rotate(360deg)}}@keyframes breathe{0%,100%{opacity:.9}50%{opacity:1}}
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>Infodose Hub — Upload + Brain Menu</title>
+  <meta name="theme-color" content="#0b0b0b">
+  <style>
+    :root{
+      --fg:#fff; --acc:#E7C65A; --stroke:rgba(255,235,180,.30); --stroke2:rgba(255,235,180,.16);
+      --dock-space:84px; --blur:22px;
+    }
+    html,body{height:100%;margin:0}
+    body{
+      color:var(--fg); font-family:ui-rounded,system-ui,-apple-system,Inter,Segoe UI,Roboto,Arial;
+      background:linear-gradient(42deg,#f0f,#0ff); -webkit-tap-highlight-color:transparent;
+      min-height:100vh;
+    }
+    .header{position:sticky;top:0;z-index:100;backdrop-filter:blur(var(--blur)) saturate(150%);
+      background:rgba(0,0,0,.45);border-bottom:1px solid var(--stroke);padding-top:env(safe-area-inset-top)}
+    .inner{max-width:980px;margin:0 auto;padding:14px;display:flex;gap:14px;align-items:center}
+    .logo{width:46px;height:46px;border-radius:50%;display:inline-grid;place-items:center;position:relative;background:rgba(0,0,0,.25);cursor:pointer}
+    .ring{position:absolute;inset:0;border:2px solid var(--acc);border-radius:50%;animation:spin 6s linear infinite}
+    .bar{position:absolute;left:50%;top:50%;width:60%;height:2px;background:var(--acc);transform:translate(-50%,-50%);border-radius:999px;animation:breathe 2.4s ease-in-out infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes breathe{0%,100%{opacity:.8}50%{opacity:1}}
+    h1{font-size:1.2rem;margin:.12rem 0 0;font-weight:800}
+    .kicker{font-size:.72rem;letter-spacing:.16em;color:#e0e0e0;text-transform:uppercase}
+    .grid{max-width:980px;margin:18px auto 22px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:0 14px;
+      padding-bottom:calc(var(--dock-space) + env(safe-area-inset-bottom) + 12px)}
+    @media(max-width:560px){.grid{grid-template-columns:1fr}}
+    .card{background:rgba(0,0,0,.3);border:1px solid var(--stroke2);border-radius:20px;padding:16px;display:flex;gap:14px;align-items:center;box-shadow:0 6px 18px rgba(0,0,0,.45)}
+    .icon{width:58px;height:58px;border-radius:16px;display:grid;place-items:center;overflow:hidden;background:#0f1320;border:1px solid var(--stroke2)}
+    .btn{appearance:none;border:1px solid var(--stroke2);cursor:pointer;background:linear-gradient(42deg,#f0f,#0ff);color:#fff;padding:.72rem 1.05rem;border-radius:999px;font-weight:700}
+    .dock{position:fixed;left:0;right:0;bottom:0;z-index:1000}
+    .dock-inner{max-width:980px;margin:0 auto;padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+      display:flex;gap:8px;justify-content:space-between;align-items:center;
+      backdrop-filter:blur(18px) saturate(140%);background:rgba(0,0,0,.45);border-top:1px solid var(--stroke);
+      box-shadow:0 -10px 30px rgba(0,0,0,.45)}
+    .dbtn{appearance:none;border:1px solid var(--stroke);background:linear-gradient(42deg,#f0f,#0ff);color:#fff;padding:.64rem .9rem;border-radius:12px;font-weight:700}
+    .dbtn.small{padding:.5rem .7rem;font-size:.9rem}
+    .viewer-iframe{display:block;width:100%;height:100%;border:0;outline:0;background:#0b0b0b;transform:translateZ(0);-webkit-overflow-scrolling:touch}
+  </style>
 </head>
 <body>
-<header class="mast">
-  <button class="icon-btn" id="backBtn" aria-label="Voltar">⟵</button>
-  <div class="title"><h1>HUB DUAL</h1><small>UNO • DUAL • TRINITY</small></div>
-  <button class="icon-btn" id="brainBtn" title="Dual Brain">◐</button>
-</header>
-
-<main>
-  <section class="card">
-    <h2 style="margin:0 0 8px;font-size:18px">Launcher</h2>
-    <p style="margin:0 0 12px;color:var(--muted)">Carrega os apps de <code>./apps/apps.json</code> e também apps locais enviados.</p>
-    <div id="appsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px"></div>
-  </section>
-
-  <section class="card" style="margin-top:16px">
-    <h2 style="margin:0 0 8px;font-size:18px">Stack</h2>
-    <div id="stackList" style="display:flex;flex-direction:column;gap:10px"></div>
-  </section>
-</main>
-
-<footer class="tabbar">
-  <div class="container">
-    <div class="tab active"><span>Home</span></div>
-    <div class="tab" onclick="location.href='chat.html'"><span>Chat</span></div>
-    <div class="tab" onclick="location.href='editor.html'"><span>Editor</span></div>
+<header class="header" id="mainHeader">
+  <div class="inner">
+    <span class="logo" id="logo" title="Abrir menu / Brain">
+      <span class="ring"></span><span class="bar"></span>
+    </span>
+    <div style="flex:1">
+      <div class="kicker">Infodose • Hub Principal</div>
+      <h1>Infodose Hub — Upload + Brain Menu</h1>
+    </div>
+    <nav><button class="btn" id="btnInstall" type="button">⬇️ Instalar</button></nav>
   </div>
-</footer>
+</header>
+<main class="grid" id="cards" aria-live="polite"></main>
 
-<div id="dualLoader" style="position:fixed;inset:0;display:none;place-items:center;z-index:9999;background:rgba(10,13,31,.66);backdrop-filter:blur(6px)">
-  <span class="loader"><span class="ring"></span><span class="bar"></span></span>
+<section id="revo" style="position:fixed;left:0;right:0;top:72px;bottom:calc(var(--dock-space) + env(safe-area-inset-bottom));z-index:900;display:none;background:rgba(0,0,0,.18);border-top:1px solid var(--stroke)">
+  <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba(0,0,0,.55);border-bottom:1px solid var(--stroke)">
+    <div id="revoTitle" style="font-weight:800">Revo</div>
+    <div>
+      <button class="dbtn small" id="revoBack" type="button">← Hub</button>
+      <button class="dbtn small" id="revoMin" type="button">— Minimizar</button>
+      <a class="dbtn small" id="revoOpen" target="_blank" rel="noopener">↗ Abrir</a>
+    </div>
+  </div>
+  <iframe id="revoFrame" class="viewer-iframe"></iframe>
+</section>
+<button class="dbtn" id="btnReopen" style="position:fixed;right:12px;bottom:calc(var(--dock-space) + env(safe-area-inset-bottom) + 12px);z-index:950;display:none">◐ Reabrir App</button>
+
+<div class="dock" role="navigation" aria-label="Dock">
+  <div class="dock-inner">
+    <div style="display:flex;gap:8px">
+      <button class="dbtn" id="dockHome" type="button">Home</button>
+      <!-- Infodose replaced by Upload -->
+      <input id="localHtmlInput" type="file" accept=".html,.htm,text/html" hidden>
+      <button class="dbtn" id="btnLocalOpen" type="button">📁 HTML Local</button>
+      <button class="dbtn" id="dockInstall" type="button">Instalar</button>
+    </div>
+    <div class="group">
+      <span class="badge" id="brainNameBadge">👤 sem-nome</span>
+      <span class="badge" id="brainSKBadge">🔑 sem-chave</span>
+    </div>
+  </div>
+</div>
+
+<style>
+.sheet{position:fixed;inset:auto 0 0 0;z-index:1200;display:none;max-height:88vh;background:rgba(0,0,0,.8);
+  backdrop-filter:blur(16px) saturate(140%);border-top:1px solid var(--stroke);padding:14px 16px calc(14px + env(safe-area-inset-bottom));}
+.sheet.active{display:block}
+.sheet h2{margin:0 0 8px;font-size:1.1rem}
+.row{display:grid;grid-template-columns:1fr;gap:10px;margin:10px 0}
+.input, .textarea{width:100%;padding:.7rem .9rem;border-radius:12px;border:1px solid var(--stroke2);background:rgba(255,255,255,.06);color:#fff}
+.textarea{min-height:120px}
+.group{display:flex;gap:8px;flex-wrap:wrap}
+.badge{padding:.3rem .6rem;border:1px solid var(--stroke2);border-radius:999px}
+</style>
+<div class="sheet" id="brainSheet" role="dialog" aria-modal="true" aria-labelledby="brainTitle">
+  <h2 id="brainTitle">Dual Brain — Perfil & Chaves</h2>
+  <div class="row">
+    <label>Nome do usuário</label>
+    <input id="br_name" class="input" placeholder="Seu nome">
+  </div>
+  <div class="row">
+    <label>OpenRouter SK (guardada localmente)</label>
+    <input id="br_sk" class="input" placeholder="sk-or-v1-...">
+  </div>
+  <div class="row">
+    <label>Background (URL) — opcional</label>
+    <input id="br_bg_url" class="input" placeholder="https://.../fundo.png">
+  </div>
+  <div class="row">
+    <label>Background (arquivo local) — opcional</label>
+    <input id="br_bg_file" type="file" accept="image/*" class="input">
+  </div>
+  <div class="row">
+    <div class="group">
+      <button class="dbtn" id="br_save" type="button">💾 Salvar</button>
+      <button class="dbtn" id="br_export" type="button">⬇️ Exportar</button>
+      <input id="br_import_file" type="file" accept="application/json" hidden>
+      <button class="dbtn" id="br_import" type="button">⬆️ Importar</button>
+      <button class="dbtn" id="br_close" type="button">✖ Fechar</button>
+    </div>
+  </div>
+  <div class="row">
+    <label>Logs</label>
+    <textarea id="br_logs" class="textarea" readonly></textarea>
+  </div>
 </div>
 
 <script>
-const LS={};
-LS.get=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
-LS.set=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
-LS.raw=(k)=>localStorage.getItem(k)||'';
+const $ = (q,root=document)=>root.querySelector(q);
+let currentObjectURL=null, bgObjectURL=null;
+function fitTop(){ const header=$('#mainHeader'); const revo=$('#revo'); revo.style.top = header.getBoundingClientRect().height+'px'; }
+window.addEventListener('resize',fitTop); window.addEventListener('orientationchange',fitTop);
 
-const appsGrid=document.getElementById('appsGrid');
-const stackList=document.getElementById('stackList');
-function dualShowLoader(){document.getElementById('dualLoader').style.display='grid'}
-function dualHideLoader(){document.getElementById('dualLoader').style.display='none'}
+function openInRevo(url,title='App'){ fitTop(); const v=$('#revo'); const t=$('#revoTitle'); const f=$('#revoFrame'); const o=$('#revoOpen');
+  t.textContent=title; f.src=url; o.href=url; v.style.display='block'; document.body.style.overflow='hidden'; }
+function closeRevo(){ const v=$('#revo'); const f=$('#revoFrame'); v.style.display='none'; f.src='about:blank'; document.body.style.overflow='';
+  if(currentObjectURL){URL.revokeObjectURL(currentObjectURL);currentObjectURL=null} }
+function minRevo(){ $('#revo').style.display='none'; $('#btnReopen').style.display='inline-block'; document.body.style.overflow=''; }
+$('#revoBack').onclick=closeRevo; $('#revoMin').onclick=minRevo; $('#btnReopen').onclick=()=>{ $('#revo').style.display='block'; $('#btnReopen').style.display='none'; document.body.style.overflow='hidden'; };
 
-const iconCache=new Map();
-function normKey(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9_-]+/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'')}
-async function getIconNode(app){
-  if(app.icon && /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(app.icon)){
-    const d=document.createElement('div'); d.style.cssText='display:grid;place-items:center;height:52px';
-    const img=new Image(); img.src=app.icon; img.alt=app.name||'app'; img.style.width='32px'; img.style.height='32px';
-    d.appendChild(img); return d;
-  }
-  const key=normKey(app.iconKey||app.key||app.id||app.title||app.name||'app');
-  const path=`./icons/others/${key}.svg`;
+// Dock actions
+$('#dockHome').onclick=()=>{ closeRevo(); window.scrollTo({top:0,behavior:'smooth'}); };
+$('#dockInstall').onclick=()=>$('#btnInstall').click();
+
+// Local upload
+const inputLocal=$('#localHtmlInput'); $('#btnLocalOpen').onclick=()=>inputLocal.click();
+inputLocal.addEventListener('change',(ev)=>{ const f=ev.target.files&&ev.target.files[0]; if(!f)return;
+  if(currentObjectURL)URL.revokeObjectURL(currentObjectURL); currentObjectURL=URL.createObjectURL(f);
+  openInRevo(currentObjectURL, f.name||'HTML Local'); inputLocal.value=''; });
+
+// Brain menu via logo
+const brainKey='dual.brain';
+function readBrain(){ try{ return JSON.parse(localStorage.getItem(brainKey)||'{}'); }catch{ return {}; } }
+function writeBrain(obj){ localStorage.setItem(brainKey, JSON.stringify(obj)); }
+function log(msg){ const l=$('#br_logs'); l.value = (new Date().toLocaleString())+' — '+msg+'\n' + l.value; }
+function applyBadges(b){ $('#brainNameBadge').textContent = '👤 '+(b.name||'sem-nome'); $('#brainSKBadge').textContent = '🔑 '+(b.sk?('•••'+b.sk.slice(-4)):'sem-chave'); }
+function applyBackground(b){
+  if(bgObjectURL){ URL.revokeObjectURL(bgObjectURL); bgObjectURL=null; }
+  if(b.bgFile){ document.body.style.backgroundImage = 'url("'+b.bgFile+'")'; document.body.style.backgroundSize='cover'; document.body.style.backgroundAttachment='fixed'; }
+  else if(b.bg){ document.body.style.backgroundImage='url("'+b.bg+'")'; document.body.style.backgroundSize='cover'; document.body.style.backgroundAttachment='fixed'; }
+  else { document.body.style.backgroundImage=''; }
+}
+function openBrain(){
+  const b=readBrain();
+  $('#br_name').value = b.name||'';
+  $('#br_sk').value   = b.sk||'';
+  $('#br_bg_url').value = b.bg||'';
+  $('#brainSheet').classList.add('active');
+  log('abriu-sheet');
+}
+function closeBrain(){ $('#brainSheet').classList.remove('active'); }
+$('#logo').addEventListener('click', openBrain);
+$('#br_close').addEventListener('click', closeBrain);
+$('#br_save').addEventListener('click', ()=>{
+  const name=$('#br_name').value.trim(); const sk=$('#br_sk').value.trim(); const bg=$('#br_bg_url').value.trim();
+  const b=readBrain(); b.name=name; b.sk=sk; b.bg=bg;
+  const f=$('#br_bg_file').files && $('#br_bg_file').files[0];
+  if(f){ if(bgObjectURL)URL.revokeObjectURL(bgObjectURL); bgObjectURL=URL.createObjectURL(f); b.bgFile=bgObjectURL; }
+  writeBrain(b); applyBadges(b); applyBackground(b); log('salvou-perfil'); alert('Salvo!');
+});
+$('#br_export').addEventListener('click', ()=>{
+  const blob = new Blob([localStorage.getItem(brainKey)||'{}'], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='dual.brain.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),500);
+  log('exportou-brain');
+});
+$('#br_import').addEventListener('click', ()=>$('#br_import_file').click());
+$('#br_import_file').addEventListener('change', async (ev)=>{
+  const file=ev.target.files && ev.target.files[0]; if(!file)return;
+  const txt = await file.text(); try{ const obj=JSON.parse(txt); writeBrain(obj); applyBadges(obj); applyBackground(obj); log('importou-brain'); alert('Importado!'); }catch{ alert('JSON inválido'); }
+  ev.target.value='';
+});
+
+// init
+const b=readBrain(); applyBadges(b); applyBackground(b); fitTop();
+</script>
+
+<script>
+const $ = (q,root=document)=>root.querySelector(q);
+
+async function loadApps(){
   try{
-    const cacheKey='svg:'+path;
-    if(iconCache.has(cacheKey)){const d=document.createElement('div'); d.innerHTML=iconCache.get(cacheKey); return d}
-    const res=await fetch(path); if(res.ok){const svg=await res.text(); iconCache.set(cacheKey,svg); const d=document.createElement('div'); d.innerHTML=svg; return d;}
-  }catch(e){}
-  const d=document.createElement('div'); d.textContent='◇'; return d;
-}
-
-function readStack(){return LS.get('dual.stack',[])}
-function writeStack(v){LS.set('dual.stack',v)}
-function addToStack(app,opts={}){
-  const st=readStack(); const i=st.findIndex(s=>s.id===app.id);
-  const item={id:app.id,title:app.name,url:app.url,minimized:!!opts.minimized,mode:opts.mode||'embed',t:Date.now()};
-  if(i>=0) st[i]=item; else st.unshift(item);
-  writeStack(st); renderStack();
-}
-function setMinimized(id,val){const st=readStack(); const i=st.findIndex(s=>s.id===id); if(i>=0){st[i].minimized=!!val;writeStack(st);renderStack()}}
-function removeFromStack(id){writeStack(readStack().filter(s=>s.id!==id)); renderStack()}
-
-function renderStack(){
-  const st=readStack(); stackList.innerHTML='';
-  if(!st.length){stackList.innerHTML='<div class="badge" style="opacity:.8">Stack vazio</div>'; return;}
-  st.forEach(s=>{
-    const row=document.createElement('div'); row.className='card';
-    row.innerHTML=`<div style="display:flex;gap:10px;align-items:center;justify-content:space-between">
-      <div style="font-weight:900">${s.title}</div>
-      <div style="display:flex;gap:8px">
-        <button class="btn" style="padding:.45rem .8rem" onclick="window.location.href='${s.url}'">Abrir</button>
-        <button class="btn" style="padding:.45rem .8rem" onclick="setMinimized('${s.id}',true)">Min</button>
-        <button class="btn" style="padding:.45rem .8rem" onclick="removeFromStack('${s.id}')">Fechar</button>
-      </div>
-    </div>`;
-    if(s.minimized){const b=document.createElement('div'); b.className='badge'; b.textContent='Minimized'; row.appendChild(b)}
-    stackList.appendChild(row);
-  });
-}
-
-function openApp(app){
-  const mode = LS.get('dual.app.openMode.'+app.id, app.defaultOpenMode||'embed');
-  if(mode==='tab'){ window.open(app.url,'_blank','noopener,noreferrer'); addToStack(app,{minimized:false,mode:'tab'}); return; }
-  addToStack(app,{minimized:false,mode:'embed'});
-  window.location.href = app.url;
-}
-
-function normalizeApps(data){
-  if(Array.isArray(data)) return data.map(x=>({id:x.id||x.key||normKey(x.title||x.name), name:x.name||x.title||x.key, url:x.url, iconKey:x.iconKey, icon:x.icon, defaultOpenMode:x.defaultOpenMode||'embed'}));
-  if(data && data.groups){
-    const out=[]; for(const g of Object.keys(data.groups)){ for(const app of (data.groups[g]||[])){
-      out.push({id:app.key||app.id||normKey(app.title||app.name), name:app.title||app.name||app.key, url:app.url, iconKey:app.iconKey||app.key, icon:app.icon, defaultOpenMode:app.defaultOpenMode||'embed'});
-    }}
-    return out;
-  }
-  return [];
-}
-
-async function readApps(){
-  const override=LS.raw('dual.apps.override');
-  if(override){ try{ const data=JSON.parse(override); return normalizeApps(data) }catch(e){} }
-  try{
-    dualShowLoader();
-    const res=await fetch('./apps/apps.json',{cache:'no-store'});
-    const data=await res.json(); return normalizeApps(data);
+    const res  = await fetch('./apps/apps.json', {cache:'no-store'});
+    const data = await res.json();
+    const root = $('#cards');
+    root.innerHTML='';
+    (data.apps || []).forEach(app=>{
+      const card = document.createElement('div');
+      card.className='card';
+      const icon = app.icon || 'icons/icon-192.png';
+      const title= app.title || app.key || 'App';
+      const desc = app.desc || '';
+      const url  = app.url;
+      card.innerHTML = `
+      <div class="icon"><img src="${icon}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:12px"/></div>
+      <div style="flex:1">
+        <div class="title" style="font-weight:800">${title}</div>
+        <div class="muted" style="opacity:.9">${desc}</div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn" type="button" ${url?`onclick="openInRevo('${encodeURI(url)}','${(title+'').replace(/'/g,"\\'")}')"`:'disabled'}>Abrir</button>
+        </div>
+      </div>`;
+      root.appendChild(card);
+    });
   }catch(e){
-    return normalizeApps([
-      {id:'chat',name:'Chat',url:'chat.html',iconKey:'hub_chat'},
-      {id:'editor',name:'Editor',url:'editor.html',iconKey:'hub_editor'},
-      {id:'books',name:'Books',url:'books.html',iconKey:'hub_books'},
-      {id:'player',name:'KOBLOX',url:'player.html',iconKey:'hub_player'}
-    ]);
-  } finally { dualHideLoader(); }
-}
-
-async function renderApps(){
-  const apps=await readApps();
-  appsGrid.innerHTML='';
-  for(const app of apps){
-    const tile=document.createElement('div'); tile.className='card'; tile.style.textAlign='center';
-    const iconNode=await getIconNode(app); iconNode.style.margin='10px auto'; tile.appendChild(iconNode);
-    const name=document.createElement('div'); name.textContent=app.name; name.style.fontWeight='900'; tile.appendChild(name);
-    const btn=document.createElement('button'); btn.className='btn'; btn.textContent='Abrir'; btn.onclick=()=>openApp(app); btn.style.marginTop='8px'; tile.appendChild(btn);
-    appsGrid.appendChild(tile);
+    $('#cards').innerHTML = '<div class="card"><div class="icon">⚠️</div><div><div style="font-weight:800">Falha ao carregar</div><div class="muted">apps/apps.json não encontrado.</div></div></div>';
   }
 }
-document.getElementById('backBtn').onclick=()=>history.back();
-document.getElementById('brainBtn').onclick=()=>alert('Brain: defina SK e Modelo via Hub PERFECT/Chat (localStorage).');
-if('serviceWorker' in navigator){ try{ navigator.serviceWorker.register('./service-worker.js') }catch(e){} }
-renderApps(); renderStack();
+loadApps();
+
+// PWA install
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;});
+async function doInstall(){ if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; } else { alert('Use “Adicionar à Tela de Início”.'); } }
+$('#btnInstall').addEventListener('click',doInstall);
 </script>
 </body></html>
