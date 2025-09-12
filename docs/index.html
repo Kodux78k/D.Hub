@@ -1,1246 +1,190 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<link rel="manifest" href="./manifest-medium.json"/>
-<title>Hub Dual — Nebula Pro (PERFECT)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<link rel="manifest" href="./manifest.json"/>
+<title>Hub Dual — Nebula Pro (Expandido)</title>
 <style>
-  /* ================= Nebula Pro — PERFECT ================= */
-  :root{
-    --grad-a:#ff52e5; --grad-b:#00c5e5;
-    --text:#f5f7ff; --muted:rgba(245,247,255,.7);
-    --surface:rgba(15,17,32,.45); --surface-strong:rgba(15,17,32,.88);
-    --border:1px solid rgba(255,255,255,.1);
-    --r:24px; --r-lg:28px; --shadow:0 10px 30px rgba(0,0,0,.35);
-  }
-  *{ box-sizing:border-box; min-width:0 }
-  html,body{ height:100dvh; margin:0 }
-  body{
-    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-    background:linear-gradient(42deg,var(--grad-a),var(--grad-b)) fixed;
-    color:var(--text);
-    overflow-x:hidden; overscroll-behavior-y:contain;
-    -webkit-text-size-adjust:100%;
-  }
-
-  /* ===== Masthead ===== */
-  .masthead{
-    position:fixed; inset:env(safe-area-inset-top,0) 0 auto 0; height:78px;
-    padding:0 16px; display:flex; align-items:center; gap:12px;
-    justify-content:space-between; backdrop-filter:blur(16px) saturate(120%);
-    z-index:100;
-  }
-  .title-block{ text-align:center; flex:1; line-height:1.1; min-width:0 }
-  .title-block h1{ margin:0; font-size:22px; font-weight:900; letter-spacing:.06em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-  .title-block small{ display:block; font-size:12px; letter-spacing:.08em; color:var(--muted) }
-  .icon-btn{
-    width:42px; height:42px; border-radius:50%; display:grid; place-items:center;
-    background:var(--surface); border:var(--border); box-shadow:var(--shadow);
-    color:var(--text); cursor:pointer; flex:0 0 auto; transition:background .15s ease;
-  }
-  .icon-btn:active{ transform:scale(.96) } .icon-btn:hover{ background:rgba(255,255,255,.08) }
-
-  /* ===== Brain menu ===== */
-  .brain-menu{
-    position:absolute; top:calc(100% + 6px); right:8px; width:min(92vw, 360px);
-    padding:12px; background:var(--surface-strong); border:var(--border);
-    border-radius:var(--r-lg); box-shadow:var(--shadow); display:none; z-index:99
-  }
-  .brain-menu.open{ display:block; animation:appear .18s ease-out forwards }
-  @keyframes appear{ from{ opacity:0; transform:translateY(-8px) } to{ opacity:1; transform:none } }
-  .brain-menu h3{ margin:4px 0 10px; font-size:16px; font-weight:800; letter-spacing:.05em }
-  .brain-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px }
-  .brain-item{ display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:18px; background:rgba(255,255,255,.05); border:var(--border); }
-  .brain-item svg{ width:22px; height:22px; flex-shrink:0 }
-  .brain-item span{ flex:1; font-weight:700; font-size:14px }
-  .brain-item small{ font-size:12px; color:var(--muted) }
-  .brain-item select, .brain-item input{
-    background:rgba(255,255,255,.06); color:var(--text); border:var(--border);
-    border-radius:10px; padding:6px 8px; font-weight:700;
-  }
-
-  /* ===== Main ===== */
-  main{
-    padding-top:calc(78px + env(safe-area-inset-top,0) + 12px);
-    padding-bottom:calc(80px + env(safe-area-inset-bottom,0) + 16px);
-    width:100%; max-width:520px; margin:0 auto; position:relative; min-height:100vh;
-  }
-  section{ display:none } section.active{ display:block }
-  .home-list{ display:flex; flex-direction:column; gap:14px; margin:0 16px }
-  .home-item{ display:flex; align-items:center; justify-content:space-between; padding:14px 18px; background:var(--surface); border:var(--border); border-radius:var(--r); box-shadow:var(--shadow); cursor:pointer }
-  .home-item .left{ display:flex; align-items:center; gap:14px }
-  .home-item .name{ font-weight:800; font-size:16px }
-  .home-item .right{ display:flex; align-items:center; gap:6px }
-  .bubble{ font-size:12px; background:#a66fff; color:#fff; border-radius:999px; padding:3px 8px; font-weight:800 }
-
-  /* ===== Apps Grid ===== */
-  .apps-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(90px,1fr)); gap:14px; padding:0 16px }
-  .app-icon{
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
-    background:var(--surface); border:var(--border); border-radius:var(--r); box-shadow:var(--shadow);
-    height:100px; cursor:pointer; padding:8px; text-align:center;
-  }
-  .app-icon .icon{ width:32px; height:32px; display:grid; place-items:center }
-  .app-icon span{ font-size:12px; font-weight:700; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100% }
-
-  /* ===== Stack ===== */
-  .stack-list{ display:flex; flex-direction:column; gap:16px; padding:0 16px }
-  .stack-card{ position:relative; background:var(--surface); border:var(--border); border-radius:var(--r); box-shadow:var(--shadow); padding:18px; min-height:118px }
-  .stack-card h2{ margin:0 0 4px; font-size:18px; font-weight:900; padding-right:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-  .stack-card .tools{ position:absolute; top:14px; right:14px; display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end }
-  .stack-card .tools .icon-btn{ width:36px; height:36px; border-radius:12px; box-shadow:none }
-  .stack-card .badge{ position:absolute; right:14px; bottom:14px; font-size:12px; padding:4px 10px; border-radius:999px; background:rgba(166,111,255,.8); border:var(--border) }
-
-  .update-section{ margin:24px 16px; text-align:center }
-  .update-btn{ display:inline-block; padding:12px 32px; border-radius:var(--r); background:linear-gradient(90deg,#a66fff,#6db4ff); border:none; box-shadow:var(--shadow); color:#0a0d1f; font-weight:900; font-size:14px; cursor:pointer; transition:transform .1s ease }
-  .update-btn:active{ transform:scale(.97) }
-
-  /* ===== Viewer embutido ===== */
-  .viewer{ position:fixed; inset:78px 0 88px 0; z-index:200; display:none }
-  .viewer.open{ display:block }
-  .viewer .frame{ position:absolute; inset:12px 16px; border-radius:18px; border:var(--border); background:var(--surface-strong); box-shadow:var(--shadow); overflow:hidden }
-  .viewer .title{ position:absolute; top:18px; left:24px; right:140px; font-size:14px; font-weight:900; letter-spacing:.04em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-  .viewer .toolbar{ position:absolute; top:12px; right:12px; display:flex; gap:8px; flex-wrap:wrap }
-  .viewer iframe{ position:absolute; inset:54px 0 0 0; width:100%; height:calc(100% - 54px); border:0; background:#0a0d1f }
-  .toggle{ display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.06); border:var(--border); border-radius:999px; padding:6px 10px; font-size:12px; cursor:pointer }
-  .toggle input{ appearance:none; width:36px; height:20px; border-radius:999px; background:#444a; position:relative; outline:none; transition:all .15s }
-  .toggle input::after{ content:""; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:#fff; transition:left .15s }
-  .toggle input:checked{ background:#7fd } .toggle input:checked::after{ left:18px }
-
-  /* ===== Quick actions ===== */
-  .quick-actions{ position:fixed; bottom:calc(env(safe-area-inset-bottom,0) + 86px); right:16px; display:flex; gap:12px; z-index:95 }
-  .quick-actions .small-btn{
-    width:44px; height:44px; border-radius:50%; display:grid; place-items:center;
-    background:var(--surface); border:var(--border); box-shadow:var(--shadow);
-    cursor:pointer; transition:background .15s ease;
-  }
-  .quick-actions .small-btn:hover{ background:rgba(255,255,255,.08) }
-
-  /* ===== Tabbar ===== */
-  .tabbar{ position:fixed; inset:auto 0 env(safe-area-inset-bottom,0) 0; height:78px; padding:6px 14px; display:flex; align-items:center; justify-content:center; z-index:100 }
-  .tabbar .container{ width:100%; max-width:520px; background:var(--surface); border:var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow); display:flex; justify-content:space-around; align-items:center; padding:10px 16px }
-  .tab{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:var(--muted); font-size:11px; font-weight:800; cursor:pointer; padding:6px; border-radius:14px; transition:background .15s ease,color .15s ease }
-  .tab.active{ color:var(--text); background:rgba(255,255,255,.08); box-shadow:0 0 0 2px rgba(255,255,255,.08) }
-  .tab svg{ width:22px; height:22px }
-
-  /* iOS 100vh fix */
-  @supports (-webkit-touch-callout:none){
-    main, .viewer{ min-height:-webkit-fill-available }
-  }
-
-  /* Hide header/footer when viewer open */
-  body.viewer-open .masthead{ opacity:0; pointer-events:none; transform:translateY(-6px); transition:opacity .12s ease }
-  body.viewer-open .tabbar{ opacity:0; pointer-events:none; transform:translateY(6px); transition:opacity .12s ease }
+:root{
+  --grad-a:#ff52e5; --grad-b:#00c5e5;
+  --text:#f5f7ff; --muted:rgba(245,247,255,.75);
+  --surface:rgba(15,17,32,.45); --surface-strong:rgba(15,17,32,.88);
+  --border:1px solid rgba(255,255,255,.12);
+  --r:22px; --r-lg:28px; --shadow:0 10px 30px rgba(0,0,0,.35);
+  --gold:#F2C75C;
+}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%;margin:0}
+body{
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  background:linear-gradient(42deg,var(--grad-a),var(--grad-b)) fixed;
+  color:var(--text); overflow-x:hidden; -webkit-text-size-adjust:100%;
+}
+a{color:#7fd}
+.mast{position:fixed;inset:env(safe-area-inset-top,0) 0 auto 0;height:76px;
+  display:flex;align-items:center;gap:12px;padding:0 14px;z-index:100;
+  backdrop-filter:blur(16px) saturate(120%)}
+.title{flex:1;text-align:center;line-height:1.1}
+.title h1{margin:0;font-size:20px;font-weight:900;letter-spacing:.06em}
+.title small{display:block;font-size:12px;letter-spacing:.08em;color:var(--muted)}
+.icon-btn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
+  background:var(--surface);border:var(--border);box-shadow:var(--shadow);color:var(--text);cursor:pointer}
+main{padding:92px 16px 100px;max-width:860px;margin:0 auto}
+footer.tabbar{position:fixed;inset:auto 0 env(safe-area-inset-bottom,0) 0;height:80px;display:flex;align-items:center;justify-content:center}
+footer .container{width:100%;max-width:520px;background:var(--surface);border:var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow);display:flex;justify-content:space-around;align-items:center;padding:10px 16px}
+footer .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);font-size:11px;font-weight:800;cursor:pointer;padding:6px;border-radius:14px}
+footer .tab.active{color:var(--text);background:rgba(255,255,255,.08)}
+.card{background:var(--surface);border:var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
+.btn{appearance:none;border:var(--border);background:linear-gradient(42deg,var(--grad-a),var(--grad-b));
+  color:#fff;border-radius:999px;padding:.72rem 1.05rem;font-weight:900;cursor:pointer}
+.badge{padding:.3rem .6rem;border:var(--border);border-radius:999px}
+.loader{--size:52px;position:relative;width:var(--size);height:var(--size)}
+.loader .ring{position:absolute;inset:0;border:2px solid var(--gold);border-radius:50%;animation:spin 6s linear infinite}
+.loader .bar{position:absolute;left:50%;top:50%;width:62%;height:2px;background:var(--gold);
+  transform:translate(-50%,-50%);border-radius:999px;animation:breathe 2.4s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes breathe{0%,100%{opacity:.9}50%{opacity:1}}
 </style>
-
-<!-- Medium-Dark theme override -->
-<style id="dual-medium-dark">
-  :root{
-    --grad-a:#a76bff;
-    --grad-b:#29d3ff;
-    --text:#f7f9ff;
-    --muted:rgba(247,249,255,.75);
-    --surface:rgba(24,26,45,.55);
-    --surface-strong:rgba(18,20,36,.92);
-    --border:1px solid rgba(255,255,255,.12);
-    --shadow:0 12px 34px rgba(0,0,0,.35);
-    --r:20px; --r-lg:24px;
-  }
-  body{ background:linear-gradient(38deg,var(--grad-a),var(--grad-b)) fixed }
-  .tab.active{ box-shadow:0 0 0 2px rgba(255,255,255,.06) }
-  .bubble{ background:#7c5cff }
-  .update-btn{ background:linear-gradient(90deg,#7c5cff,#49c2ff); color:#0a0d1f }
-
-  /* Hide header/footer when viewer open */
-  body.viewer-open .masthead{ opacity:0; pointer-events:none; transform:translateY(-6px); transition:opacity .12s ease }
-  body.viewer-open .tabbar{ opacity:0; pointer-events:none; transform:translateY(6px); transition:opacity .12s ease }
-</style>
-
-
-  <!-- iOS PWA / Splash & Capabilities -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="./icons/pwa/icon-192.png">
-  <!-- iOS startup images -->
-  <link rel="apple-touch-startup-image" href="./icons/splash/splash-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-  <link rel="apple-touch-startup-image" href="./icons/splash/splash-2048x2732.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-  <link rel="apple-touch-startup-image" href="./icons/splash/splash-1280x720.png" media="(device-width: 360px) and (device-height: 640px) and (-webkit-device-pixel-ratio: 4) and (orientation: landscape)">
-
 </head>
 <body>
-<header class="masthead">
-  <button class="icon-btn" id="backBtn" aria-label="Voltar">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-  </button>
-  <div class="title-block">
-    <h1>HUB DUAL</h1>
-    <small>UNO • DUAL • TRINITY</small>
-  </div>
-  <button class="icon-btn" id="brainBtn" aria-haspopup="true" aria-expanded="false" aria-label="Dual Brain">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 1 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
-  </button>
-
-  <!-- Brain menu -->
-  <div class="brain-menu" id="brainMenu">
-    <h3>Brain</h3>
-    <ul class="brain-list">
-      <li class="brain-item" id="brainDownload">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        <span>Download (backup)</span>
-      </li>
-      <li class="brain-item" id="brainSK">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2"/><path d="M7.5 13.5L2 19v3h3l5.5-5.5"/><circle cx="16" cy="8" r="5"/></svg>
-        <span>SK OpenRouter</span><small id="skHint"></small>
-      </li>
-      <li class="brain-item" style="cursor:default">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v6H3z"/><path d="M3 15h18v6H3z"/></svg>
-        <span>Modelo</span>
-        <select id="modelSelect"></select>
-      </li>
-      <li class="brain-item" id="brainLogs">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18"/><path d="M3 8h18"/><path d="M3 13h18"/><path d="M3 18h18"/></svg>
-        <span>Limpar logs</span>
-      </li>
-    
-      <li class="brain-item" id="brainUpload">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 3v14"/><polyline points="7 8 12 3 17 8"/><rect x="4" y="17" width="16" height="4" rx="2"/>
-        </svg>
-        <span>Upload Local (.html / .json)</span>
-        <input id="filePicker" type="file" accept=".html,.htm,.json" multiple style="display:none"/>
-      </li>
-      <li class="brain-item" id="brainClearOverride">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/>
-        </svg>
-        <span>Limpar override do apps.json</span><small>se ativo</small>
-      </li>
-    
-      <li class="brain-item" id="brainLocalMgr">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 20h10"/>
-        </svg>
-        <span>Gerenciar Apps Locais</span>
-      </li>
-          <li class="brain-item" id="brainLocalManager">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="4" width="18" height="14" rx="3"/>
-          <path d="M7 8h10M7 12h10M7 16h6"/>
-        </svg>
-        <span>Gerenciar Apps Locais</span>
-      </li>
-    </ul>
-  </div>
+<header class="mast">
+  <button class="icon-btn" id="backBtn" aria-label="Voltar">⟵</button>
+  <div class="title"><h1>HUB DUAL</h1><small>UNO • DUAL • TRINITY</small></div>
+  <button class="icon-btn" id="brainBtn" title="Dual Brain">◐</button>
 </header>
 
-<!-- Ações rápidas -->
-<div class="quick-actions">
-  <button class="small-btn" onclick="toast('Atalho 1')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-  </button>
-  <button class="small-btn" onclick="toast('Atalho 2')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3H7a4 4 0 0 0-4 4v10a4 4 0 0 0 4 4h10a4 4 0 0 0 4-4V7a4 4 0 0 0-4-4z"/><line x1="7" y1="7" x2="17" y2="17"/><line x1="17" y1="7" x2="7" y2="17"/></svg>
-  </button>
-</div>
-
 <main>
-  <section id="page-home" class="active">
-    <div class="home-list">
-      <div class="home-item" onclick="go('apps')">
-        <div class="left">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/></svg>
-          <span class="name">Apps</span>
-        </div>
-        <div class="right">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-        </div>
-      </div>
-      <div class="home-item" onclick="go('stack')">
-        <div class="left">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l9 4.5-9 4.5L3 6.5 12 2z"/><path d="M3 13l9 4.5 9-4.5"/></svg>
-          <span class="name">Stack</span>
-        </div>
-        <div class="right">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-        </div>
-      </div>
-      <div class="home-item" onclick="go('stack')">
-        <div class="left">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18"/></svg>
-          <span class="name">Minimized</span>
-        </div>
-        <div class="right">
-          <span class="bubble" id="miniCountHome">0</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-        </div>
-      </div>
-    </div>
+  <section class="card">
+    <h2 style="margin:0 0 8px;font-size:18px">Launcher</h2>
+    <p style="margin:0 0 12px;color:var(--muted)">Carrega os apps de <code>./apps/apps.json</code> e também apps locais enviados.</p>
+    <div id="appsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px"></div>
   </section>
 
-  <!-- Apps -->
-  <section id="page-apps">
-    <div class="apps-grid" id="appsGrid"></div>
-  </section>
-
-  <!-- Stack -->
-  <section id="page-stack">
-    <div class="stack-list" id="stackList"></div>
-    <div class="update-section">
-      <button class="update-btn" onclick="toast('Update')">Update</button>
-    </div>
+  <section class="card" style="margin-top:16px">
+    <h2 style="margin:0 0 8px;font-size:18px">Stack</h2>
+    <div id="stackList" style="display:flex;flex-direction:column;gap:10px"></div>
   </section>
 </main>
 
-<!-- Viewer embutido -->
-<div class="viewer" id="viewer">
-  <div class="frame">
-    <div class="title"><span id="viewerTitle">—</span></div>
-    <div class="toolbar">
-      <label class="toggle" title="Abrir em nova aba / dentro (por app)">
-        <input type="checkbox" id="openModeToggle"/>
-        <span id="openModeLabel">Dentro</span>
-      </label>
-      <button class="icon-btn" title="Minimizar" id="viewerMinBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
-      </button>
-      <button class="icon-btn" title="Recarregar" id="viewerReloadBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.13-3.36L23 10M1 14l5.36 4.36A9 9 0 0 0 20.49 15"/></svg>
-      </button>
-      <button class="icon-btn" title="Fechar" id="viewerCloseBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <iframe id="viewerFrame" src="about:blank" referrerpolicy="no-referrer"></iframe>
-  </div>
-</div>
-
 <footer class="tabbar">
   <div class="container">
-    <div class="tab" id="tab-home" onclick="go('home')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9"/><path d="M9 21V9h6v12"/></svg>
-      <span>Home</span>
-    </div>
-    <div class="tab" id="tab-apps" onclick="go('apps')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/></svg>
-      <span>Apps</span>
-    </div>
-    <div class="tab" id="tab-stack" onclick="go('stack')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l9 4.5-9 4.5L3 6.5 12 2z"/><path d="M3 13l9 4.5 9-4.5"/></svg>
-      <span>Stack</span>
-    </div>
+    <div class="tab active"><span>Home</span></div>
+    <div class="tab" onclick="location.href='chat.html'"><span>Chat</span></div>
+    <div class="tab" onclick="location.href='editor.html'"><span>Editor</span></div>
   </div>
 </footer>
 
+<div id="dualLoader" style="position:fixed;inset:0;display:none;place-items:center;z-index:9999;background:rgba(10,13,31,.66);backdrop-filter:blur(6px)">
+  <span class="loader"><span class="ring"></span><span class="bar"></span></span>
+</div>
+
 <script>
-/* ================= Helpers ================= */
-const LS = {
-  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d }catch(e){ return d } },
-  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)) }catch(e){} },
-  raw(k){ return localStorage.getItem(k)||'' }
-};
-function toast(m){ console.log(m) }
-function exportBackup(){
-  const data = { when: Date.now(), storage: {...localStorage} };
-  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob); const a = document.createElement('a');
-  a.href = url; a.download = 'dual.backup.json'; a.click(); URL.revokeObjectURL(url);
-  toast('Backup exportado');
-}
-function promptKey(){
-  const key = prompt('Cole sua SK do OpenRouter (salva localmente):', LS.raw('dual.keys.openrouter'));
-  if(key!=null){ localStorage.setItem('dual.keys.openrouter', key); document.getElementById('skHint').textContent = key ? '• OK' : '' ; toast('Chave armazenada') }
-}
-function clearLogs(){ console.clear(); toast('Logs limpos') }
+const LS={};
+LS.get=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
+LS.set=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+LS.raw=(k)=>localStorage.getItem(k)||'';
 
-/* ================= Navegação ================= */
-function go(target){
-  brainMenu.classList.remove('open'); brainBtn.setAttribute('aria-expanded','false');
-  ['home','apps','stack'].forEach(p=>{
-    const sec = document.getElementById('page-'+p); if(sec) sec.classList.remove('active');
-    const tab = document.getElementById('tab-'+p); if(tab) tab.classList.remove('active');
-  });
-  const newSec = document.getElementById('page-'+target); if(newSec) newSec.classList.add('active');
-  const newTab = document.getElementById('tab-'+target); if(newTab) newTab.classList.add('active');
-}
-const brainBtn = document.getElementById('brainBtn');
-const brainMenu = document.getElementById('brainMenu');
-brainBtn.addEventListener('click', (e)=>{
-  const isOpen = brainMenu.classList.toggle('open');
-  brainBtn.setAttribute('aria-expanded', String(isOpen)); e.stopPropagation();
-});
-document.addEventListener('click', (e)=>{
-  if(!brainMenu.contains(e.target) && e.target !== brainBtn){
-    brainMenu.classList.remove('open'); brainBtn.setAttribute('aria-expanded','false');
-  }
-});
-document.getElementById('backBtn').addEventListener('click', ()=>history.back());
+const appsGrid=document.getElementById('appsGrid');
+const stackList=document.getElementById('stackList');
+function dualShowLoader(){document.getElementById('dualLoader').style.display='grid'}
+function dualHideLoader(){document.getElementById('dualLoader').style.display='none'}
 
-/* ================= Modelo (OpenRouter) ================= */
-const DEFAULT_MODELS = [
-  "openrouter/auto",
-  "anthropic/claude-3.5-sonnet",
-  "openai/gpt-4.1-mini",
-  "google/gemini-1.5-pro",
-  "meta/llama-3.1-405b-instruct",
-  "mistral/mistral-large-latest"
-];
-const modelSelect = document.getElementById('modelSelect');
-function initModelSelect(){
-  const saved = LS.get('dual.openrouter.model', DEFAULT_MODELS[0]);
-  modelSelect.innerHTML = "";
-  DEFAULT_MODELS.forEach(m=>{
-    const opt = document.createElement('option'); opt.value = m; opt.textContent = m; if(m===saved) opt.selected = true;
-    modelSelect.appendChild(opt);
-  });
-  modelSelect.addEventListener('change', ()=>{ LS.set('dual.openrouter.model', modelSelect.value); toast('Modelo: '+modelSelect.value) });
-}
-
-/* ================= Ícones dinâmicos ================= */
-const iconCache = new Map();
-function normKey(s){
-  return (s||'').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9_-]+/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
-}
+const iconCache=new Map();
+function normKey(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9_-]+/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'')}
 async function getIconNode(app){
-  // Priority: explicit bitmap/icon path -> iconKey svg -> computed key svg -> fallback
-  if(app.icon && /\\.(png|jpg|jpeg|gif|webp|svg)$/i.test(app.icon)){
-    const d = document.createElement('div'); d.className='icon';
-    const img = new Image(); img.src = app.icon; img.alt = app.name||app.title||app.id||'app';
-    img.style.width = '26px'; img.style.height = '26px';
+  if(app.icon && /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(app.icon)){
+    const d=document.createElement('div'); d.style.cssText='display:grid;place-items:center;height:52px';
+    const img=new Image(); img.src=app.icon; img.alt=app.name||'app'; img.style.width='32px'; img.style.height='32px';
     d.appendChild(img); return d;
   }
-  const key = normKey(app.iconKey || app.key || app.id || app.title || app.name || 'app');
-  const path = `./icons/others/${key}.svg`;
+  const key=normKey(app.iconKey||app.key||app.id||app.title||app.name||'app');
+  const path=`./icons/others/${key}.svg`;
   try{
-    const cacheKey = 'svg:'+path;
-    if(iconCache.has(cacheKey)){ const d=document.createElement('div'); d.className='icon'; d.innerHTML = iconCache.get(cacheKey); return d; }
-    const res = await fetch(path, {cache:'force-cache'});
-    if(res.ok){
-      const svg = await res.text(); iconCache.set(cacheKey, svg);
-      const d=document.createElement('div'); d.className='icon'; d.innerHTML=svg; return d;
-    }
+    const cacheKey='svg:'+path;
+    if(iconCache.has(cacheKey)){const d=document.createElement('div'); d.innerHTML=iconCache.get(cacheKey); return d}
+    const res=await fetch(path); if(res.ok){const svg=await res.text(); iconCache.set(cacheKey,svg); const d=document.createElement('div'); d.innerHTML=svg; return d;}
   }catch(e){}
-  const d=document.createElement('div'); d.className='icon';
-  d.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="4"/></svg>';
-  return d;
+  const d=document.createElement('div'); d.textContent='◇'; return d;
 }
 
-/* ================= Apps ================= */
-const appsGrid = document.getElementById('appsGrid');
-async function readApps(){
-  // Supports two formats:
-  // 1) Array of apps: [ {id,name,url,iconKey,defaultOpenMode} ]
-  // 2) { groups: { "Group Name": [ {key,title,url,iconKey,...}, ... ] } }
-  try{
-    const res = await fetch('./apps/apps.json', {cache:'no-cache'});
-    if(!res.ok) throw new Error('missing apps.json');
-    const data = await res.json();
-    if(Array.isArray(data)) return data.map(x => ({
-      id: x.id || x.key || normKey(x.title||x.name),
-      name: x.name || x.title || x.key,
-      url: x.url,
-      iconKey: x.iconKey,
-      icon: x.icon,
-      defaultOpenMode: x.defaultOpenMode || 'embed'
-    }));
-    if(data && data.groups){
-      const out=[];
-      for(const g of Object.keys(data.groups)){
-        for(const app of (data.groups[g]||[])){
-          out.push({
-            id: app.key || app.id || normKey(app.title||app.name),
-            name: app.title || app.name || app.key,
-            url: app.url,
-            iconKey: app.iconKey || app.key,
-            icon: app.icon,
-            defaultOpenMode: app.defaultOpenMode || 'embed'
-          });
-        }
-      }
-      return out;
-    }
-    return [];
-  }catch(e){
-    // Fallback demonstrativo
-    return [
-      { id:'chat', name:'Chat', url:'chat.html', iconKey:'hub_chat', defaultOpenMode:'embed' },
-      { id:'editor', name:'Editor', url:'editor.html', iconKey:'hub_config', defaultOpenMode:'embed' },
-      { id:'books', name:'Books', url:'books.html', iconKey:'hub_relatorio', defaultOpenMode:'embed' },
-      { id:'koblox', name:'KOBLOX', url:'player.html', iconKey:'hub_health', defaultOpenMode:'embed' }
-    ];
-  }
-}
-
-/* per-app openMode */
-function getOpenMode(appId, def){ return LS.get('dual.app.openMode.'+appId, def||'embed') }
-function setOpenMode(appId, mode){ LS.set('dual.app.openMode.'+appId, mode) }
-
-/* ================= Viewer + Stack ================= */
-const viewer = document.getElementById('viewer');
-const viewerFrame = document.getElementById('viewerFrame');
-const viewerTitle = document.getElementById('viewerTitle');
-const openModeToggle = document.getElementById('openModeToggle');
-const openModeLabel = document.getElementById('openModeLabel');
-const viewerMinBtn = document.getElementById('viewerMinBtn');
-const viewerReloadBtn = document.getElementById('viewerReloadBtn');
-const viewerCloseBtn = document.getElementById('viewerCloseBtn');
-let currentAppId = null;
-
-function readStack(){ return LS.get('dual.stack', []) }
-function writeStack(v){ LS.set('dual.stack', v) }
-function addToStack(app, opts={}){
-  const st = readStack();
-  const i = st.findIndex(s=>s.id===app.id);
-  const item = { id:app.id, title:app.name, url:app.url, minimized:!!opts.minimized, mode:opts.mode||'embed', t:Date.now() };
-  if(i>=0){ st[i] = item } else { st.unshift(item) }
+function readStack(){return LS.get('dual.stack',[])}
+function writeStack(v){LS.set('dual.stack',v)}
+function addToStack(app,opts={}){
+  const st=readStack(); const i=st.findIndex(s=>s.id===app.id);
+  const item={id:app.id,title:app.name,url:app.url,minimized:!!opts.minimized,mode:opts.mode||'embed',t:Date.now()};
+  if(i>=0) st[i]=item; else st.unshift(item);
   writeStack(st); renderStack();
 }
-function removeFromStack(id){ writeStack(readStack().filter(s=>s.id!==id)); renderStack() }
-function setMinimized(id,val){
-  const st = readStack(); const i = st.findIndex(s=>s.id===id);
-  if(i>=0){ st[i].minimized = !!val; writeStack(st); renderStack() }
-}
-function setStackMode(id, mode){
-  const st = readStack(); const i = st.findIndex(s=>s.id===id);
-  if(i>=0){ st[i].mode = mode; writeStack(st); renderStack() }
-}
+function setMinimized(id,val){const st=readStack(); const i=st.findIndex(s=>s.id===id); if(i>=0){st[i].minimized=!!val;writeStack(st);renderStack()}}
+function removeFromStack(id){writeStack(readStack().filter(s=>s.id!==id)); renderStack()}
 
-const stackList = document.getElementById('stackList');
 function renderStack(){
-  const st = readStack();
-  const miniCount = st.filter(s=>s.minimized).length;
-  document.getElementById('miniCountHome').textContent = miniCount;
-  stackList.innerHTML = '';
+  const st=readStack(); stackList.innerHTML='';
+  if(!st.length){stackList.innerHTML='<div class="badge" style="opacity:.8">Stack vazio</div>'; return;}
   st.forEach(s=>{
-    const card = document.createElement('div'); card.className='stack-card';
-    const h2 = document.createElement('h2'); h2.textContent = s.title; card.appendChild(h2);
-
-    const tools = document.createElement('div'); tools.className='tools';
-    // toggle open mode (também no stack)
-    const toggleWrap = document.createElement('label'); toggleWrap.className='toggle'; toggleWrap.title='Abrir em nova aba / dentro';
-    const chk = document.createElement('input'); chk.type='checkbox'; chk.checked = (getOpenMode(s.id, 'embed')==='tab');
-    const span = document.createElement('span'); span.textContent = chk.checked ? 'Nova aba' : 'Dentro';
-    chk.addEventListener('change', ()=>{ const m = chk.checked?'tab':'embed'; setOpenMode(s.id,m); setStackMode(s.id,m); span.textContent = chk.checked?'Nova aba':'Dentro' });
-    toggleWrap.appendChild(chk); toggleWrap.appendChild(span);
-    tools.appendChild(toggleWrap);
-
-    const btnMin = document.createElement('button'); btnMin.className='icon-btn'; btnMin.title='Minimizar';
-    btnMin.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>`;
-    btnMin.onclick = ()=>setMinimized(s.id,true);
-
-    const btnOpen = document.createElement('button'); btnOpen.className='icon-btn'; btnOpen.title='Abrir';
-    btnOpen.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>`;
-    btnOpen.onclick = ()=>{
-      if(getOpenMode(s.id,'embed')==='tab'){ window.open(s.url,'_blank','noopener,noreferrer') }
-      else { viewerTitle.textContent = s.title; viewerFrame.src = s.url; viewer.classList.add('open'); document.body.classList.add('viewer-open'); setMinimized(s.id,false) }
-    };
-
-    const btnReload = document.createElement('button'); btnReload.className='icon-btn'; btnReload.title='Recarregar';
-    btnReload.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.13-3.36L23 10M1 14l5.36 4.36A9 9 0 0 0 20.49 15"/></svg>`;
-    btnReload.onclick = ()=>{ try{ viewerFrame.contentWindow.location.reload() }catch(e){ viewerFrame.src = viewerFrame.src } };
-
-    const btnClose = document.createElement('button'); btnClose.className='icon-btn'; btnClose.title='Fechar';
-    btnClose.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
-    btnClose.onclick = ()=>removeFromStack(s.id);
-
-    tools.appendChild(btnMin); tools.appendChild(btnOpen); tools.appendChild(btnReload); tools.appendChild(btnClose);
-    card.appendChild(tools);
-
-    if(s.minimized){ const b=document.createElement('div'); b.className='badge'; b.textContent='Minimized'; card.appendChild(b) }
-    stackList.appendChild(card);
-  });
-}
-
-/* ================= Render Apps ================= */
-async function renderApps(){
-  const apps = await readApps();
-  appsGrid.innerHTML = '';
-  for(const app of apps){
-    const tile = document.createElement('div'); tile.className='app-icon';
-    const iconNode = await getIconNode(app); iconNode.classList.add('icon');
-    const label = document.createElement('span'); label.textContent = app.name;
-    tile.appendChild(iconNode); tile.appendChild(label);
-    tile.onclick = ()=>openApp(app);
-    appsGrid.appendChild(tile);
-    if(LS.get('dual.app.openMode.'+app.id, null)===null){ setOpenMode(app.id, app.defaultOpenMode||'embed') }
-  }
-}
-
-/* ================= Open App ================= */
-function openApp(app){
-  const mode = getOpenMode(app.id, app.defaultOpenMode||'embed');
-  if(mode==='tab'){
-    window.open(app.url,'_blank','noopener,noreferrer');
-    addToStack(app,{ minimized:false, mode:'tab' });
-    return;
-  }
-  viewerTitle.textContent = app.name;
-  viewer.classList.add('open'); document.body.classList.add('viewer-open');
-  viewerFrame.src = app.url;
-  currentAppId = app.id;
-  openModeToggle.checked = (mode==='tab');
-  openModeLabel.textContent = openModeToggle.checked ? 'Nova aba' : 'Dentro';
-  addToStack(app,{ minimized:false, mode:'embed' });
-}
-openModeToggle.addEventListener('change', ()=>{
-  if(!currentAppId) return;
-  const m = openModeToggle.checked ? 'tab' : 'embed';
-  setOpenMode(currentAppId, m);
-  setStackMode(currentAppId, m);
-  openModeLabel.textContent = openModeToggle.checked ? 'Nova aba' : 'Dentro';
-});
-viewerMinBtn.addEventListener('click', ()=>{ viewer.classList.remove('open'); document.body.classList.remove('viewer-open'); if(currentAppId){ setMinimized(currentAppId,true) } });
-viewerReloadBtn.addEventListener('click', ()=>{ try{ viewerFrame.contentWindow.location.reload() }catch(e){ viewerFrame.src = viewerFrame.src } });
-viewerCloseBtn.addEventListener('click', ()=>{ viewer.classList.remove('open'); document.body.classList.remove('viewer-open'); viewerFrame.src='about:blank'; if(currentAppId){ removeFromStack(currentAppId); currentAppId=null } });
-
-
-/* ================= Local Uploads & Apps Override ================= */
-function lsListLocalApps(){ return LS.get('dual.localapps', []) }
-function lsSaveLocalApps(list){ LS.set('dual.localapps', list) }
-function addLocalAppEntry(id, name){
-  const list = lsListLocalApps();
-  const i = list.findIndex(a=>a.id===id);
-  const entry = { id, name: name || id, url: 'local:'+id, iconKey: 'hub_apps', defaultOpenMode: 'embed' };
-  if(i>=0){ list[i] = entry } else { list.unshift(entry) }
-  lsSaveLocalApps(list);
-}
-function getLocalAppContent(id){ return LS.raw('dual.localapp.'+id) || '' }
-function setLocalAppContent(id, html){ try{ localStorage.setItem('dual.localapp.'+id, html) }catch(e){} }
-
-async function handleLocalUpload(files){
-  if(!files || !files.length) return;
-  dualShowLoaderAfter(600); // feedback rápido
-  try{
-    const tasks = Array.from(files).map(async f=>{
-      const name = f.name || 'upload';
-      if(/\.json$/i.test(name)){
-        const txt = await f.text();
-        try{
-          const parsed = JSON.parse(txt);
-          if(Array.isArray(parsed) || (parsed && typeof parsed==='object' && parsed.groups)){
-            localStorage.setItem('dual.apps.override', txt);
-            toast('Override de apps.json ativado ('+ name +')');
-          }else{
-            toast('JSON não reconhecido como apps.json válido: '+name);
-          }
-        }catch(e){ toast('Falha ao ler JSON: '+name) }
-      } else if(/\.(html|htm)$/i.test(name)){
-        const id = (name.toLowerCase().replace(/[^a-z0-9_-]+/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'')) || ('local_'+Date.now());
-        const txt = await f.text();
-        setLocalAppContent(id, txt);
-        addLocalAppEntry(id, name.replace(/\.(html|htm)$/i,''));
-        toast('App local adicionado: '+name);
-      } else {
-        toast('Tipo não suportado: '+name);
-      }
-    });
-    await Promise.all(tasks);
-  } finally {
-    dualHideLoader();
-    renderApps(); // atualiza grid
-  }
-}
-
-function clearAppsOverride(){
-  localStorage.removeItem('dual.apps.override');
-  toast('Override removido');
-}
-
-/* Override-aware readApps */
-const __readApps_fetch = readApps;
-readApps = async function(){
-  // 1) local override (apps.json via upload) tem prioridade
-  const override = LS.raw('dual.apps.override');
-  if(override){
-    try{
-      const data = JSON.parse(override);
-      const norm = Array.isArray(data) ? data.map(x => ({
-        id: x.id || x.key || normKey(x.title||x.name),
-        name: x.name || x.title || x.key,
-        url: x.url, iconKey: x.iconKey, icon: x.icon, defaultOpenMode: x.defaultOpenMode || 'embed'
-      })) : (data && data.groups ? Object.keys(data.groups).flatMap(g => (data.groups[g]||[]).map(app => ({
-        id: app.key || app.id || normKey(app.title||app.name),
-        name: app.title || app.name || app.key,
-        url: app.url, iconKey: app.iconKey || app.key, icon: app.icon, defaultOpenMode: app.defaultOpenMode || 'embed'
-      }))) : []);
-      // + local uploads
-      const locals = lsListLocalApps();
-      return [...locals, ...norm];
-    }catch(e){ /* cai para fetch */ }
-  }
-  // 2) fetch padrão + append dos locais
-  const list = await __readApps_fetch();
-  const locals = lsListLocalApps();
-  return [...locals, ...list];
-};
-
-/* Open local:* apps */
-const __openApp_base = openApp;
-openApp = function(app){
-  if(app && typeof app.url==='string' && app.url.startsWith('local:')){
-    const id = app.url.slice(6);
-    const html = getLocalAppContent(id);
-    const blob = new Blob([html || '<!doctype html><title>Local App</title><meta charset=\"utf-8\"><style>body{background:#0b0f1a;color:#fff;font-family:Inter,sans-serif;padding:20px}
-  /* Hide header/footer when viewer open */
-  body.viewer-open .masthead{ opacity:0; pointer-events:none; transform:translateY(-6px); transition:opacity .12s ease }
-  body.viewer-open .tabbar{ opacity:0; pointer-events:none; transform:translateY(6px); transition:opacity .12s ease }
-</style><h1>Local App vazio</h1>'], {type:'text/html'});
-    const u = URL.createObjectURL(blob);
-    const mode = getOpenMode(app.id||id, app.defaultOpenMode||'embed');
-    if(mode==='tab'){ window.open(u, '_blank', 'noopener,noreferrer'); }
-    else {
-      viewerTitle.textContent = app.name || id;
-      viewer.classList.add('open'); document.body.classList.add('viewer-open');
-      dualShowLoaderAfter(500);
-      viewerFrame.src = u;
-    }
-    addToStack({ id: app.id||id, name: app.name||id, url: app.url, iconKey: app.iconKey, defaultOpenMode: app.defaultOpenMode }, { minimized:false, mode: (mode==='tab'?'tab':'embed') });
-    return;
-  }
-  return __openApp_base(app);
-};
-
-/* ================= Boot ================= */
-function boot(){
-  // Replace/Restore wiring
-  const lamReplace = document.getElementById('localAppsReplace');
-  const lamRestore = document.getElementById('localAppsRestore');
-  const lamImportPicker = document.getElementById('localAppsImportPicker');
-  updateRestoreButton();
-  if(lamReplace && lamImportPicker){
-    lamReplace.onclick = ()=> lamImportPicker.click();
-    // existing lamImportPicker onchange merges; for replace we temporarily override handler
-    const oldOnChange = lamImportPicker.onchange;
-    lamReplace.addEventListener('click', ()=>{
-      lamImportPicker.onchange = (e)=>{
-        const f = (e.target.files||[])[0];
-        if(f) replaceAllLocalAppsFromJson(f);
-        e.target.value='';
-        // restore merge behavior after replace action
-        lamImportPicker.onchange = oldOnChange;
-      };
-    });
-  }
-  if(lamRestore){ lamRestore.onclick = restoreLocalAppsBackup }
-
-  // Local Apps Import wiring
-  const lamImport = document.getElementById('localAppsImport');
-  const lamImportFile = document.getElementById('localAppsImportFile');
-  if(lamImport && lamImportFile){
-    lamImport.onclick = ()=> lamImportFile.click();
-    lamImportFile.onchange = (e)=>{ if(e.target.files.length) importLocalApps(e.target.files[0]) };
-  }
-
-  // Local Apps Manager wiring
-  const lam = document.getElementById('localAppsModal');
-  const lamClose = document.getElementById('localAppsClose');
-  const lamExport = document.getElementById('localAppsExport');
-  const lamClear = document.getElementById('localAppsClear');
-  const lamOpen = document.getElementById('brainLocalManager');
-  if(lamOpen){ lamOpen.onclick = showLocalAppsManager }
-  if(lamClose){ lamClose.onclick = hideLocalAppsManager }
-  if(lamExport){ lamExport.onclick = exportAllLocalApps }
-  if(lamClear){ lamClear.onclick = clearAllLocalApps }
-
-  const uploadLi = document.getElementById('brainUpload');
-  const filePicker = document.getElementById('filePicker');
-  if(uploadLi && filePicker){
-    uploadLi.onclick = ()=> filePicker.click();
-    filePicker.onchange = (e)=> handleLocalUpload(e.target.files);
-  }
-  const clearOv = document.getElementById('brainClearOverride');
-  if(clearOv){ clearOv.onclick = clearAppsOverride }
-
-  document.getElementById('skHint').textContent = LS.raw('dual.keys.openrouter') ? '• OK' : '';
-  document.getElementById('brainDownload').onclick = exportBackup;
-  document.getElementById('brainSK').onclick = promptKey;
-  document.getElementById('brainLogs').onclick = clearLogs;
-  initModelSelect();
-  renderApps();
-  renderStack();
-  if('serviceWorker' in navigator){ try{ navigator.serviceWorker.register('./service-worker.js') }catch(e){} }
-}
-boot();
-</script>
-
-<style>
-/* === Dual Loader Overlay === */
-#dualLoader{ position:fixed; inset:0; display:none; place-items:center; z-index:9999;
-  background:rgba(10,13,31,.66); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px) }
-#dualLoader.show{ display:grid }
-#dualLoader .di-loader{ --di-size:54px; --di-gold:#F2C75C; --di-stroke:2px; position:relative; width:var(--di-size); height:var(--di-size) }
-#dualLoader .di-ring{ position:absolute; inset:0; border:var(--di-stroke) solid var(--di-gold); border-radius:50%; animation:di-spin 6s linear infinite }
-#dualLoader .di-stroke{ position:absolute; left:50%; top:50%; width:62%; height:var(--di-stroke); background:var(--di-gold);
-  transform:translate(-50%,-50%); border-radius:999px; animation:di-breathe 2.4s ease-in-out infinite }
-#dualLoader .di-dots{ position:absolute; inset:0; transform:rotate(-90deg); animation:di-orbit 4.2s linear infinite }
-#dualLoader .di-dots i{ --i:0; position:absolute; left:50%; top:50%; width:4px; height:4px; border-radius:50%; background:var(--di-gold); opacity:.55;
-  transform: rotate(calc(var(--i)*51deg)) translate(calc(7px + var(--i)*2.2px)) rotate(calc(var(--i)*-51deg));
-  animation:di-pulse 4.2s linear infinite; animation-delay:calc(var(--i) * .6s) }
-@keyframes di-orbit{ to{ transform:rotate(270deg) } }@keyframes di-spin{ to{ transform:rotate(360deg) } }
-@keyframes di-breathe{ 0%,100%{ opacity:.9 } 50%{ opacity:1 } }
-@keyframes di-pulse{ 0%,70%{ opacity:.45; transform:scale(.92) } 76%,84%{ opacity:1; transform:scale(1.18) } 100%{ opacity:.6; transform:scale(.96) } }
-@media (prefers-reduced-motion:reduce){ #dualLoader .di-ring,#dualLoader .di-stroke,#dualLoader .di-dots,#dualLoader .di-dots i{ animation:none } }
-
-  /* Hide header/footer when viewer open */
-  body.viewer-open .masthead{ opacity:0; pointer-events:none; transform:translateY(-6px); transition:opacity .12s ease }
-  body.viewer-open .tabbar{ opacity:0; pointer-events:none; transform:translateY(6px); transition:opacity .12s ease }
-</style>
-<div id="dualLoader" aria-hidden="true">
-  <span class="di-loader">
-    <span class="di-ring"></span>
-    <span class="di-stroke"></span>
-    <span class="di-dots">
-      <i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i>
-      <i style="--i:3"></i><i style="--i:4"></i><i style="--i:5"></i><i style="--i:6"></i>
-    </span>
-  </span>
-</div>
-
-
-<script>
-// === Dual Loader control (show after 3s threshold) ===
-const __dualLoader = document.getElementById('dualLoader');
-let __dualTimer = null, __dualVisible = false;
-function dualShowLoaderAfter(thresholdMs){
-  dualHideLoader();
-  __dualTimer = setTimeout(()=>{ __dualVisible = true; __dualLoader.classList.add('show') }, thresholdMs);
-}
-function dualHideLoader(){
-  if(__dualTimer){ clearTimeout(__dualTimer); __dualTimer=null }
-  if(__dualVisible){ __dualLoader.classList.remove('show'); __dualVisible=false }
-}
-
-// Patch readApps fetch to use loader
-const __readApps_orig = readApps;
-readApps = async function(){
-  dualShowLoaderAfter(3000);
-  try{
-    const out = await __readApps_orig();
-    return out;
-  } finally { dualHideLoader() }
-}
-
-// Hook viewer iframe loads
-if (typeof viewerFrame !== 'undefined'){
-  viewerFrame.addEventListener('load', ()=> dualHideLoader());
-}
-
-// When opening embedded app, show loader if slow
-const __openApp_orig = openApp;
-openApp = function(app){
-  const mode = getOpenMode(app.id, app.defaultOpenMode||'embed');
-  if (mode !== 'tab'){
-    dualShowLoaderAfter(3000);
-  }
-  return __openApp_orig(app);
-}
-</script>
-
-
-<script>
-// === Global fetch loader hook (slow fetches) ===
-(function(){
-  const EXCEPTIONS = [
-    /\.(png|jpg|jpeg|gif|webp|svg|ico|mp3|mp4|webm|woff2?|ttf|otf|css)$/i,
-    /service-worker\.js$/i,
-    /manifest\.json$/i
-  ];
-  const OPT_OUT_HEADER = 'x-dual-loader';
-  const SLOW_MS = 3000;
-
-  const _origFetch = window.fetch.bind(window);
-  window.fetch = function(input, init){
-    try {
-      const req = new Request(input, init);
-      const method = (req.method || 'GET').toUpperCase();
-      if (req.headers && req.headers.get(OPT_OUT_HEADER) === 'off') {
-        return _origFetch(input, init);
-      }
-      if (!['GET','POST','PUT','PATCH'].includes(method)) {
-        return _origFetch(input, init);
-      }
-      const url = req.url || String(input||'');
-      if (EXCEPTIONS.some(rx => rx.test(url))) {
-        return _origFetch(input, init);
-      }
-      dualShowLoaderAfter(SLOW_MS);
-      return _origFetch(input, init)
-        .finally(() => { try{ dualHideLoader() }catch(e){} });
-    } catch (e){
-      return _origFetch(input, init);
-    }
-  };
-})();
-</script>
-
-
-<div id="localMgrModal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);">
-  <div style="background:#111a28;border:1px solid rgba(255,255,255,.1);border-radius:16px;max-width:420px;width:92%;margin:10vh auto;padding:16px;color:#f5f7ff;font-family:Inter,system-ui;">
-    <h2 style="margin-top:0;font-size:18px;">Apps Locais</h2>
-    <ul id="localAppsList" style="list-style:none;margin:0;padding:0;max-height:50vh;overflow:auto;display:flex;flex-direction:column;gap:8px;"></ul>
-    <div style="margin-top:12px;text-align:right;">
-      <button onclick="closeLocalMgr()" style="padding:6px 14px;border-radius:8px;border:none;background:#444;color:#fff;font-weight:700;">Fechar</button>
-    </div>
-  </div>
-</div>
-
-<script>
-function openLocalMgr(){
-  renderLocalAppsList();
-  document.getElementById('localMgrModal').style.display='block';
-}
-function closeLocalMgr(){
-  document.getElementById('localMgrModal').style.display='none';
-}
-function renderLocalAppsList(){
-  const listEl = document.getElementById('localAppsList');
-  listEl.innerHTML = '';
-  const apps = lsListLocalApps();
-  if(!apps.length){
-    listEl.innerHTML = '<li style="opacity:.6;font-size:13px;">Nenhum app local salvo.</li>';
-    return;
-  }
-  apps.forEach(app=>{
-    const li = document.createElement('li');
-    li.style.display='flex'; li.style.alignItems='center'; li.style.justifyContent='space-between';
-    li.style.gap='8px'; li.style.padding='6px 10px'; li.style.background='rgba(255,255,255,.05)'; li.style.borderRadius='10px';
-    const span = document.createElement('span');
-    span.textContent = app.name || app.id;
-    span.style.flex='1'; span.style.fontSize='14px'; span.style.fontWeight='700';
-    span.contentEditable = true;
-    span.onblur = ()=>{
-      const newName = span.textContent.trim();
-      if(newName && newName!==app.name){
-        app.name = newName;
-        const all = lsListLocalApps().map(a=>a.id===app.id?app:a);
-        lsSaveLocalApps(all);
-        toast('Renomeado: '+newName);
-      }
-    };
-    const btnDel = document.createElement('button');
-    btnDel.textContent = '✕';
-    btnDel.style.cssText='background:#c33;border:none;color:#fff;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:13px;';
-    btnDel.onclick = ()=>{
-      const all = lsListLocalApps().filter(a=>a.id!==app.id);
-      lsSaveLocalApps(all);
-      localStorage.removeItem('dual.localapp.'+app.id);
-      renderLocalAppsList();
-      renderApps();
-      toast('Removido: '+app.name);
-    };
-    li.appendChild(span); li.appendChild(btnDel);
-    listEl.appendChild(li);
-  });
-}
-
-// Wire Brain menu item
-document.addEventListener('DOMContentLoaded', ()=>{
-  const mgrBtn = document.getElementById('brainLocalMgr');
-  if(mgrBtn){ mgrBtn.onclick = openLocalMgr }
-});
-</script>
-
-
-<style>
-/* === Local Apps Manager (modal) === */
-#localAppsModal{ position:fixed; inset:0; z-index:1000; display:none; align-items:center; justify-content:center;
-  background:rgba(10,13,31,.6); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px) }
-#localAppsModal.show{ display:flex }
-#localAppsModal .panel{ width:min(96vw,560px); max-height:78vh; overflow:auto;
-  background:var(--surface-strong); border:var(--border); border-radius:24px; box-shadow:var(--shadow); padding:16px }
-#localAppsModal h3{ margin:0 0 8px; font-size:18px; font-weight:900; letter-spacing:.04em }
-#localAppsModal .hint{ font-size:12px; color:var(--muted); margin-bottom:12px }
-#localAppsList{ display:flex; flex-direction:column; gap:10px }
-.lapp{ display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; padding:10px 12px; border:var(--border); border-radius:16px; background:rgba(255,255,255,.05) }
-.lapp .name{ font-weight:800; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-.lapp .id{ font-size:11px; color:var(--muted) }
-.lapp .btns{ display:flex; gap:8px }
-.btn-mini{ padding:8px 10px; border-radius:12px; border:var(--border); background:rgba(255,255,255,.06); color:var(--text); font-weight:800; font-size:12px; cursor:pointer }
-.btn-mini:active{ transform:scale(.98) }
-#localAppsModal .footer{ display:flex; justify-content:space-between; align-items:center; margin-top:14px }
-
-  /* Hide header/footer when viewer open */
-  body.viewer-open .masthead{ opacity:0; pointer-events:none; transform:translateY(-6px); transition:opacity .12s ease }
-  body.viewer-open .tabbar{ opacity:0; pointer-events:none; transform:translateY(6px); transition:opacity .12s ease }
-</style>
-<div id="localAppsModal" role="dialog" aria-modal="true" aria-labelledby="localAppsTitle">
-  <div class="panel">
-    <h3 id="localAppsTitle">Apps Locais</h3>
-    <div class="hint">Uploads salvos no navegador. Você pode abrir, renomear ou remover.</div>
-    <div id="localAppsList"></div>
-    <div class="footer">
-      <button class="btn-mini" id="localAppsReplace">Substituir tudo</button>
-      <button class="btn-mini" id="localAppsRestore" style="display:none">Restaurar backup</button>
-      <button class="btn-mini" id="localAppsClose">Fechar</button>
-      <div style="display:flex; gap:8px">
-        <button class="btn-mini" id="localAppsImport">Importar</button>
-        <input type="file" id="localAppsImportFile" accept=".json" style="display:none"/>
-        <button class="btn-mini" id="localAppsExport">Exportar todos (JSON)</button>
-        <button class="btn-mini" id="localAppsClear">Remover todos</button>
+    const row=document.createElement('div'); row.className='card';
+    row.innerHTML=`<div style="display:flex;gap:10px;align-items:center;justify-content:space-between">
+      <div style="font-weight:900">${s.title}</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="padding:.45rem .8rem" onclick="window.location.href='${s.url}'">Abrir</button>
+        <button class="btn" style="padding:.45rem .8rem" onclick="setMinimized('${s.id}',true)">Min</button>
+        <button class="btn" style="padding:.45rem .8rem" onclick="removeFromStack('${s.id}')">Fechar</button>
       </div>
-    </div>
-  </div>
-</div>
+    </div>`;
+    if(s.minimized){const b=document.createElement('div'); b.className='badge'; b.textContent='Minimized'; row.appendChild(b)}
+    stackList.appendChild(row);
+  });
+}
 
+function openApp(app){
+  const mode = LS.get('dual.app.openMode.'+app.id, app.defaultOpenMode||'embed');
+  if(mode==='tab'){ window.open(app.url,'_blank','noopener,noreferrer'); addToStack(app,{minimized:false,mode:'tab'}); return; }
+  addToStack(app,{minimized:false,mode:'embed'});
+  window.location.href = app.url;
+}
 
-<script>
-/* === Local Apps Manager logic === */
-function renderLocalAppsManager(){
-  const cont = document.getElementById('localAppsList');
-  const list = lsListLocalApps();
-  cont.innerHTML = '';
-  if(!list.length){
-    cont.innerHTML = '<div class="lapp"><div><div class="name">Sem apps locais</div><div class="id">Use Upload Local para adicionar</div></div></div>';
-    return;
+function normalizeApps(data){
+  if(Array.isArray(data)) return data.map(x=>({id:x.id||x.key||normKey(x.title||x.name), name:x.name||x.title||x.key, url:x.url, iconKey:x.iconKey, icon:x.icon, defaultOpenMode:x.defaultOpenMode||'embed'}));
+  if(data && data.groups){
+    const out=[]; for(const g of Object.keys(data.groups)){ for(const app of (data.groups[g]||[])){
+      out.push({id:app.key||app.id||normKey(app.title||app.name), name:app.title||app.name||app.key, url:app.url, iconKey:app.iconKey||app.key, icon:app.icon, defaultOpenMode:app.defaultOpenMode||'embed'});
+    }}
+    return out;
   }
-  list.forEach(app => {
-    const row = document.createElement('div'); row.className = 'lapp';
-    const left = document.createElement('div');
-    const nm = document.createElement('div'); nm.className = 'name'; nm.textContent = app.name || app.id;
-    const id = document.createElement('div'); id.className = 'id'; id.textContent = app.id;
-    left.appendChild(nm); left.appendChild(id);
-    const btns = document.createElement('div'); btns.className = 'btns';
-
-    const bOpen = document.createElement('button'); bOpen.className = 'btn-mini'; bOpen.textContent = 'Abrir';
-    bOpen.onclick = () => openApp(app);
-
-    const bRen = document.createElement('button'); bRen.className = 'btn-mini'; bRen.textContent = 'Renomear';
-    bRen.onclick = () => {
-      const novo = prompt('Novo nome para o app:', app.name || app.id);
-      if(novo && novo.trim()){
-        const list = lsListLocalApps();
-        const i = list.findIndex(x=>x.id===app.id);
-        if(i>=0){ list[i].name = novo.trim(); lsSaveLocalApps(list); renderLocalAppsManager(); renderApps(); }
-      }
-    };
-
-    const bDel = document.createElement('button'); bDel.className = 'btn-mini'; bDel.textContent = 'Remover';
-    bDel.onclick = () => {
-      if(confirm('Remover app local "'+(app.name||app.id)+'"?')){
-        // remove content and entry
-        try{ localStorage.removeItem('dual.localapp.'+app.id) }catch(e){}
-        const list = lsListLocalApps().filter(x=>x.id!==app.id);
-        lsSaveLocalApps(list);
-        renderLocalAppsManager();
-        renderApps();
-      }
-    };
-
-    btns.appendChild(bOpen); btns.appendChild(bRen); btns.appendChild(bDel);
-    row.appendChild(left); row.appendChild(btns);
-    cont.appendChild(row);
-  });
+  return [];
 }
 
-function showLocalAppsManager(){ document.getElementById('localAppsModal').classList.add('show'); renderLocalAppsManager(); }
-function hideLocalAppsManager(){ document.getElementById('localAppsModal').classList.remove('show'); }
+async function readApps(){
+  const override=LS.raw('dual.apps.override');
+  if(override){ try{ const data=JSON.parse(override); return normalizeApps(data) }catch(e){} }
+  try{
+    dualShowLoader();
+    const res=await fetch('./apps/apps.json',{cache:'no-store'});
+    const data=await res.json(); return normalizeApps(data);
+  }catch(e){
+    return normalizeApps([
+      {id:'chat',name:'Chat',url:'chat.html',iconKey:'hub_chat'},
+      {id:'editor',name:'Editor',url:'editor.html',iconKey:'hub_editor'},
+      {id:'books',name:'Books',url:'books.html',iconKey:'hub_books'},
+      {id:'player',name:'KOBLOX',url:'player.html',iconKey:'hub_player'}
+    ]);
+  } finally { dualHideLoader(); }
+}
 
-// Export/clear helpers
-function exportAllLocalApps(){
-  const list = lsListLocalApps();
-  const payload = { apps: list, contents: list.reduce((acc,a)=>{ acc[a.id] = LS.raw('dual.localapp.'+a.id) || ''; return acc; }, {}) };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = 'dual.localapps.json'; a.click();
-  URL.revokeObjectURL(url);
+async function renderApps(){
+  const apps=await readApps();
+  appsGrid.innerHTML='';
+  for(const app of apps){
+    const tile=document.createElement('div'); tile.className='card'; tile.style.textAlign='center';
+    const iconNode=await getIconNode(app); iconNode.style.margin='10px auto'; tile.appendChild(iconNode);
+    const name=document.createElement('div'); name.textContent=app.name; name.style.fontWeight='900'; tile.appendChild(name);
+    const btn=document.createElement('button'); btn.className='btn'; btn.textContent='Abrir'; btn.onclick=()=>openApp(app); btn.style.marginTop='8px'; tile.appendChild(btn);
+    appsGrid.appendChild(tile);
+  }
 }
-function clearAllLocalApps(){
-  if(!confirm('Remover TODOS os apps locais?')) return;
-  const list = lsListLocalApps();
-  list.forEach(a=>{ try{ localStorage.removeItem('dual.localapp.'+a.id) }catch(e){} });
-  lsSaveLocalApps([]);
-  renderLocalAppsManager();
-  renderApps();
-}
+document.getElementById('backBtn').onclick=()=>history.back();
+document.getElementById('brainBtn').onclick=()=>alert('Brain: defina SK e Modelo via Hub PERFECT/Chat (localStorage).');
+if('serviceWorker' in navigator){ try{ navigator.serviceWorker.register('./service-worker.js') }catch(e){} }
+renderApps(); renderStack();
 </script>
-
-
-<script>
-/* === Import Local Apps (merge) === */
-function importLocalApps(file){
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = (e)=>{
-    try{
-      const data = JSON.parse(e.target.result);
-      if(data && Array.isArray(data.apps) && data.contents){
-        const existing = lsListLocalApps();
-        const merged = [...existing];
-        data.apps.forEach(app=>{
-          const i = merged.findIndex(x=>x.id===app.id);
-          if(i>=0){ merged[i] = {...merged[i], ...app} } else { merged.push(app) }
-          if(data.contents[app.id]){ setLocalAppContent(app.id, data.contents[app.id]) }
-        });
-        lsSaveLocalApps(merged);
-        toast('Apps locais importados: '+data.apps.length);
-        renderLocalAppsManager(); renderApps();
-      }else{
-        toast('Arquivo inválido para importação');
-      }
-    }catch(err){ toast('Erro ao importar: '+err.message) }
-  };
-  reader.readAsText(file);
-}
-</script>
-
-
-<script>
-function importLocalAppsMerge(file){
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = (e)=>{
-    try{
-      const data = JSON.parse(String(e.target.result||'{}'));
-      const list = Array.isArray(data.apps) ? data.apps : [];
-      const contents = (data && typeof data.contents==='object') ? data.contents : {};
-      // current
-      const cur = lsListLocalApps();
-      const byId = new Map(cur.map(a=>[a.id, a]));
-      // merge: upsert entries; update name if provided
-      list.forEach(a=>{
-        if(!a || !a.id) return;
-        const existing = byId.get(a.id);
-        if(existing){
-          if(a.name && a.name.trim()) existing.name = a.name.trim();
-        }else{
-          byId.set(a.id, { id:a.id, name:(a.name||a.id), url:'local:'+a.id, iconKey:a.iconKey||'hub_apps', defaultOpenMode:a.defaultOpenMode||'embed' });
-        }
-        // set content if provided
-        if(Object.prototype.hasOwnProperty.call(contents, a.id)){
-          try{ localStorage.setItem('dual.localapp.'+a.id, String(contents[a.id]||'')) }catch(e){}
-        }
-      });
-      // save merged
-      const merged = Array.from(byId.values());
-      lsSaveLocalApps(merged);
-      toast('Importação concluída ('+ merged.length +' apps locais).');
-      renderLocalAppsManager(); renderApps();
-    }catch(err){
-      toast('Falha ao importar JSON.');
-    }
-  };
-  reader.readAsText(file);
-}
-</script>
-
-
-<script>
-function hasLocalBackup(){ return !!LS.raw('dual.localapps.backup') }
-function setLocalBackup(payload){ try{ localStorage.setItem('dual.localapps.backup', JSON.stringify(payload)) }catch(e){} }
-function popLocalBackup(){
-  const raw = LS.raw('dual.localapps.backup');
-  if(!raw) return null;
-  try{ localStorage.removeItem('dual.localapps.backup'); return JSON.parse(raw) }catch(e){ return null }
-}
-function updateRestoreButton(){
-  const btn = document.getElementById('localAppsRestore');
-  if(btn) btn.style.display = hasLocalBackup() ? '' : 'none';
-}
-function replaceAllLocalAppsFromJson(file){
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = (e)=>{
-    try{
-      const data = JSON.parse(String(e.target.result||'{}'));
-      const list = Array.isArray(data.apps) ? data.apps : [];
-      const contents = (data && typeof data.contents==='object') ? data.contents : {};
-
-      // backup current
-      const current = lsListLocalApps();
-      const payload = { apps: current, contents: current.reduce((acc,a)=>{ acc[a.id] = LS.raw('dual.localapp.'+a.id)||''; return acc; }, {}) };
-      setLocalBackup(payload);
-
-      // clear all
-      current.forEach(a=>{ try{ localStorage.removeItem('dual.localapp.'+a.id) }catch(e){} });
-      lsSaveLocalApps([]);
-
-      // import all
-      const merged = [];
-      list.forEach(a=>{
-        if(!a || !a.id) return;
-        merged.push({ id:a.id, name:(a.name||a.id), url:'local:'+a.id, iconKey:a.iconKey||'hub_apps', defaultOpenMode:a.defaultOpenMode||'embed' });
-        if(Object.prototype.hasOwnProperty.call(contents, a.id)){
-          try{ localStorage.setItem('dual.localapp.'+a.id, String(contents[a.id]||'')) }catch(e){}
-        }
-      });
-      lsSaveLocalApps(merged);
-      updateRestoreButton();
-      toast('Substituição concluída ('+ merged.length +' apps).');
-      renderLocalAppsManager(); renderApps();
-    }catch(err){ toast('Falha ao substituir JSON.'); }
-  };
-  reader.readAsText(file);
-}
-function restoreLocalAppsBackup(){
-  const b = popLocalBackup();
-  if(!b){ toast('Nenhum backup disponível.'); updateRestoreButton(); return; }
-  // wipe current
-  const cur = lsListLocalApps();
-  cur.forEach(a=>{ try{ localStorage.removeItem('dual.localapp.'+a.id) }catch(e){} });
-  lsSaveLocalApps([]);
-  // apply backup
-  const list = Array.isArray(b.apps) ? b.apps : [];
-  const contents = (b && typeof b.contents==='object') ? b.contents : {};
-  list.forEach(a=>{
-    try{ localStorage.setItem('dual.localapp.'+a.id, String(contents[a.id]||'')) }catch(e){}
-  });
-  lsSaveLocalApps(list);
-  toast('Backup restaurado.');
-  renderLocalAppsManager(); renderApps(); updateRestoreButton();
-}
-</script>
-<style> /* === Viewer atrás do HUD (header+tabbar) === */
-.masthead{ z-index:200; }
-.tabbar{ z-index:200; }
-
-/* Viewer ocupa o espaço útil entre header e tabbar solta */
-.viewer{
-  position: fixed;
-  top: 78px;               /* altura do header */
-  left: 0; right: 0;
-  bottom: calc(88px + 24px); /* altura tabbar + gap “solto” */
-  z-index: 100;            /* ATRÁS do header/tabbar */
-  display: none;
-}
-.viewer.open{ display:block; }
-
-/* Tabbar flutuando (desgrudada do fundo) + safe-area */
-.tabbar{
-  position: fixed;
-  left: 0; right: 0;
-  bottom: calc(env(safe-area-inset-bottom,0px) + 24px);
-  height: 78px;
-  padding: 6px 14px;
-  display: flex; align-items: center; justify-content: center;
-  z-index: 200;
-}
-
-/* Cápsula com respiro lateral e sombra */
-.tabbar .container{
-  width: 100%;
-  max-width: 520px;
-  background: var(--surface);
-  border: var(--border);
-  border-radius: 24px;
-  box-shadow: 0 16px 40px rgba(0,0,0,.35);
-  display: flex; justify-content: space-around; align-items: center;
-  padding: 10px 16px;
-  margin: 0 16px; /* “solta” das bordas curvas */
-}
-
-/* Quick-actions acompanham a tabbar solta */
-.quick-actions{
-  position: fixed;
-  bottom: calc(24px + 78px + env(safe-area-inset-bottom,0) + 12px);
-  right: calc(16px + env(safe-area-inset-right,0));
-  display: flex; gap: 12px; z-index: 195;
-}
-
-/* Se você tinha regras que escondiam header/footer com body.viewer-open, neutraliza: */
-body.viewer-open .masthead,
-body.viewer-open .tabbar{
-  opacity: 1; pointer-events: auto; transform: none;
-}
-</style>
-</body>
-</html>
+</body></html>
