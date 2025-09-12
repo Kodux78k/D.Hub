@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Brain</title>
+<style>
+  :root{
+    --font: 'Inter', 'JetBrains Mono', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --bg-a:#ff52e5; --bg-b:#00c5e5;
+    --ink:#eef3ff; --ink-weak:#a9b3c9;
+    --panel:#0d0f15cc; --panel-strong:#0d0f15f2;
+    --accent:#9d7aff; --accent-2:#39ffb6;
+    --shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; margin:0; }
+  body{
+    font:500 16px/1.4 var(--font);
+    color:var(--ink);
+    background: radial-gradient(120% 120% at 0% 0%, var(--bg-a), transparent 50%),
+                radial-gradient(120% 120% at 100% 0%, var(--bg-b), #0b0e14 60%);
+    display:flex;
+    flex-direction:column;
+  }
+  .header{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; margin:12px; border-radius:22px; background:var(--panel-strong); box-shadow:var(--shadow); }
+  .hrow{ display:flex; align-items:center; gap:10px; }
+  .title{ font-weight:800; font-size:20px; }
+  .icon{ display:inline-flex; width:22px; height:22px; }
+  .icon>img{ width:100%; height:100%; filter:invert(99%) sepia(2%) saturate(232%) hue-rotate(180deg) brightness(105%) contrast(98%); }
+  .panel{ margin:0 12px 12px; padding:14px; border-radius:22px; background:var(--panel); box-shadow:var(--shadow); backdrop-filter:blur(8px); display:flex; flex-direction:column; gap:12px; }
+  label{ display:flex; flex-direction:column; gap:4px; font-size:14px; }
+  input[type="text"], input[type="password"], select{ padding:10px 12px; border:none; border-radius:14px; background:#ffffff10; color:var(--ink); font:500 14px/1.4 var(--font); }
+  .btn{ appearance:none; border:none; color:var(--ink); background:#ffffff10; padding:10px 14px; border-radius:14px; font-size:14px; cursor:pointer; display:flex; align-items:center; gap:6px; }
+  .btn:hover{ background:#ffffff20; }
+  .local-list{ list-style:none; padding:0; margin:0; }
+  .local-item{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.1); }
+  .local-item:last-child{ border-bottom:none; }
+  .small{ font-size:12px; color:var(--ink-weak); }
+</style>
+<body>
+  <div class="header">
+    <div class="hrow">
+      <span class="icon"><img src="../icons/others/brain.svg" alt="Brain"></span>
+      <div class="title">Brain</div>
+    </div>
+  </div>
+  <!-- Profile Section -->
+  <div class="panel">
+    <h3 style="margin:0">Perfil</h3>
+    <label>Nome
+      <input id="nameInput" type="text" placeholder="Seu nome"/>
+    </label>
+    <label>Chave OpenRouter (SK)
+      <input id="keyInput" type="password" placeholder="Cole sua chave"/>
+    </label>
+    <label>Modelo
+      <select id="modelSelect">
+        <option value="openrouter/auto">openrouter/auto</option>
+        <option value="anthropic/claude-3.5-sonnet">claude-3.5-sonnet</option>
+        <option value="openai/gpt-4o-mini">gpt-4o-mini</option>
+        <option value="mistralai/mistral-large">mistral-large</option>
+      </select>
+    </label>
+    <button id="saveProfile" class="btn">Salvar Perfil</button>
+  </div>
+
+  <!-- Local Apps Section -->
+  <div class="panel">
+    <h3 style="margin:0">Apps Locais</h3>
+    <p class="small">Carregue páginas HTML para adicionar ao Hub. Elas serão armazenadas localmente.</p>
+    <button id="uploadAppBtn" class="btn"><span class="icon"><img src="../icons/others/upload.svg" alt="Upload"></span>Adicionar App</button>
+    <ul id="appsList" class="local-list"></ul>
+    <input type="file" id="appFileInput" accept=".html,.htm" style="display:none"/>
+  </div>
+
+  <!-- Export/Import Section -->
+  <div class="panel">
+    <h3 style="margin:0">Exportar / Importar</h3>
+    <p class="small">Faça backup ou restaure sua configuração, incluindo perfil e apps locais.</p>
+    <div style="display:flex; gap:10px; flex-wrap:wrap">
+      <button id="exportBtn" class="btn"><span class="icon"><img src="../icons/others/download.svg" alt="Exportar"></span>Exportar Brain</button>
+      <button id="importBtn" class="btn"><span class="icon"><img src="../icons/others/upload.svg" alt="Importar"></span>Importar Brain</button>
+    </div>
+    <input type="file" id="brainFileInput" accept="application/json" style="display:none"/>
+  </div>
+
+<script>
+  // Helpers for persistent storage
+  const LS = (k, v) => v === undefined ? JSON.parse(localStorage.getItem(k) || "null") : localStorage.setItem(k, JSON.stringify(v));
+  const nameInput  = document.getElementById('nameInput');
+  const keyInput   = document.getElementById('keyInput');
+  const modelSelect= document.getElementById('modelSelect');
+  const saveProfile= document.getElementById('saveProfile');
+  const uploadAppBtn = document.getElementById('uploadAppBtn');
+  const appFileInput = document.getElementById('appFileInput');
+  const appsList  = document.getElementById('appsList');
+  const exportBtn = document.getElementById('exportBtn');
+  const importBtn = document.getElementById('importBtn');
+  const brainFileInput = document.getElementById('brainFileInput');
+
+  function loadProfile(){
+    const name = LS('dual.brain.name') || '';
+    const key  = LS('dual.keys.openrouter') || '';
+    const pref = LS('dual.brain.pref') || { model:'openrouter/auto' };
+    nameInput.value = name;
+    keyInput.value  = key;
+    modelSelect.value = pref.model || 'openrouter/auto';
+  }
+  function saveProfileFn(){
+    LS('dual.brain.name', nameInput.value.trim());
+    LS('dual.keys.openrouter', keyInput.value.trim());
+    const pref = LS('dual.brain.pref') || {};
+    pref.model = modelSelect.value;
+    LS('dual.brain.pref', pref);
+    alert('Perfil salvo!');
+  }
+
+  function loadLocalApps(){
+    const apps = LS('dual.localApps') || [];
+    appsList.innerHTML = '';
+    apps.forEach((app, idx) => {
+      const li = document.createElement('li');
+      li.className = 'local-item';
+      const span = document.createElement('span');
+      span.textContent = app.name;
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'btn';
+      removeBtn.textContent = 'Remover';
+      removeBtn.onclick = () => {
+        apps.splice(idx, 1);
+        LS('dual.localApps', apps);
+        loadLocalApps();
+      };
+      li.appendChild(span);
+      li.appendChild(removeBtn);
+      appsList.appendChild(li);
+    });
+  }
+  function uploadLocalApp(){
+    const file = appFileInput.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+      const dataUrl = evt.target.result;
+      const apps = LS('dual.localApps') || [];
+      apps.push({
+        name: file.name.replace(/\.[^.]+$/, ''),
+        url: dataUrl,
+        iconKey: 'htmls',
+        openInNew: false
+      });
+      LS('dual.localApps', apps);
+      loadLocalApps();
+      alert('App adicionado!');
+    };
+    reader.readAsDataURL(file);
+    appFileInput.value = '';
+  }
+
+  function exportBrain(){
+    const data = {
+      name: LS('dual.brain.name') || '',
+      key: LS('dual.keys.openrouter') || '',
+      pref: LS('dual.brain.pref') || {},
+      localApps: LS('dual.localApps') || []
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'dual-brain-backup.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+  function importBrainFile(){
+    const file = brainFileInput.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+      try{
+        const data = JSON.parse(evt.target.result);
+        if(data.name !== undefined) LS('dual.brain.name', data.name);
+        if(data.key !== undefined) LS('dual.keys.openrouter', data.key);
+        if(data.pref !== undefined) LS('dual.brain.pref', data.pref);
+        if(data.localApps !== undefined) LS('dual.localApps', data.localApps);
+        loadProfile();
+        loadLocalApps();
+        alert('Dados importados!');
+      }catch(e){
+        alert('Falha ao importar: ' + e.message);
+      }
+    };
+    reader.readAsText(file);
+    brainFileInput.value = '';
+  }
+
+  saveProfile.addEventListener('click', saveProfileFn);
+  uploadAppBtn.addEventListener('click', () => appFileInput.click());
+  appFileInput.addEventListener('change', uploadLocalApp);
+  exportBtn.addEventListener('click', exportBrain);
+  importBtn.addEventListener('click', () => brainFileInput.click());
+  brainFileInput.addEventListener('change', importBrainFile);
+
+  loadProfile();
+  loadLocalApps();
+</script>
+</body>
+</html>

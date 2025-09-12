@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Chat</title>
+<style>
+  /* Styles consistent with the Nebula Pro look */
+  :root{
+    --font: 'Inter', 'JetBrains Mono', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --bg-a:#ff52e5; --bg-b:#00c5e5;
+    --ink:#eef3ff; --ink-weak:#a9b3c9;
+    --panel:#0d0f15cc; --panel-strong:#0d0f15f2;
+    --accent:#9d7aff; --accent-2:#39ffb6;
+    --shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; margin:0; }
+  body{
+    font:500 16px/1.4 var(--font);
+    color:var(--ink);
+    background: radial-gradient(120% 120% at 0% 0%, var(--bg-a), transparent 50%),
+                radial-gradient(120% 120% at 100% 0%, var(--bg-b), #0b0e14 60%);
+    display:flex;
+    flex-direction:column;
+  }
+  .header{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:var(--panel-strong); box-shadow:var(--shadow); border-radius:22px; margin:12px; }
+  .hrow{ display:flex; align-items:center; gap:10px; }
+  .title{ font-weight:800; letter-spacing:.4px; font-size:20px; }
+  .icon{ display:inline-flex; width:22px; height:22px; }
+  .icon>img{ width:100%; height:100%; filter:invert(99%) sepia(2%) saturate(232%) hue-rotate(180deg) brightness(105%) contrast(98%); }
+  .btn{ appearance:none; border:none; color:var(--ink); background:#ffffff10; padding:10px 14px; border-radius:14px; cursor:pointer; display:flex; align-items:center; gap:6px; font-size:14px; }
+  .btn:hover{ background:#ffffff20; }
+  .panel{ flex:1; display:flex; flex-direction:column; gap:10px; padding:14px; margin:0 12px 12px; background:var(--panel); box-shadow:var(--shadow); border-radius:22px; backdrop-filter:blur(8px); overflow:hidden; }
+  .messages{ flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding-right:4px; }
+  .msg{ max-width:80%; padding:10px 12px; border-radius:14px; line-height:1.35; white-space:pre-wrap; word-break:break-word; }
+  .msg.user{ align-self:flex-end; background:#ffffff14; }
+  .msg.assistant{ align-self:flex-start; background:#ffffff0a; }
+  .msg.loading{ font-style:italic; opacity:.6; }
+  .inputBar{ display:flex; gap:8px; margin-top:8px; }
+  textarea{ flex:1; resize:none; border:none; outline:none; border-radius:14px; padding:10px 12px; background:#ffffff10; color:var(--ink); font:500 16px/1.4 var(--font); }
+  textarea::placeholder{ color:var(--ink-weak); }
+</style>
+<body>
+  <div class="header">
+    <div class="hrow">
+      <span class="icon"><img src="../icons/others/chat.svg" alt="Chat"></span>
+      <div class="title">Chat</div>
+    </div>
+    <div class="hrow">
+      <button id="setKey" class="btn"><span class="icon"><img src="../icons/others/key.svg" alt="Chave"></span>SK</button>
+      <button id="uploadTplBtn" class="btn"><span class="icon"><img src="../icons/others/upload.svg" alt="Template"></span>Template</button>
+      <button id="switchTplBtn" class="btn"><span class="icon"><img src="../icons/others/apps.svg" alt="Ativar"></span>Usar</button>
+    </div>
+  </div>
+  <div class="panel">
+    <div id="messages" class="messages"></div>
+    <div class="inputBar">
+      <textarea id="prompt" rows="2" placeholder="Digite sua mensagem..."></textarea>
+      <button id="sendBtn" class="btn"><span class="icon"><img src="../icons/others/arrow-right.svg" alt="Enviar"></span>Enviar</button>
+    </div>
+  </div>
+
+<script>
+  // Minimal helper to persist values
+  const LS = (k, v) => v === undefined ? JSON.parse(localStorage.getItem(k) || "null") : localStorage.setItem(k, JSON.stringify(v));
+  // Raw key helper (returns raw string instead of parsed JSON)
+  LS.raw = (k, v) => v === undefined ? localStorage.getItem(k) : localStorage.setItem(k, v);
+
+  // Keys to store chat templates and active template
+  const TKEY = 'dual.chat.templates';
+  const AKEY = 'dual.chat.active';
+
+  // Template helpers
+  function getTemplates(){ return LS(TKEY) || []; }
+  function setTemplates(arr){ LS(TKEY, arr); }
+  function getActiveTemplate(){ const id = LS(AKEY); if(!id) return null; const list = getTemplates(); return list.find(t => t.id === id) || null; }
+  function setActiveTemplate(id){ LS(AKEY, id); }
+
+  // Upload a chat template from JSON file
+  function uploadChatTemplate(){
+    const inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = '.json,.dualchat.json,application/json';
+    inp.onchange = async e => {
+      const file = e.target.files && e.target.files[0];
+      if(!file) return;
+      try{
+        const text = await file.text();
+        const tpl = JSON.parse(text);
+        if(!tpl.id) tpl.id = 'tpl_' + Date.now();
+        const list = getTemplates().filter(t => t.id !== tpl.id);
+        list.push(tpl);
+        setTemplates(list);
+        setActiveTemplate(tpl.id);
+        alert(`Template “${tpl.name || tpl.id}” ativado!`);
+      }catch(err){ alert('JSON inválido'); }
+    };
+    inp.click();
+  }
+
+  // Switch between saved templates
+  function switchTemplate(){
+    const list = getTemplates();
+    if(!list.length){ alert('Nenhum template salvo. Faça upload primeiro.'); return; }
+    const names = list.map((t,i) => `${i+1}. ${t.name || t.id}`).join('\n');
+    const pick = prompt(`Escolha template:\n${names}\n\nNúmero:`);
+    const idx = parseInt(pick, 10) - 1;
+    if(list[idx]){
+      setActiveTemplate(list[idx].id);
+    }
+  }
+
+  // Compose messages array with system prompt, starters and injections
+  function composeMessages(promptText){
+    const tpl = getActiveTemplate();
+    const history = LS('dual.chat.history') || [];
+    const sys = tpl && tpl.system ? tpl.system : 'Você é um assistente útil.';
+    const starters = (tpl && tpl.starters) || [];
+    const prependUser = tpl && tpl.injections && tpl.injections.prependUser;
+    const prependAssistant = tpl && tpl.injections && tpl.injections.prependAssistant;
+    const messages = [];
+    messages.push({ role:'system', content: sys });
+    starters.forEach(s => messages.push({ role:'user', content: s }));
+    // include previous conversation messages
+    history.forEach(item => messages.push({ role: item.role, content: item.content }));
+    // Append new user message, optionally with prefix
+    let userContent = promptText;
+    if(prependUser){
+      const uname = (LS('dual.brain.name') || '') || 'Usuário';
+      userContent = prependUser.replace('{userName}', uname) + '\n' + promptText;
+    }
+    messages.push({ role:'user', content: userContent });
+    // Optionally append a prefix for assistant; this helps control the first answer
+    if(prependAssistant){
+      messages.push({ role:'assistant', content: prependAssistant });
+    }
+    return messages;
+  }
+
+  // Call OpenRouter API using the active template and preferences
+  async function callOpenRouter(promptText){
+    const key = LS.raw('dual.keys.openrouter');
+    if(!key) throw new Error('Chave não definida.');
+    const tpl = getActiveTemplate();
+    const pref = LS('dual.brain.pref') || { model:'openrouter/auto' };
+    const model = (tpl && tpl.model) || pref.model || 'openrouter/auto';
+    const messages = composeMessages(promptText);
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer ' + key
+      },
+      body: JSON.stringify({ model, messages })
+    });
+    if(!res.ok) throw new Error('Erro ' + res.status);
+    const data = await res.json();
+    return data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+  }
+  const messagesDiv = document.getElementById('messages');
+  const promptEl = document.getElementById('prompt');
+  const sendBtn = document.getElementById('sendBtn');
+  const setKeyBtn = document.getElementById('setKey');
+
+  // Scroll messages container to bottom
+  function scrollToBottom(){ messagesDiv.scrollTop = messagesDiv.scrollHeight; }
+
+  // Render a message element
+  function renderMessage(role, content, loading=false){
+    const div = document.createElement('div');
+    div.className = 'msg ' + role + (loading ? ' loading' : '');
+    div.textContent = content;
+    messagesDiv.appendChild(div);
+    scrollToBottom();
+    return div;
+  }
+
+  // Save and load chat history (optional: can persist across sessions)
+  function loadHistory(){
+    const history = LS('dual.chat.history') || [];
+    history.forEach(item => renderMessage(item.role, item.content));
+  }
+  function saveHistory(){
+    const msgs = Array.from(messagesDiv.querySelectorAll('.msg')).map(el => ({ role: el.classList.contains('user') ? 'user' : 'assistant', content: el.textContent }));
+    LS('dual.chat.history', msgs);
+  }
+
+  // Handler to send a message
+  async function sendMessage(){
+    const content = promptEl.value.trim();
+    if(!content) return;
+    promptEl.value = '';
+    // Render user message
+    renderMessage('user', content);
+    saveHistory();
+    // Render loading placeholder
+    const loadingMsg = renderMessage('assistant', '...', true);
+    try{
+      const reply = await callOpenRouter(content);
+      loadingMsg.textContent = reply || '[sem resposta]';
+    }catch(err){
+      if(/Chave não definida/.test(err.message)){
+        loadingMsg.textContent = 'Configure sua chave de API em Brain → Perfil';
+      }else{
+        loadingMsg.textContent = 'Falha: ' + err.message;
+      }
+    }finally{
+      loadingMsg.classList.remove('loading');
+      saveHistory();
+    }
+  }
+
+  // Attach events
+  sendBtn.onclick = sendMessage;
+  promptEl.addEventListener('keydown', e => {
+    if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+  });
+  setKeyBtn.onclick = () => {
+    const cur = LS('dual.keys.openrouter') || '';
+    const key = prompt('Cole sua chave do OpenRouter', cur || '');
+    if(key !== null) LS('dual.keys.openrouter', key.trim());
+  };
+
+  // Wire up template buttons
+  document.getElementById('uploadTplBtn').onclick = uploadChatTemplate;
+  document.getElementById('switchTplBtn').onclick = switchTemplate;
+
+  loadHistory();
+</script>
+</body>
+</html>

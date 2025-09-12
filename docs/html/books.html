@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Livros</title>
+<style>
+  :root{
+    --font: 'Inter', 'JetBrains Mono', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --bg-a:#ff52e5; --bg-b:#00c5e5;
+    --ink:#eef3ff; --ink-weak:#a9b3c9;
+    --panel:#0d0f15cc; --panel-strong:#0d0f15f2;
+    --accent:#9d7aff; --accent-2:#39ffb6;
+    --shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; margin:0; }
+  body{
+    font:500 16px/1.4 var(--font);
+    color:var(--ink);
+    background: radial-gradient(120% 120% at 0% 0%, var(--bg-a), transparent 50%),
+                radial-gradient(120% 120% at 100% 0%, var(--bg-b), #0b0e14 60%);
+    display:flex;
+    flex-direction:column;
+  }
+  .header{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; margin:12px; background:var(--panel-strong); border-radius:22px; box-shadow:var(--shadow); }
+  .hrow{ display:flex; align-items:center; gap:10px; }
+  .title{ font-weight:800; font-size:20px; }
+  .icon{ display:inline-flex; width:22px; height:22px; }
+  .icon>img{ width:100%; height:100%; filter:invert(99%) sepia(2%) saturate(232%) hue-rotate(180deg) brightness(105%) contrast(98%); }
+  .btn{ appearance:none; border:none; color:var(--ink); background:#ffffff10; padding:10px 14px; border-radius:14px; font-size:14px; cursor:pointer; display:flex; align-items:center; gap:6px; }
+  .btn:hover{ background:#ffffff20; }
+  .panel{ flex:1; display:flex; flex-direction:column; gap:12px; padding:14px; margin:0 12px 12px; background:var(--panel); border-radius:22px; box-shadow:var(--shadow); backdrop-filter:blur(8px); }
+  #bookContent{ flex:1; overflow-y:auto; white-space:pre-wrap; line-height:1.45; padding-right:4px; }
+  .controls{ display:flex; gap:10px; }
+</style>
+<body>
+  <div class="header">
+    <div class="hrow">
+      <span class="icon"><img src="../icons/others/tts.svg" alt="Livros"></span>
+      <div class="title">Leitor</div>
+    </div>
+    <div class="hrow">
+      <button id="loadBtn" class="btn"><span class="icon"><img src="../icons/others/upload.svg" alt="Carregar"></span>Carregar</button>
+      <button id="playBtn" class="btn"><span class="icon"><img src="../icons/others/play.svg" alt="Ler"></span>Ler</button>
+      <button id="pauseBtn" class="btn"><span class="icon"><img src="../icons/others/pause.svg" alt="Pausar"></span>Pausar</button>
+    </div>
+  </div>
+  <div class="panel">
+    <div id="bookContent">Carregue um arquivo de texto para começar a leitura.</div>
+  </div>
+  <input type="file" id="fileInput" accept="text/plain" style="display:none"/>
+
+<script>
+  const loadBtn = document.getElementById('loadBtn');
+  const playBtn = document.getElementById('playBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const bookContent = document.getElementById('bookContent');
+  const fileInput = document.getElementById('fileInput');
+  let utterance = null;
+
+  loadBtn.onclick = () => fileInput.click();
+  fileInput.onchange = e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+      bookContent.textContent = evt.target.result;
+    };
+    reader.readAsText(file);
+  };
+
+  playBtn.onclick = () => {
+    if(!bookContent.textContent.trim()) return;
+    // Stop existing utterance if playing
+    window.speechSynthesis.cancel();
+    utterance = new SpeechSynthesisUtterance(bookContent.textContent);
+    // Choose a Portuguese voice if available
+    const voices = speechSynthesis.getVoices().filter(v => /pt/gi.test(v.lang));
+    if(voices.length) utterance.voice = voices[0];
+    speechSynthesis.speak(utterance);
+  };
+  pauseBtn.onclick = () => {
+    if(speechSynthesis.speaking){
+      if(speechSynthesis.paused) speechSynthesis.resume();
+      else speechSynthesis.pause();
+    }
+  };
+</script>
+</body>
+</html>

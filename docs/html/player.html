@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Player</title>
+<style>
+  :root{
+    --font: 'Inter', 'JetBrains Mono', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --bg-a:#ff52e5; --bg-b:#00c5e5;
+    --ink:#eef3ff; --ink-weak:#a9b3c9;
+    --panel:#0d0f15cc; --panel-strong:#0d0f15f2;
+    --accent:#9d7aff; --accent-2:#39ffb6;
+    --shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; margin:0; }
+  body{
+    font:500 16px/1.4 var(--font);
+    color:var(--ink);
+    background: radial-gradient(120% 120% at 0% 0%, var(--bg-a), transparent 50%),
+                radial-gradient(120% 120% at 100% 0%, var(--bg-b), #0b0e14 60%);
+    display:flex;
+    flex-direction:column;
+  }
+  .header{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; margin:12px; border-radius:22px; background:var(--panel-strong); box-shadow:var(--shadow); }
+  .hrow{ display:flex; align-items:center; gap:10px; }
+  .title{ font-weight:800; font-size:20px; }
+  .icon{ display:inline-flex; width:22px; height:22px; }
+  .icon>img{ width:100%; height:100%; filter:invert(99%) sepia(2%) saturate(232%) hue-rotate(180deg) brightness(105%) contrast(98%); }
+  .btn{ appearance:none; border:none; color:var(--ink); background:#ffffff10; padding:10px 14px; border-radius:14px; font-size:14px; cursor:pointer; display:flex; align-items:center; gap:6px; }
+  .btn:hover{ background:#ffffff20; }
+  .panel{ flex:1; display:flex; flex-direction:column; gap:12px; padding:14px; margin:0 12px 12px; border-radius:22px; background:var(--panel); box-shadow:var(--shadow); backdrop-filter:blur(8px); }
+  audio{ width:100%; margin-bottom:10px; }
+  canvas{ width:100%; height:200px; background:#0b0e14; border-radius:22px; box-shadow:var(--shadow); }
+</style>
+<body>
+  <div class="header">
+    <div class="hrow">
+      <span class="icon"><img src="../icons/others/play.svg" alt="Player"></span>
+      <div class="title">Player</div>
+    </div>
+    <button id="fileBtn" class="btn"><span class="icon"><img src="../icons/others/upload.svg" alt="Carregar"></span>Carregar</button>
+  </div>
+  <div class="panel">
+    <audio id="audio" controls></audio>
+    <canvas id="visual"></canvas>
+  </div>
+  <input type="file" id="fileInput" accept="audio/*" style="display:none"/>
+
+<script>
+  const fileBtn = document.getElementById('fileBtn');
+  const fileInput = document.getElementById('fileInput');
+  const audio = document.getElementById('audio');
+  const canvas = document.getElementById('visual');
+  const ctx = canvas.getContext('2d');
+  let audioContext, source, analyser, dataArray;
+
+  function resizeCanvas(){
+    canvas.width = canvas.clientWidth * window.devicePixelRatio;
+    canvas.height = canvas.clientHeight * window.devicePixelRatio;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  fileBtn.onclick = () => fileInput.click();
+  fileInput.onchange = e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const url = URL.createObjectURL(file);
+    audio.src = url;
+    audio.load();
+    setupAudio();
+  };
+
+  function setupAudio(){
+    if(audioContext){ audioContext.close(); }
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    source = audioContext.createMediaElementSource(audio);
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+    const bufferLength = analyser.frequencyBinCount;
+    dataArray = new Uint8Array(bufferLength);
+    source.connect(analyser);
+    analyser.connect(audioContext.destination);
+    draw();
+  }
+
+  function draw(){
+    requestAnimationFrame(draw);
+    if(!analyser) return;
+    analyser.getByteFrequencyData(dataArray);
+    const width = canvas.width;
+    const height = canvas.height;
+    const barWidth = width / dataArray.length;
+    ctx.clearRect(0,0,width,height);
+    for(let i=0; i<dataArray.length; i++){
+      const v = dataArray[i] / 255;
+      const h = v * height;
+      const x = i * barWidth;
+      ctx.fillStyle = `hsl(${200 + v*100}, 70%, 60%)`;
+      ctx.fillRect(x, height - h, barWidth - 1, h);
+    }
+  }
+</script>
+</body>
+</html>
