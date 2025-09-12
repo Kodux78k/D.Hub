@@ -1,0 +1,23 @@
+{
+  "name": "Hub Dual Medium-Dark",
+  "short_name": "Dual Dark",
+  "start_url": "./Hub_Dual_perfect_mediumdark.html",
+  "display": "standalone",
+  "background_color": "#121424",
+  "theme_color": "#29d3ff",
+  "description": "Hub Dual variante Medium-Dark — contraste suave.",
+  "icons": [
+    {
+      "src": "./icons/pwa/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/pwa/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

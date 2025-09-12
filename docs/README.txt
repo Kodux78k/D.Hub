@@ -1,13 +1,15 @@
-# Nebula Prime — V3.4.1 ULTRA (Uno–Dual–Trinity Unificado)
+Hub Dual — Nebula Pro (PERFECT) — Pack
 
-## Novidades
-- **Animações por rotas internas** (Chat ↔ Apps ↔ Profile) sincronizadas com a persona ativa (iris/flare/warp/fade).
-- **HUD expandido**: `cacheSize`, `hotTop`, `seq2Top` (bigram), `seq3Top` (trigram), `lastFetches` (10) e `avgLatencyMs`; **Purge** de cache por persona via postMessage.
-- **Prefetch preditivo n-grama=3**: aprende sequências compostas e aquece os próximos alvos.
-- **DevDocs** com export/minify em cliente (sem backend).
+Files:
+- Hub_Dual_perfect.html ................ Main unified build (design refinado)
+- Hub_Dual_perfect_ultracompact.html ... Variante Ultra-Compact (densidade máxima)
+- Hub_Dual_perfect_mediumdark.html ..... Variante Medium-Dark (tema um pouco mais claro)
 
-## Teste rápido
-1. Servir via HTTPS (ou `python -m http.server`).
-2. Abrir `index.html` (SW registra com `?arch=horus` por padrão).
-3. Orbs → aplica **persona** (tema/transição) e troca manifest + SW.
-4. DevDocs → HUD ↻ / Purge; Export ⬇ A / ⬇ M; Preview 👁.
+Notas rápidas:
+- Ícones: coloca seus SVGs em icons/others/ com keys normalizadas (ex: hub_chat.svg).
+- Apps: cria apps/apps.json (lista simples ou groups). As chaves 'id'/'key' viram persistência e ícone.
+- Open mode: cada app salva 'Dentro/Nova aba' em localStorage (dual.app.openMode.{id}).
+- Stack: estado de minimizado/aberto persiste em 'dual.stack'.
+- Brain: SK em 'dual.keys.openrouter' e modelo em 'dual.openrouter.model'.
+
+Bom uso!

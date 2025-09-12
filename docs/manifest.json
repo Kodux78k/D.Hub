@@ -1,0 +1,23 @@
+{
+  "name": "Hub Dual — Nebula Pro",
+  "short_name": "Hub Dual",
+  "start_url": "./Hub_Dual_perfect.html",
+  "display": "standalone",
+  "background_color": "#0a0d1f",
+  "theme_color": "#7c5cff",
+  "description": "Hub unificado UNO • DUAL • TRINITY, com Brain, Stack e Viewer.",
+  "icons": [
+    {
+      "src": "./icons/pwa/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/pwa/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Hub Dual Ultra-Compact",
+  "short_name": "Dual Ultra",
+  "start_url": "./Hub_Dual_perfect_ultracompact.html",
+  "display": "standalone",
+  "background_color": "#0a0d1f",
+  "theme_color": "#ff52e5",
+  "description": "Hub Dual variante Ultra-Compact — densidade máxima.",
+  "icons": [
+    {
+      "src": "./icons/pwa/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/pwa/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

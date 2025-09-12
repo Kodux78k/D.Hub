@@ -1,12 +1,11 @@
-// Basic SW: cache-first for static, network-first for HTML
-const CACHE = 'hub-pwa-' + (self.registration?.scope || '') + '-v1';
-const STATIC = [
-  '/docs/apps/wrapper.html',
+const CACHE_NAME = 'dualhub-v1';
+const CORE = [
+  './',
+  './Hub_Dual_perfect.html'
 ];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)));
-  self.skipWaiting();
+  e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(CORE)).then(self.skipWaiting()));
 });
 
 self.addEventListener('activate', (e) => {
@@ -14,36 +13,28 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  const req = e.request;
-  const url = new URL(req.url);
+  const url = new URL(e.request.url);
 
-  // Only handle same-origin
-  if (url.origin !== location.origin) return;
-
-  // HTML: network-first
-  if (req.destination === 'document' || req.headers.get('accept')?.includes('text/html')) {
-    e.respondWith((async () => {
-      try {
-        const net = await fetch(req);
-        const cache = await caches.open(CACHE);
-        cache.put(req, net.clone());
-        return net;
-      } catch (err) {
-        const cache = await caches.open(CACHE);
-        const cached = await cache.match(req);
-        return cached || new Response('<h1>Offline</h1>', {headers:{'Content-Type':'text/html'}});
-      }
-    })());
+  // Network-first for apps/apps.json to avoid stale app lists
+  if (url.pathname.endsWith('/apps/apps.json')) {
+    e.respondWith(
+      fetch(e.request).then(resp => {
+        const copy = resp.clone();
+        caches.open(CACHE_NAME).then(c => c.put(e.request, copy));
+        return resp;
+      }).catch(() => caches.match(e.request))
+    );
     return;
   }
 
-  // Others: cache-first
-  e.respondWith((async () => {
-    const cache = await caches.open(CACHE);
-    const cached = await cache.match(req);
-    if (cached) return cached;
-    const net = await fetch(req);
-    cache.put(req, net.clone());
-    return net;
-  })());
+  // Cache-first for everything else (GET only)
+  if (e.request.method === 'GET') {
+    e.respondWith(
+      caches.match(e.request).then(hit => hit || fetch(e.request).then(resp => {
+        const copy = resp.clone();
+        caches.open(CACHE_NAME).then(c => c.put(e.request, copy));
+        return resp;
+      }))
+    );
+  }
 });
