@@ -114,6 +114,52 @@
   .ico18{width:18px;height:18px}
   .ico16{width:16px;height:16px}
 </style>
+
+<style>
+/* Linha da Home (Apps/Stack/Minimized) */
+.home-item .left{
+  flex: 1 1 auto;
+  min-width: 0;            /* <- permite encolher no flex */
+}
+.home-item .right{
+  flex: 0 0 auto;          /* ícones não encolhem */
+}
+.home-item .name{
+  display:block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;  /* ... quando não couber */
+  white-space: nowrap;
+}
+
+/* Cartões do Stack – evita quebrar lateral ao ter títulos longos */
+.stack-card h2{
+  margin:0 0 4px;
+  font-size:20px;
+  font-weight:800;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+/* Ícones do grid de Apps – idem */
+.app-icon{
+  min-width: 0;
+}
+.app-icon span{
+  max-width: 100%;
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+/* Se você preferir quebrar a palavra ao invés de ellipsis para nomes-sem-espaço:
+.home-item .name, .stack-card h2, .app-icon span{ overflow-wrap:anywhere; white-space:normal; }
+*/
+</style>
+
 </head>
 <body>
 
