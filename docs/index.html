@@ -49,8 +49,8 @@
       <span class="ring"></span><span class="bar"></span>
     </span>
     <div style="flex:1">
-      <div class="kicker">Infodose • Hub Principal</div>
-      <h1>Infodose Hub — Upload + Brain Menu</h1>
+      <div class="kicker">DUAL • Hub </div>
+      <h1>HUB</h1>
     </div>
     <nav><button class="btn" id="btnInstall" type="button">⬇️ Instalar</button></nav>
   </div>
@@ -76,7 +76,7 @@
       <button class="dbtn" id="dockHome" type="button">Home</button>
       <!-- Infodose replaced by Upload -->
       <input id="localHtmlInput" type="file" accept=".html,.htm,text/html" hidden>
-      <button class="dbtn" id="btnLocalOpen" type="button">📁 HTML Local</button>
+      <button class="dbtn" id="btnLocalOpen" type="button">🧪⚡️</button>
       <button class="dbtn" id="dockInstall" type="button">Instalar</button>
     </div>
     <div class="group">
@@ -205,7 +205,7 @@ const $ = (q,root=document)=>root.querySelector(q);
 
 async function loadApps(){
   try{
-    const res  = await fetch('./apps/apps.json', {cache:'no-store'});
+    const res  = await fetch('apps/apps.json', {cache:'no-store'});
     const data = await res.json();
     const root = $('#cards');
     root.innerHTML='';
