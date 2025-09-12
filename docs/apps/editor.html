@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Editor</title>
+<style>
+  :root{
+    --font: 'Inter', 'JetBrains Mono', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --bg-a:#ff52e5; --bg-b:#00c5e5;
+    --ink:#eef3ff; --ink-weak:#a9b3c9;
+    --panel:#0d0f15cc; --panel-strong:#0d0f15f2;
+    --accent:#9d7aff; --accent-2:#39ffb6;
+    --shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; margin:0; }
+  body{
+    font:500 16px/1.4 var(--font);
+    color:var(--ink);
+    background: radial-gradient(120% 120% at 0% 0%, var(--bg-a), transparent 50%),
+                radial-gradient(120% 120% at 100% 0%, var(--bg-b), #0b0e14 60%);
+    display:flex;
+    flex-direction:column;
+  }
+  .header{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; margin:12px; border-radius:22px; background:var(--panel-strong); box-shadow:var(--shadow); }
+  .hrow{ display:flex; align-items:center; gap:10px; }
+  .title{ font-weight:800; font-size:20px; }
+  .icon{ display:inline-flex; width:22px; height:22px; }
+  .icon>img{ width:100%; height:100%; filter:invert(99%) sepia(2%) saturate(232%) hue-rotate(180deg) brightness(105%) contrast(98%); }
+  .btn{ appearance:none; border:none; color:var(--ink); background:#ffffff10; padding:10px 14px; border-radius:14px; font-size:14px; cursor:pointer; display:flex; align-items:center; gap:6px; }
+  .btn:hover{ background:#ffffff20; }
+  .editor-body{ flex:1; display:flex; gap:12px; margin:0 12px 12px; }
+  textarea{ flex:1; resize:none; border:none; outline:none; border-radius:22px; padding:14px; background:var(--panel); color:var(--ink); font:500 14px/1.4 var(--font); box-shadow:var(--shadow); backdrop-filter:blur(8px); min-height:200px; }
+  iframe{ flex:1; border-radius:22px; border:none; box-shadow:var(--shadow); background:#0b0e14; }
+
+  /* Inspector cards */
+  .card{ background:var(--panel); border-radius:22px; padding:14px; box-shadow:var(--shadow); backdrop-filter:blur(8px); margin:10px 12px; }
+  .badge{ display:inline-block; font-size:12px; font-weight:600; color:var(--ink-weak); margin-bottom:4px; }
+  .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .id-item{ padding:6px; cursor:pointer; border-radius:12px; background:#ffffff08; margin-bottom:6px; font-family:ui-monospace,monospace; font-size:13px; }
+  .id-item:hover{ background:#ffffff14; }
+</style>
+<body>
+  <div class="header">
+    <div class="hrow">
+      <span class="icon"><img src="../icons/others/htmls.svg" alt="Editor"></span>
+      <div class="title">Editor</div>
+    </div>
+    <div class="hrow">
+      <button id="openBtn" class="btn"><span class="icon"><img src="../icons/others/upload.svg" alt="Abrir"></span>Abrir</button>
+      <button id="saveBtn" class="btn"><span class="icon"><img src="../icons/others/download.svg" alt="Exportar"></span>Exportar</button>
+    </div>
+  </div>
+  <div class="editor-body">
+    <textarea id="code" placeholder="Digite ou cole seu código HTML/CSS aqui..."></textarea>
+    <iframe id="preview"></iframe>
+  </div>
+  <!-- Inspector Section -->
+  <div class="card">
+    <div style="font-weight:900;margin:4px 0">Analisador</div>
+    <div class="grid-2">
+      <div>
+        <div class="badge">IDs/Classes</div>
+        <div id="tree" style="max-height:30vh; overflow:auto;"></div>
+      </div>
+      <div>
+        <div class="badge">Tamanhos & CSS</div>
+        <div class="grid-2">
+          <label>W <input id="cssW" placeholder="ex: 300px"></label>
+          <label>H <input id="cssH" placeholder="ex: 200px"></label>
+          <label>BG <input id="cssBG" placeholder="#0b0f1a"></label>
+          <label>Display
+            <select id="cssDisp">
+              <option value="">(auto)</option>
+              <option>block</option><option>inline</option><option>flex</option><option>grid</option><option>none</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <input type="file" id="fileInput" accept=".html,.htm,.txt" style="display:none"/>
+
+<script>
+  const codeEl = document.getElementById('code');
+  const previewEl = document.getElementById('preview');
+  const openBtn = document.getElementById('openBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const fileInput = document.getElementById('fileInput');
+
+    // Inspector variables
+    let selEl = null;
+
+  // Update preview on input
+    function updatePreview(){
+      const html = codeEl.value;
+      previewEl.srcdoc = html;
+      // Re-wire inspector after the new document loads
+      setTimeout(wirePreviewInspector, 150);
+    }
+  codeEl.addEventListener('input', updatePreview);
+
+  // Open file
+  openBtn.onclick = () => fileInput.click();
+  fileInput.onchange = e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+      codeEl.value = evt.target.result;
+      updatePreview();
+    };
+    reader.readAsText(file);
+  };
+
+  // Export current code as a file
+  saveBtn.onclick = () => {
+    const content = codeEl.value;
+    const blob = new Blob([content], { type:'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'pagina.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // Load from localStorage if available
+  const saved = localStorage.getItem('dual.editor.last');
+  if(saved){ codeEl.value = saved; updatePreview(); }
+  window.addEventListener('beforeunload', () => {
+    localStorage.setItem('dual.editor.last', codeEl.value);
+  });
+
+    // ================= Inspector Functions =================
+    function buildTree(doc){
+      const all = Array.from(doc.querySelectorAll('*'));
+      const tree = document.getElementById('tree');
+      let html = '';
+      all.forEach((el, idx) => {
+        const id = el.id ? '#' + el.id : '';
+        const cls = el.className && typeof el.className === 'string' ? ('.' + el.className.trim().split(/\s+/).join('.')) : '';
+        if(!id && !cls) return;
+        html += `<div class="id-item" data-idx="${idx}">${el.tagName.toLowerCase()}${id}${cls}</div>`;
+      });
+      tree.innerHTML = html || '<div class="badge">(sem ids/classes)</div>';
+      tree.querySelectorAll('.id-item').forEach(item => {
+        item.onclick = () => {
+          const i = parseInt(item.dataset.idx, 10);
+          selectByIndex(i, all);
+        };
+      });
+    }
+
+    function selectByIndex(i, list){
+      selEl = list[i];
+      if(!selEl) return;
+      const r = selEl.getBoundingClientRect();
+      document.getElementById('cssW').value = selEl.style.width || Math.round(r.width) + 'px';
+      document.getElementById('cssH').value = selEl.style.height || Math.round(r.height) + 'px';
+      document.getElementById('cssBG').value = selEl.style.background || '';
+      document.getElementById('cssDisp').value = selEl.style.display || '';
+    }
+
+    function wirePreviewInspector(){
+      try{
+        const doc = previewEl.contentDocument;
+        if(!doc) return;
+        buildTree(doc);
+        doc.addEventListener('click', function(e){
+          e.preventDefault(); e.stopPropagation();
+          const list = Array.from(doc.querySelectorAll('*'));
+          selEl = e.target;
+          selectByIndex(list.indexOf(selEl), list);
+        }, true);
+      }catch(err){ /* ignore */ }
+    }
+
+    // When preview loads, build inspector
+    previewEl.addEventListener('load', wirePreviewInspector);
+
+    // CSS fields update selected element
+    ['cssW','cssH','cssBG','cssDisp'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        if(!selEl) return;
+        if(id === 'cssW') selEl.style.width = document.getElementById('cssW').value || '';
+        if(id === 'cssH') selEl.style.height = document.getElementById('cssH').value || '';
+        if(id === 'cssBG') selEl.style.background = document.getElementById('cssBG').value || '';
+        if(id === 'cssDisp') selEl.style.display = document.getElementById('cssDisp').value || '';
+      });
+    });
+</script>
+</body>
+</html>
