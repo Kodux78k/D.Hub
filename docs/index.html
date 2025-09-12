@@ -1,574 +1,692 @@
 <!doctype html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
-<title>DUAL • UNO·DUAL·TRINITY — Hub M0</title>
-<meta name="theme-color" content="#0b0b14">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Dual Hub — Nebula Pro (Espelho • Launcher • Brain • Trinity)</title>
+<meta name="theme-color" content="#0b0b13">
 <style>
-  :root{
-    --bg:#0a0b13; --bg2:#0b0d1a; --fg:#e9ecff; --mut:#9aa4c7;
-    --acc:#a77cff; --acc2:#29d3ff; --mag:#ff5bd4; --ok:#5bffcf;
-    --ring:rgba(167,124,255,.35); --shadow:0 12px 36px rgba(0,0,0,.45);
-    --r:20px; --tabsH:72px;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0; color:var(--fg);
-    background:radial-gradient(1200px 900px at 50% -120px,#2a1e60 0%,#1c1540 45%,#0b0d1a 80%,#070812 100%), #05060c;
-    font:14px/1.45 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
-    overflow:hidden;
-  }
-  .app{position:relative; height:100%; display:flex; flex-direction:column;
-       padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-  header.top{
-    height:56px; display:flex; gap:10px; align-items:center; padding:10px 14px;
-    position:sticky; top:0; z-index:50;
-    backdrop-filter:saturate(120%) blur(8px);
-    background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0));
-    border-bottom:1px solid #ffffff12;
-  }
-  .brand{font-weight:900; letter-spacing:.18em; display:flex; gap:.5ch; align-items:center}
-  .dot{width:8px; height:8px; border-radius:50%; background:var(--acc); box-shadow:0 0 18px var(--acc)}
-  .hbtn{height:34px; min-width:34px; display:grid; place-items:center; border-radius:12px;
-        border:1px solid #ffffff18; background:linear-gradient(180deg,#161a2e,#0e1124); color:var(--fg); cursor:pointer}
-  main{flex:1; position:relative}
-  .view{position:absolute; inset:0; padding:12px; padding-bottom:calc(var(--tabsH) + 14px);
-        overflow:auto; display:none}
-  .view.active{display:block; animation:fade .22s ease-out}
-  @keyframes fade{from{opacity:0; transform:translateY(6px)}}
-  .grid{display:grid; gap:12px}
-  .cards{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
-  @media (max-width:520px){ .cards{grid-template-columns:1fr} }
-  .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
-        border:1px solid #ffffff12; border-radius:var(--r); box-shadow:var(--shadow);
-        padding:14px; min-height:96px; display:flex; gap:10px}
-  .ico{width:48px; height:48px; border-radius:14px; display:grid; place-items:center;
-       background:linear-gradient(180deg,#1b1f37,#0e1228); border:1px solid #ffffff10}
-  .muted{color:var(--mut); font-size:12px}
-  /* Brain drawer */
-  .brain{position:fixed; right:0; top:0; bottom:0; width:380px; max-width:92vw; z-index:80;
-         transform:translateX(105%); transition:transform .28s ease;
-         background:linear-gradient(180deg,rgba(15,16,32,.97),rgba(15,16,32,.92));
-         border-left:1px solid #ffffff14; box-shadow:-12px 0 40px rgba(0,0,0,.55); padding:12px}
-  .brain.open{transform:translateX(0)}
-  .sec{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
-       border:1px solid #ffffff12; border-radius:16px; padding:10px}
-  .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
-  .input, textarea, select{width:100%; background:#0f1426; color:var(--fg); border:1px solid #ffffff1a;
-                           border-radius:10px; padding:10px}
-  .pill{font-size:11px; color:#a6b8ff; letter-spacing:.05em}
-  .btn{appearance:none; border:1px solid #ffffff1a; background:linear-gradient(180deg,#11162a,#0b1122);
-       color:var(--fg); font-weight:800; border-radius:10px; padding:.55rem .85rem; cursor:pointer}
-  .btn.prime{background:linear-gradient(90deg,var(--acc),var(--acc2)); color:#0b0b14; border-color:transparent}
-  .mini{font:12px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space:pre-wrap}
-  /* Stack (apps em sessões) */
-  .session{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.005));
-           border:1px solid #ffffff12; border-radius:16px; box-shadow:var(--shadow); overflow:hidden}
-  .session .hdr{display:flex; align-items:center; gap:8px; padding:10px; background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02)); border-bottom:1px solid #ffffff10}
-  .session .title{font-weight:800}
-  .session .tools{margin-left:auto; display:flex; gap:6px}
-  .session iframe{display:block; width:100%; height:60vh; border:0; background:#000}
-  .session.min iframe{display:none}
-  /* Footer nav */
-  nav.tabs{
-    position:fixed; left:0; right:0; bottom:0; height:var(--tabsH); z-index:70;
-    display:flex; justify-content:space-around; align-items:center; gap:10px;
-    padding:10px 14px env(safe-area-inset-bottom);
-    backdrop-filter: blur(8px); background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.06));
-    border-top:1px solid #ffffff12;
-  }
-  .tab{--sz:44px; width:var(--sz); height:var(--sz); border-radius:14px; display:grid; place-items:center;
-       border:1px solid #ffffff14; background:linear-gradient(180deg,#12152a,#0d1124); box-shadow:var(--shadow); opacity:.85}
-  .tab.active{opacity:1; outline:1px solid var(--ring)}
-  /* Quick dock (badges dos apps abertos) */
-  .dock{position:fixed; left:10px; right:10px; bottom:calc(var(--tabsH) + 8px); display:flex; gap:8px; flex-wrap:wrap; z-index:60}
-  .badge{display:inline-flex; gap:6px; align-items:center; padding:.35rem .6rem; border:1px solid #ffffff18;
-         background:#0f1428; border-radius:999px; font-weight:800; cursor:pointer}
-  /* Portrait safeguards */
-  html, body { overflow-x:hidden }
+/* ========= Nebula Pro (42° #f0f → #0ff) ========= */
+:root{
+  --nebula-a:#ff00ff; --nebula-b:#00ffff; --angle:42deg;
+  --bg-0:#0b0b13; --bg-1:#0f0f19; --bg-2:#151525; --card:#0f1220;
+  --txt:#e9eef7; --muted:#a7b1c6; --accent:#9d7dff; --ok:#39FFB6; --warn:#ffd166; --err:#ff5c7a;
+  --border:rgba(255,255,255,.08); --shadow:rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; color:var(--txt); background:
+  radial-gradient(1200px 600px at 70% -10%, rgba(157,125,255,.25), transparent 60%),
+  linear-gradient(var(--angle), var(--nebula-a), var(--nebula-b));
+  background-attachment: fixed;
+  min-height:100%;
+  font: 14px/1.45 "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+a{color:var(--ok); text-decoration:none}
+button{cursor:pointer}
+.hidden{display:none!important}
+.row{display:flex; gap:.75rem}
+.col{display:flex; flex-direction:column; gap:.75rem}
+
+/* ======= Shell ======= */
+.app{
+  display:flex; flex-direction:column; min-height:100dvh;
+  backdrop-filter: blur(6px);
+}
+.header{
+  position:sticky; top:0; z-index:10;
+  display:flex; align-items:center; gap:.5rem;
+  padding:.6rem .8rem; background:color-mix(in oklab, var(--bg-0) 80%, transparent);
+  border-bottom:1px solid var(--border);
+  box-shadow: 0 6px 18px -12px var(--shadow);
+}
+.brand{
+  display:flex; align-items:center; gap:.6rem; font-weight:700; letter-spacing:.2px;
+}
+.brand .logo{
+  width:28px; height:28px; border-radius:50%;
+  background: conic-gradient(from 0turn, var(--nebula-a), var(--nebula-b), var(--nebula-a));
+  position:relative; box-shadow:0 0 0 2px rgba(255,255,255,.08) inset, 0 0 18px rgba(0,0,0,.25);
+}
+.brand .logo:after{
+  content:""; position:absolute; inset:4px; border-radius:50%;
+  background: radial-gradient(circle at 50% 40%, rgba(255,255,255,.35), rgba(255,255,255,0) 55%);
+  animation: breathe 3.6s ease-in-out infinite;
+}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.nav{
+  margin-left:auto; display:flex; gap:.35rem; overflow:auto hidden; padding-bottom:.25rem;
+}
+.btn{
+  display:inline-flex; align-items:center; gap:.5rem;
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border:1px solid var(--border); color:var(--txt);
+  padding:.5rem .7rem; border-radius:14px; white-space:nowrap;
+}
+.btn.ghost{background:transparent}
+.btn.primary{
+  border-color: color-mix(in oklab, var(--ok) 30%, var(--border));
+  box-shadow: 0 8px 20px -12px rgba(57,255,182,.7);
+}
+.dot{
+  width:10px; height:10px; border-radius:50%;
+  background: var(--ok);
+  box-shadow:0 0 0 0 rgba(57,255,182,.5);
+  animation: dotPulse 2.4s ease-out infinite;
+}
+@keyframes dotPulse{0%{box-shadow:0 0 0 0 rgba(57,255,182,.6)}70%{box-shadow:0 0 0 10px rgba(57,255,182,0)}100%{box-shadow:0 0 0 0 rgba(57,255,182,0)}}
+
+.main{flex:1; display:grid; grid-template-rows:auto 1fr;}
+
+/* Tabs */
+.tabs{display:flex; gap:.4rem; padding:.6rem .8rem; border-bottom:1px solid var(--border); background:color-mix(in oklab, var(--bg-0) 70%, transparent)}
+.tab{padding:.45rem .7rem; border:1px solid transparent; border-radius:12px; color:var(--muted)}
+.tab.active{border-color:var(--border); color:var(--txt); background:rgba(255,255,255,.04)}
+
+/* Surfaces */
+.surface{
+  padding:clamp(.8rem, 1.6vw, 1.2rem);
+  display:grid; gap:1rem;
+}
+
+/* ====== Espelho Dual (Home) ====== */
+.portal{
+  display:grid; place-items:center; min-height:58dvh;
+}
+.portal-card{
+  width:min(980px, 92vw);
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border:1px solid var(--border); border-radius:20px; padding:1.1rem;
+  box-shadow: 0 30px 80px -40px var(--shadow);
+}
+.portal-hero{
+  display:grid; grid-template-columns:1.1fr .9fr; gap:1rem; align-items:center;
+}
+@media (max-width:900px){ .portal-hero{grid-template-columns:1fr;}}
+.canvas{
+  aspect-ratio:1/1; border-radius:24px; background:radial-gradient(circle at 50% 60%, rgba(255,255,255,.08), transparent 65%);
+  display:grid; place-items:center; position:relative; isolation:isolate; overflow:hidden; border:1px solid var(--border);
+}
+.mirror{
+  width:74%; aspect-ratio:1/1; border-radius:50%;
+  background:
+   radial-gradient(120px 60px at 50% 30%, rgba(255,255,255,.28), transparent 60%),
+   conic-gradient(from 0turn, rgba(255,255,255,.08), rgba(255,255,255,.0) 30%, rgba(255,255,255,.08) 60%, rgba(255,255,255,.0) 100%),
+   linear-gradient(var(--angle), color-mix(in oklab, var(--nebula-a) 70%, white 8%), color-mix(in oklab, var(--nebula-b) 70%, white 8%));
+  box-shadow:
+   0 0 0 2px rgba(255,255,255,.08) inset,
+   0 40px 120px -40px rgba(0,0,0,.5),
+   0 0 120px 20px color-mix(in oklab, var(--nebula-b) 20%, transparent);
+  position:relative;
+  animation: spin 24s linear infinite;
+}
+.mirror:after{
+  content:""; position:absolute; inset:0; border-radius:50%;
+  background: radial-gradient(300px 140px at 50% 10%, rgba(255,255,255,.15), transparent 50%);
+  mix-blend-mode:screen;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pulse{
+  position:absolute; inset:-20%; border-radius:50%;
+  background: radial-gradient(circle at 50% 50%, rgba(157,125,255,.15), rgba(157,125,255,0) 55%);
+  filter: blur(20px); animation: halo 5.2s ease-in-out infinite;
+}
+@keyframes halo{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+.kicker{opacity:.75; font-size:.86rem}
+.title{font-size: clamp(1.2rem, 2.4vw, 1.8rem); font-weight:800; letter-spacing:.2px}
+.lead{color:var(--muted); margin:.4rem 0 1rem}
+.actions{display:flex; flex-wrap:wrap; gap:.5rem}
+.badge{font-size:.75rem; padding:.25rem .5rem; border:1px solid var(--border); border-radius:999px; background:rgba(255,255,255,.04)}
+
+/* ===== Launcher ===== */
+.grid{
+  display:grid; gap:.75rem;
+  grid-template-columns: repeat( auto-fill, minmax(160px, 1fr) );
+}
+.card{
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border:1px solid var(--border); border-radius:16px; padding:.75rem; display:flex; flex-direction:column; gap:.5rem;
+}
+.app-icon{
+  width:48px; height:48px; border-radius:12px; background:rgba(255,255,255,.06);
+  display:grid; place-items:center; border:1px solid var(--border);
+}
+.app-icon svg{width:26px; height:26px; opacity:.9}
+.meta{font-size:.8rem; color:var(--muted)}
+.row-btns{display:flex; gap:.4rem; margin-top:auto}
+.btn.sm{padding:.38rem .6rem; border-radius:10px; font-size:.82rem}
+
+/* ===== Brain ===== */
+.field{display:grid; gap:.35rem}
+.input, .textarea, .select{
+  width:100%; color:var(--txt); background:rgba(255,255,255,.04);
+  border:1px solid var(--border); border-radius:12px; padding:.55rem .7rem;
+}
+.textarea{min-height:120px; resize:vertical}
+.kv{display:grid; grid-template-columns:1fr auto; align-items:center; gap:.5rem}
+.loader-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 rgba(157,125,255,.6);animation:dotPulse 2.6s ease-out infinite}
+
+/* ===== Viewer ===== */
+.viewer-wrap{position:relative}
+.viewer{
+  width:100%; height:min(70dvh, 70vh);
+  border:1px solid var(--border); border-radius:16px; background:#0a0c16;
+}
+.viewer-controls{
+  position:absolute; right:.6rem; top:.6rem; display:flex; gap:.4rem;
+}
+.badge-float{
+  position:fixed; right:.9rem; bottom:4.2rem; z-index:50;
+  display:none; align-items:center; gap:.5rem;
+}
+
+/* ===== Trinity ===== */
+.tri-grid{display:grid; gap:.75rem; grid-template-columns:1fr 1fr}
+@media (max-width:1000px){.tri-grid{grid-template-columns:1fr}}
+.tri-box{min-height:240px; border:1px solid var(--border); border-radius:16px; background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); padding:.75rem}
+.small{font-size:.85rem; color:var(--muted)}
+hr.sep{border:0; height:1px; background:var(--border); margin:.5rem 0}
+
+/* ===== Chips ===== */
+.chips{display:flex; gap:.4rem; flex-wrap:wrap}
+.chip{padding:.25rem .55rem; border-radius:999px; border:1px solid var(--border); background:rgba(255,255,255,.04); font-size:.78rem}
+
+.footer{
+  padding:.7rem; display:flex; justify-content:space-between; align-items:center;
+  border-top:1px solid var(--border); background:color-mix(in oklab, var(--bg-0) 80%, transparent)
+}
+.minibar{display:flex; gap:.5rem; align-items:center}
+.minibar .btn{padding:.4rem .6rem}
 </style>
 </head>
 <body>
-<div class="app">
-  <header class="top">
-    <div class="brand">DUAL <span class="dot"></span> HUB</div>
-    <div style="margin-left:auto" class="row">
-      <button id="btnDownload" class="hbtn" title="Baixar esta página">⤓</button>
-      <button id="btnBrain" class="hbtn" title="Dual Brain">👤</button>
+<div class="app" id="app">
+  <!-- Header -->
+  <header class="header">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>Dual Hub</div>
+      <span class="badge">Nebula Pro</span>
+    </div>
+    <div class="nav" id="topNav">
+      <button class="btn tabBtn" data-tab="home">Espelho</button>
+      <button class="btn tabBtn" data-tab="launcher">Launcher</button>
+      <button class="btn tabBtn" data-tab="brain">Dual Brain</button>
+      <button class="btn tabBtn" data-tab="trinity">Trinity</button>
+      <button class="btn tabBtn" data-tab="viewer">Viewer</button>
+      <button class="btn ghost" id="statusBtn"><span class="dot" title="Sincronizado"></span></button>
     </div>
   </header>
 
-  <main>
-    <!-- HOME -->
-    <section id="view-home" class="view active">
-      <div class="grid">
-        <div class="card" style="display:block">
-          <div class="row" style="justify-content:space-between">
-            <div>
-              <div style="font-weight:800; letter-spacing:.06em">UNO • DUAL • TRINITY</div>
-              <div class="muted">Header fixo + Stack vertical de apps + Trinity</div>
+  <!-- Tabs (breadcrumb-ish) -->
+  <div class="tabs">
+    <button class="tab active" data-tab="home">Home</button>
+    <button class="tab" data-tab="launcher">Launcher</button>
+    <button class="tab" data-tab="brain">Brain</button>
+    <button class="tab" data-tab="trinity">Trinity</button>
+    <button class="tab" data-tab="viewer">Viewer</button>
+  </div>
+
+  <!-- Content Surfaces -->
+  <main class="main">
+    <!-- HOME / ESPELHO -->
+    <section class="surface" data-panel="home">
+      <div class="portal">
+        <div class="portal-card">
+          <div class="portal-hero">
+            <div class="canvas">
+              <div class="pulse"></div>
+              <div class="mirror" aria-hidden="true"></div>
             </div>
-            <div class="ico">⚡</div>
+            <div class="col">
+              <div class="kicker">✨ Espelho Dual</div>
+              <div class="title">Portal Místico · Intenção → Toques → Ativações</div>
+              <p class="lead">Abra o Hub e já reflita o pulso: registre intenções, toque o centro, acione arquétipos. O espelho conversa com seu Brain e com o Launcher.</p>
+              <div class="actions">
+                <button class="btn primary" data-goto="launcher">Abrir Launcher</button>
+                <button class="btn" data-goto="brain">Ir ao Dual Brain</button>
+                <span class="badge">⚡️ Tríade ativa: <span id="triade">⚡️ ⭕️ ⚡️</span></span>
+              </div>
+              <div class="chips" id="intentsChips"></div>
+              <small class="small">Dica: toque o status (ponto verde) para ver perfis/sincronização.</small>
+            </div>
           </div>
         </div>
-
-        <div class="cards">
-          <button class="card" data-open="apps">
-            <div class="ico">🗂</div>
-            <div>
-              <div style="font-weight:800">Apps</div>
-              <div class="muted">Catálogo (apps.json) + Locais</div>
-            </div>
-          </button>
-          <button class="card" data-open="stack">
-            <div class="ico">⬛</div>
-            <div>
-              <div style="font-weight:800">Stack</div>
-              <div class="muted">Sessões abertas (min/fechar)</div>
-            </div>
-          </button>
-          <button class="card" data-open="trinity">
-            <div class="ico">◐</div>
-            <div>
-              <div style="font-weight:800">Trinity</div>
-              <div class="muted">Fusão com Dual-App/Hubs</div>
-            </div>
-          </button>
-          <button class="card" data-open="brain">
-            <div class="ico">🧠</div>
-            <div>
-              <div style="font-weight:800">Dual Brain</div>
-              <div class="muted">Nome, SK, Treinamento, TTS</div>
-            </div>
-          </button>
-        </div>
-
-        <div class="sec">
-          <div class="pill">Dica</div>
-          Use o botão **⤓** no header para baixar esta versão com o seu estado salvo (localStorage não vai junto).
-        </div>
       </div>
-    </section>
 
-    <!-- APPS -->
-    <section id="view-apps" class="view">
-      <div class="grid">
-        <div class="sec">
+      <!-- Quick Intention -->
+      <div class="card">
+        <div class="row" style="align-items:center; justify-content:space-between;">
+          <div class="row" style="align-items:center;">
+            <strong>Registrar intenção</strong>
+            <span class="badge">localStorage</span>
+          </div>
           <div class="row">
-            <input id="appSearch" class="input" placeholder="Buscar…">
-            <select id="appSort" class="input" style="max-width:160px">
-              <option value="az">A–Z</option>
-              <option value="za">Z–A</option>
-            </select>
-            <label class="row" style="font-size:12px; color:#a6b8ff">
-              <input id="openInside" type="checkbox" checked>&nbsp;abrir dentro do hub
-            </label>
+            <button class="btn sm" id="btnIntentSample">Gerar exemplo</button>
           </div>
-          <div class="row" style="margin-top:8px">
-            <input id="fileLocal" type="file" accept=".html,.htm" multiple class="input">
-            <button id="btnImportLocals" class="btn">Adicionar Locais</button>
-            <button id="btnExportLocals" class="btn">Exportar Locais</button>
-            <button id="btnClearLocals" class="btn">Limpar Locais</button>
-          </div>
-          <div id="appsCount" class="pill" style="margin-top:6px">—</div>
         </div>
-
-        <div id="appsWrap" class="grid"></div>
+        <div class="row">
+          <input class="input" id="intentInput" placeholder="Escreva uma intenção…"/>
+          <button class="btn sm primary" id="intentAdd">Salvar</button>
+        </div>
       </div>
     </section>
 
-    <!-- STACK (sessões) -->
-    <section id="view-stack" class="view">
-      <div id="stackWrap" class="grid"></div>
+    <!-- LAUNCHER -->
+    <section class="surface hidden" data-panel="launcher">
+      <div class="row" style="flex-wrap:wrap; align-items:center; justify-content:space-between">
+        <div class="row" style="align-items:center">
+          <strong>Launcher</strong>
+          <span class="badge">Apps por grupos • Favoritos • Recentes</span>
+        </div>
+        <div class="row">
+          <label class="btn sm">
+            Importar apps.json
+            <input type="file" id="appsImport" accept=".json" hidden>
+          </label>
+          <label class="btn sm">
+            Upload HTML
+            <input type="file" id="htmlUpload" accept=".html,.htm" hidden>
+          </label>
+          <button class="btn sm" id="appsReset">Reset defaults</button>
+        </div>
+      </div>
+
+      <div class="row" style="flex-wrap:wrap; gap:.5rem">
+        <select class="select" id="groupFilter" style="max-width:220px">
+          <option value="">Todos os grupos</option>
+        </select>
+        <input class="input" id="searchApps" placeholder="Buscar apps… (nome, tags)"/>
+      </div>
+
+      <div id="appsGrid" class="grid"></div>
+
+      <h4>Favoritos</h4>
+      <div id="favGrid" class="grid"></div>
+
+      <h4>Recentes</h4>
+      <div id="recentGrid" class="grid"></div>
     </section>
 
-    <!-- TRINITY (ponte simples) -->
-    <section id="view-trinity" class="view">
-      <div class="grid">
+    <!-- BRAIN -->
+    <section class="surface hidden" data-panel="brain">
+      <div class="grid" style="grid-template-columns:1.1fr .9fr">
+        <!-- Perfil -->
         <div class="card">
-          <div class="ico">◎</div>
-          <div style="flex:1">
-            <div style="font-weight:800">Dual-App acoplado</div>
-            <div class="muted">Abre em viewer interno (iframe)</div>
-            <div class="row" style="margin-top:8px">
-              <input id="trinityUrl" class="input" placeholder="./index.html ou app do Dual">
-              <button id="btnOpenTrinity" class="btn prime">Abrir</button>
+          <strong>Perfil</strong>
+          <div class="field">
+            <label>Nome</label>
+            <input class="input" id="profileName" placeholder="Seu nome…">
+          </div>
+          <div class="field">
+            <label>SK (OpenRouter)</label>
+            <input class="input" id="profileSK" placeholder="sk-or-v1-…">
+          </div>
+          <div class="row" style="align-items:center; justify-content:space-between">
+            <div class="row" style="align-items:center; gap:.5rem">
+              <span class="loader-dot" title="autosave"></span>
+              <small class="small">AutoSave</small>
+            </div>
+            <div class="row">
+              <button class="btn sm" id="brainExport">Exportar Brain</button>
+              <label class="btn sm">Importar Brain<input type="file" id="brainImport" accept=".json" hidden></label>
+              <button class="btn sm" id="brainReset">Reset</button>
             </div>
           </div>
+          <hr class="sep"/>
+          <div class="field">
+            <label>Treinamento (JSON/Texto)</label>
+            <textarea class="textarea" id="training"></textarea>
+          </div>
         </div>
-        <div class="sec mini" id="trinityLog">—</div>
+
+        <!-- Arquétipos -->
+        <div class="card">
+          <strong>Ativações — 12 Arquétipos</strong>
+          <div class="chips" id="archetypesChips"></div>
+          <hr class="sep"/>
+          <div class="row" style="align-items:center; justify-content:space-between">
+            <div class="row" style="align-items:center">
+              <span class="badge">Ritual cues</span>
+              <small class="small">Cliques discretos entre blocos</small>
+            </div>
+            <div class="row">
+              <button class="btn sm" id="playCue">Tocar cue</button>
+              <button class="btn sm" id="triadeGen">Gerar Tríade</button>
+            </div>
+          </div>
+          <div class="row">
+            <input class="input" id="triadeOut" readonly value="⚡️ ⭕️ ⚡️"/>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRINITY -->
+    <section class="surface hidden" data-panel="trinity">
+      <div class="tri-grid">
+        <div class="tri-box">
+          <strong>Host (Hub)</strong>
+          <p class="small">O Host sincroniza tema/ações via <code>postMessage</code> com os viewers.</p>
+          <div class="row">
+            <button class="btn sm" id="triSyncTheme">Sync Tema</button>
+            <button class="btn sm" id="triSendPing">Ping</button>
+          </div>
+          <hr class="sep"/>
+          <div class="row">
+            <textarea class="textarea" id="triLog" placeholder="Logs do Trinity…" style="min-height:120px"></textarea>
+          </div>
+        </div>
+        <div class="col">
+          <div class="tri-box">
+            <strong>Viewer A</strong>
+            <iframe id="triA" class="viewer" title="Trinity A"></iframe>
+            <div class="small">Carrega apps/HTMLs locais; recebe pings/tema.</div>
+          </div>
+          <div class="tri-box">
+            <strong>Viewer B</strong>
+            <iframe id="triB" class="viewer" title="Trinity B"></iframe>
+            <div class="small">Segundo canal para experimentos/Chat.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEWER -->
+    <section class="surface hidden" data-panel="viewer">
+      <div class="viewer-wrap">
+        <iframe id="appViewer" class="viewer" title="App Viewer" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+        <div class="viewer-controls">
+          <button class="btn sm" id="viewerBack">⬅ Hub</button>
+          <button class="btn sm" id="viewerMin">— Minimizar</button>
+          <button class="btn sm" id="viewerReload">⟳ Recarregar</button>
+        </div>
       </div>
     </section>
   </main>
 
-  <!-- Dock de sessões (reabrir rápido) -->
-  <div id="dock" class="dock"></div>
-
-  <!-- Footer -->
-  <nav class="tabs">
-    <button class="tab active" data-nav="home" title="Home">⌂</button>
-    <button class="tab" data-nav="apps" title="Apps">🗂</button>
-    <button class="tab" data-nav="stack" title="Stack">⬛</button>
-    <button class="tab" data-nav="trinity" title="Trinity">◐</button>
-  </nav>
-
-  <!-- Brain Drawer -->
-  <aside id="brain" class="brain" aria-label="Dual Brain">
-    <div class="row" style="justify-content:space-between; margin-bottom:8px">
-      <div style="font-weight:800; letter-spacing:.06em">AETHER • BRAIN</div>
-      <button id="brainClose" class="hbtn">✕</button>
+  <!-- Footer / Minibar -->
+  <footer class="footer">
+    <div class="minibar">
+      <span class="badge">Toque o pulso com intenção</span>
+      <span id="miniIntent" class="small"></span>
     </div>
-
-    <div class="grid">
-      <div class="sec">
-        <div class="pill">Usuário</div>
-        <div class="row" style="margin-top:6px">
-          <input id="userName" class="input" placeholder="Seu nome">
-          <button id="saveName" class="btn prime">Salvar</button>
-        </div>
-      </div>
-
-      <div class="sec">
-        <div class="pill">OpenRouter SK</div>
-        <div class="row" style="margin-top:6px">
-          <input id="userSK" class="input" placeholder="sk-or-v1-…">
-          <button id="btnPasteSK" class="btn">📋 Colar</button>
-          <button id="saveSK" class="btn prime">Salvar</button>
-        </div>
-      </div>
-
-      <div class="sec">
-        <div class="pill">Treinamento</div>
-        <textarea id="training" rows="5" class="input" placeholder="Cole seu treinamento…"></textarea>
-        <div class="row" style="justify-content:flex-end; margin-top:6px">
-          <button id="saveTraining" class="btn">Salvar</button>
-        </div>
-      </div>
-
-      <div class="sec">
-        <div class="pill">Vozes por Arquétipo (TTS)</div>
-        <div id="voiceMap" class="grid"></div>
-        <div class="row" style="margin-top:8px">
-          <select id="ttsPreset" class="input" style="max-width:200px">
-            <option value="natural">Voz Natural</option>
-            <option value="neutra">Voz Neutra</option>
-            <option value="dinamica">Voz Dinâmica</option>
-          </select>
-          <button id="ttsTest" class="btn">Testar</button>
-        </div>
-        <div class="pill" style="margin-top:6px">Chaves: dual.brain.voice.* • infodose:ttsPreset</div>
-      </div>
-
-      <div class="sec">
-        <div class="pill">Desempenho & Tema</div>
-        <div class="row" style="margin-top:6px">
-          <select id="perf" class="input" style="max-width:180px">
-            <option>Low</option><option selected>Medium</option><option>High</option>
-          </select>
-          <select id="theme" class="input" style="max-width:180px">
-            <option value="nebula" selected>NebulaPro</option>
-            <option value="luxara">Luxara</option>
-            <option value="ignyra">Ignyra</option>
-            <option value="elysha">Elysha</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="sec">
-        <div class="pill">Logs</div>
-        <pre id="log" class="mini" style="min-height:120px"></pre>
-        <div class="row">
-          <button id="btnExportBrain" class="btn">Exportar Brain</button>
-          <button id="btnClearLS" class="btn">Limpar LS</button>
-        </div>
-      </div>
+    <div class="row">
+      <button class="btn" data-goto="home">Espelho</button>
+      <button class="btn" data-goto="launcher">Launcher</button>
+      <button class="btn" data-goto="brain">Brain</button>
+      <button class="btn" data-goto="trinity">Trinity</button>
+      <button class="btn" data-goto="viewer">Viewer</button>
     </div>
-  </aside>
+  </footer>
+
+  <div id="reopenBadge" class="badge-float">
+    <span class="badge">◐ Reabrir App</span>
+    <button class="btn sm" id="viewerOpen">Abrir</button>
+  </div>
 </div>
 
 <script>
-/* ========= Core Helpers ========= */
-const $ = (q, root=document)=>root.querySelector(q);
-const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
-function speakOnce(text){
-  try{
-    if(!('speechSynthesis' in window)) return;
-    const u = new SpeechSynthesisUtterance(String(text||'').replace(/\s+/g,' ').trim());
-    const vs = speechSynthesis.getVoices();
-    const v = vs.find(v=>/pt[-_]?br/i.test(v.lang||'')) || vs[0];
-    if(v){ u.voice=v; u.lang=v.lang; } else { u.lang='pt-BR'; }
-    u.rate = 0.95; u.pitch = 1.05; speechSynthesis.cancel(); speechSynthesis.speak(u);
-  }catch{}
+/* =========== State / Storage Helpers =========== */
+const S = {
+  get(k, fallback){ try{ return JSON.parse(localStorage.getItem(k)) ?? fallback }catch(e){ return fallback }},
+  set(k, v){ localStorage.setItem(k, JSON.stringify(v)) }
+};
+const qs = (sel, el=document)=>el.querySelector(sel);
+const qsa = (sel, el=document)=>[...el.querySelectorAll(sel)];
+const panels = {};
+
+/* =========== Tabs / Routing (hashless simple) =========== */
+function showTab(key){
+  qsa('.tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===key));
+  qsa('[data-panel]').forEach(p=>p.classList.toggle('hidden', p.dataset.panel!==key));
+  // If viewer tab -> ensure badge hidden
+  if(key==='viewer'){ badge(false) }
 }
-function lsGet(k,d=null){ try{ const v=localStorage.getItem(k); return v===null?d:v }catch{ return d } }
-function lsSet(k,v){ try{ localStorage.setItem(k,v) }catch{} }
-function log(msg){ const box = $('#log'); if(!box) return; box.textContent = (new Date().toLocaleTimeString()+' • '+msg+'\n') + box.textContent }
+qsa('.tab').forEach(b=>b.addEventListener('click', ()=>showTab(b.dataset.tab)));
+qsa('[data-goto]').forEach(b=>b.addEventListener('click', ()=>showTab(b.dataset.goto)));
+qsa('.tabBtn').forEach(b=>b.addEventListener('click', ()=>showTab(b.dataset.tab)));
+showTab('home');
 
-/* ========= Router ========= */
-const views = {home:$('#view-home'), apps:$('#view-apps'), stack:$('#view-stack'), trinity:$('#view-trinity')};
-function navTo(key){
-  Object.values(views).forEach(v=>v.classList.remove('active'));
-  (views[key]||views.home).classList.add('active');
-  document.querySelectorAll('nav.tabs .tab').forEach(b=>b.classList.toggle('active', b.dataset.nav===key));
-}
-document.querySelectorAll('[data-nav]').forEach(b=> b.addEventListener('click', ()=> navTo(b.dataset.nav)));
-document.querySelectorAll('[data-open]').forEach(c=> c.addEventListener('click', ()=>{
-  const t = c.dataset.open;
-  if(t==='brain') openBrain(true);
-  else navTo(t);
-}));
-
-/* ========= Brain ========= */
-const ARCHS = ["Atlas","Nova","Elysha","Kaion","Artemis","Serena","Vitalis","Pulse","Aion","Rhea","Genus","Lumine"];
-const brain = $('#brain');
-$('#btnBrain').onclick = ()=> openBrain(true);
-$('#brainClose').onclick = ()=> openBrain(false);
-function openBrain(on){ brain.classList.toggle('open', !!on); if(on) syncBrainUI(); }
-
-function readBrain(){
-  let b={}; try{ b = JSON.parse(lsGet('infodose:brain','{}')) || {}; }catch{}
-  b.userName = b.userName || lsGet('infodose:userName','');
-  b.userSK   = b.userSK   || lsGet('infodose:userSK','');
-  b.training = b.training || '';
-  b.ttsPreset= b.ttsPreset|| lsGet('infodose:ttsPreset','natural');
-  return b;
-}
-function writeBrain(obj){
-  lsSet('infodose:brain', JSON.stringify(obj||{}));
-}
-async function syncBrainUI(){
-  const b = readBrain();
-  $('#userName').value = b.userName||'';
-  $('#userSK').value   = b.userSK||'';
-  $('#training').value = b.training||'';
-  $('#ttsPreset').value= b.ttsPreset||'natural';
-  // Map de vozes
-  buildVoiceMapper();
-}
-
-$('#saveName').onclick = ()=>{
-  const b=readBrain(); b.userName = $('#userName').value.trim(); writeBrain(b);
-  lsSet('infodose:userName', b.userName||'');
-  log('Nome salvo: '+(b.userName||''));
-};
-$('#btnPasteSK').onclick = async ()=>{
-  try{ $('#userSK').value = (await navigator.clipboard.readText()).trim(); }catch{}
-};
-$('#saveSK').onclick = ()=>{
-  const b=readBrain(); b.userSK = $('#userSK').value.trim(); writeBrain(b);
-  lsSet('infodose:userSK', b.userSK||'');
-  log('SK salvo (local)');
-};
-$('#saveTraining').onclick = ()=>{
-  const b=readBrain(); b.training = $('#training').value||''; writeBrain(b);
-  log('Treinamento salvo');
-};
-$('#ttsPreset').onchange = ()=>{
-  const v = $('#ttsPreset').value||'natural';
-  const b = readBrain(); b.ttsPreset = v; writeBrain(b);
-  lsSet('infodose:ttsPreset', v);
-  log('Preset TTS: '+v);
-};
-$('#ttsTest').onclick = ()=> speakOnce('Teste de voz do seu Hub UNO·DUAL·TRINITY');
-
-$('#btnExportBrain').onclick = ()=>{
-  const blob = new Blob([lsGet('infodose:brain','{}')], {type:'application/json'});
-  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='infodose_brain.json'; a.click();
-};
-$('#btnClearLS').onclick = ()=>{
-  if(confirm('Limpar localStorage deste domínio?')){ localStorage.clear(); location.reload(); }
-};
-
-function buildVoiceMapper(){
-  const wrap = $('#voiceMap'); wrap.innerHTML='';
-  const vs = speechSynthesis.getVoices()||[];
-  ARCHS.forEach(a=>{
-    const row = document.createElement('div'); row.className='row';
-    const lab = document.createElement('div'); lab.textContent = a; lab.style.minWidth='84px';
-    const sel = document.createElement('select'); sel.className='input'; sel.dataset.arch=a;
-    vs.forEach(v=>{ const o=document.createElement('option'); o.value=v.name; o.textContent=`${v.name} — ${v.lang}`; sel.appendChild(o); });
-    const saved = lsGet('dual.brain.voice.'+a, '');
-    if(saved) sel.value = saved;
-    sel.onchange = ()=> lsSet('dual.brain.voice.'+a, sel.value);
-    row.appendChild(lab); row.appendChild(sel);
-    wrap.appendChild(row);
+/* =========== Espelho: Intenções =========== */
+const intentsKey='dual.intents';
+function renderIntents(){
+  const chips=qs('#intentsChips'); chips.innerHTML='';
+  const list=S.get(intentsKey,[]);
+  list.slice(-12).reverse().forEach(txt=>{
+    const s=document.createElement('span'); s.className='chip'; s.textContent=txt; chips.appendChild(s);
   });
+  qs('#miniIntent').textContent=list.at(-1) || '';
 }
-if('speechSynthesis' in window){ speechSynthesis.onvoiceschanged = ()=>{ if(brain.classList.contains('open')) buildVoiceMapper(); }; }
+qs('#intentAdd').addEventListener('click', ()=>{
+  const v = qs('#intentInput').value.trim(); if(!v) return;
+  const list=S.get(intentsKey,[]); list.push(v); S.set(intentsKey,list); qs('#intentInput').value='';
+  renderIntents();
+});
+qs('#btnIntentSample').addEventListener('click', ()=>{
+  const samples=['Respirar no centro','Hoje eu avanço 1%','Somar beleza ao essencial','Fluxo leve e profundo','Ligação com o mestre interior'];
+  qs('#intentInput').value = samples[Math.floor(Math.random()*samples.length)];
+});
+renderIntents();
 
-/* ========= Download página ========= */
-$('#btnDownload').onclick = ()=>{
-  const html = '<!doctype html>\n'+document.documentElement.outerHTML;
-  const blob = new Blob([html], {type:'text/html'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='DUAL_Hub_UNO-DUAL-TRINITY_M0.html'; a.click();
-};
+/* =========== Defaults: Apps + Archetypes =========== */
+const archetypeList = ['Atlas','Nova','Kaion','Elysha','Serena','Artemis','Lumine','Genus','Vitalis','Aion','Rhea','Horus'];
+const appsDefault = [
+  {id:'chat', name:'Dual Chat', grupo:'Core', url:'about:blank', tags:['ai','chat'], icon:'chat'},
+  {id:'editor', name:'Editor HTML/CSS/JS', grupo:'Criação', url:'about:blank', tags:['code','editor'], icon:'code'},
+  {id:'dual', name:'Dual (Home)', grupo:'Core', url:'about:blank', tags:['hub'], icon:'dual'},
+  {id:'twitter', name:'Twitter/YouTube', grupo:'Social', url:'https://twitter.com', tags:['social'], icon:'social'},
+  {id:'nlst', name:'Next Level Sound Tracks', grupo:'Áudio', url:'about:blank', tags:['audio','gen'], icon:'sound'},
+  {id:'koblox', name:'KOBLOX Player', grupo:'Áudio', url:'about:blank', tags:['player'], icon:'player'},
+  {id:'books', name:'Dual Books', grupo:'Conteúdo', url:'about:blank', tags:['text','speech'], icon:'book'},
+  {id:'brain', name:'Dual Brain', grupo:'Core', url:'about:blank', tags:['brain'], icon:'brain'}
+];
 
-/* ========= APPS: catálogo + locais ========= */
-const RAW = { groups:null, apps:null };
-const FALLBACK_GROUPS = { base:[] };
-const appsWrap = $('#appsWrap'), appsCount = $('#appsCount');
-const openInside = $('#openInside');
-
-function normalizeApps(list){
-  return (list||[]).map(x=>({
-    key: x.key || x.url,
-    title: x.title || x.key || 'App',
-    desc: x.desc || '',
-    url: x.url,
-    icon: x.icon || '',
-    tags: Array.isArray(x.tags)? x.tags : []
-  }));
-}
-function localsAsApps(){
-  let arr=[]; try{ arr = JSON.parse(lsGet('infodose:locals:v1','[]'))||[] }catch{}
-  return arr.map(l=>({ key:'local:'+l.id, title:l.name||'Local', desc:'HTML local', url:'local:'+l.id, icon:'', tags:['local']}));
-}
-function getLocalById(id){
-  let arr=[]; try{ arr = JSON.parse(lsGet('infodose:locals:v1','[]'))||[] }catch{}
-  return arr.find(x=>x.id===id)||null;
-}
-function blobUrlFromLocal(local){
-  const blob = new Blob([local.html||''], {type:'text/html;charset=utf-8'});
-  return URL.createObjectURL(blob);
+/* =========== Icons (try icons/others/* fallback to inline) =========== */
+function iconSVG(name){
+  // Fallback minimal SVG set (monoline)
+  const map = {
+    chat:'<path d="M4 5h16v10H8l-4 4V5z" fill="none" stroke="currentColor" stroke-width="1.6"/>',
+    code:'<path d="M9 5l-6 7 6 7M15 5l6 7-6 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>',
+    dual:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v18M3 12h18" stroke="currentColor" stroke-width="1.6"/>',
+    social:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6 14c2 2 10 2 12-2" stroke="currentColor" stroke-width="1.6"/>',
+    sound:'<path d="M4 10h4l5-4v12l-5-4H4zM18 9a3 3 0 010 6M20 7a5 5 0 010 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
+    player:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 9l6 3-6 3z" fill="currentColor"/>',
+    book:'<path d="M5 5h8a3 3 0 013 3v11H8a3 3 0 01-3-3V5z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M16 8h3v11h-3" fill="none" stroke="currentColor" stroke-width="1.6"/>',
+    brain:'<path d="M9 7a3 3 0 00-6 1v6a3 3 0 006 1m6-8a3 3 0 116 1v6a3 3 0 01-6 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'}
+  return `<svg viewBox="0 0 24 24" aria-hidden="true">${map[name]||map.dual}</svg>`;
 }
 
-function appCard(a){
-  const el=document.createElement('div'); el.className='card';
-  const ico=document.createElement('div'); ico.className='ico'; ico.textContent='🧩';
-  if(a.icon){ try{ ico.innerHTML = '<img src="'+a.icon+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:12px">'; }catch{} }
-  const meta=document.createElement('div'); meta.style.flex='1';
-  const t=document.createElement('div'); t.style.fontWeight='800'; t.textContent=a.title;
-  const d=document.createElement('div'); d.className='muted'; d.textContent=a.desc||'';
-  const row=document.createElement('div'); row.className='row'; row.style.marginTop='8px';
-  const btn=document.createElement('button'); btn.className='btn'; btn.textContent='Abrir';
-  const inj=document.createElement('button'); inj.className='btn'; inj.textContent='⎘ Injection';
-  btn.onclick = ()=> openApp(a);
-  inj.onclick = ()=> copyInjection();
-  meta.appendChild(t); meta.appendChild(d); meta.appendChild(row);
-  row.appendChild(btn); row.appendChild(inj);
-  el.appendChild(ico); el.appendChild(meta);
-  return el;
-}
-function renderApps(list){
-  appsWrap.innerHTML='';
-  const q = ($('#appSearch').value||'').toLowerCase();
-  const mode = $('#appSort').value;
-  let L = normalizeApps(list).concat(localsAsApps());
-  if(q){
-    L = L.filter(a=> (a.title+' '+a.desc+' '+a.key+' '+a.url+' '+(a.tags||[]).join(' ')).toLowerCase().includes(q));
-  }
-  L.sort((a,b)=> (mode==='za'? -1:1) * String(a.title||'').localeCompare(b.title||''));
-  L.forEach(a=> appsWrap.appendChild(appCard(a)));
-  appsCount.textContent = `${L.length} apps`;
-}
-$('#appSearch').oninput = ()=> renderApps((RAW.apps||[]));
-$('#appSort').onchange = ()=> renderApps((RAW.apps||[]));
-
-async function tryFetchJson(u){
-  const r = await fetch(u, {cache:'no-store'}); if(!r.ok) throw 0; return r.json();
-}
+/* =========== Launcher Render =========== */
+const appsKey='dual.apps', favKey='dual.favorites', recKey='dual.recents';
 async function loadApps(){
-  let data=null;
-  const cands=['./apps/apps.json','./apps.json','./docs/apps/apps.json','/apps/apps.json'];
-  for(const u of cands){ try{ data = await tryFetchJson(u); break; }catch(e){} }
-  if(!data){ log('Sem apps.json — use ./apps/apps.json'); data={apps:[]}; }
-  RAW.apps = Array.isArray(data.apps) ? data.apps : [];
-  renderApps(RAW.apps);
+  let apps = S.get(appsKey, null);
+  if(!apps){
+    // Try fetch /apps/apps.json (optional)
+    try{
+      const r = await fetch('apps/apps.json', {cache:'no-store'});
+      if(r.ok){ apps = await r.json(); S.set(appsKey, apps); }
+    }catch(e){}
+  }
+  if(!apps){ apps = appsDefault; S.set(appsKey, appsDefault); }
+  populateGroups(apps); renderApps(apps); renderFav(); renderRecent();
 }
-loadApps();
-
-/* Locais */
-$('#btnImportLocals').onclick = async()=>{
-  const files = Array.from($('#fileLocal').files||[]);
-  if(!files.length) return;
-  const tasks = files.map(f=> new Promise(res=>{
-    const r=new FileReader(); r.onload=()=> res({ id:'l_'+Math.random().toString(36).slice(2), name:f.name.replace(/\.(html?|txt)$/i,''), html:String(r.result||''), ts:Date.now() }); r.readAsText(f);
-  }));
-  const list = await Promise.all(tasks);
-  const cur = JSON.parse(lsGet('infodose:locals:v1','[]')||'[]'); list.forEach(x=> cur.unshift(x));
-  lsSet('infodose:locals:v1', JSON.stringify(cur)); renderApps(RAW.apps);
-};
-$('#btnExportLocals').onclick = ()=>{
-  const data = { v:1, when:Date.now(), items: JSON.parse(lsGet('infodose:locals:v1','[]')||'[]') };
-  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='locals_pack.json'; a.click();
-};
-$('#btnClearLocals').onclick = ()=>{
-  if(confirm('Limpar HTMLs locais salvos?')){ localStorage.removeItem('infodose:locals:v1'); renderApps(RAW.apps); }
-};
-
-/* ========= Stack (sessões) ========= */
-const stackWrap = $('#stackWrap');
-const dock = $('#dock');
-function sessionBadge(item){
-  const b=document.createElement('button'); b.className='badge'; b.textContent = item.title||'App';
-  b.title = 'Reabrir '+(item.title||'App');
-  b.onclick = ()=>{ const s = document.querySelector('[data-sid="'+item.sid+'"]'); if(s){ s.scrollIntoView({behavior:'smooth'}); s.classList.remove('min'); } };
-  return b;
+function populateGroups(apps){
+  const sel=qs('#groupFilter'); const groups=[...new Set(apps.map(a=>a.grupo).filter(Boolean))].sort();
+  sel.innerHTML='<option value="">Todos os grupos</option>'+groups.map(g=>`<option>${g}</option>`).join('');
 }
-function updateDock(){
-  dock.innerHTML=''; document.querySelectorAll('.session').forEach(s=>{
-    const meta=JSON.parse(s.dataset.meta||'{}'); dock.appendChild(sessionBadge({title:meta.title, sid:s.dataset.sid}));
+function matchApp(app, term){ 
+  if(!term) return true; term=term.toLowerCase();
+  return app.name.toLowerCase().includes(term) || (app.tags||[]).some(t=>t.toLowerCase().includes(term));
+}
+function renderApps(apps){
+  const wrap=qs('#appsGrid'); wrap.innerHTML='';
+  const group=qs('#groupFilter').value; const term=qs('#searchApps').value;
+  const favs=new Set(S.get(favKey,[]));
+  apps.filter(a=>!group||a.grupo===group).filter(a=>matchApp(a,term)).forEach(a=>{
+    const card=document.createElement('div'); card.className='card';
+    const icon=document.createElement('div'); icon.className='app-icon'; icon.innerHTML=iconSVG(a.icon);
+    const title=document.createElement('div'); title.innerHTML=`<strong>${a.name}</strong>`;
+    const meta=document.createElement('div'); meta.className='meta'; meta.textContent=a.grupo || '—';
+    const btns=document.createElement('div'); btns.className='row-btns';
+    const btnOpen=btn('Abrir', 'primary sm', ()=>openInViewer(a));
+    const btnFav=btn(favs.has(a.id)?'★ Fav':'☆ Fav', 'sm', ()=>toggleFav(a.id));
+    const btnIns=btn('Injection', 'sm', ()=>injectToTrinity(a));
+    btns.append(btnOpen, btnFav, btnIns);
+    card.append(icon, title, meta, btns);
+    wrap.append(card);
   });
 }
-function openApp(a){
-  const sid = 's_'+Math.random().toString(36).slice(2);
-  const localRef = String(a.url||'').startsWith('local:') ? getLocalById(String(a.url).slice(6)) : null;
-  const url = localRef ? blobUrlFromLocal(localRef) : a.url;
-  const card=document.createElement('div'); card.className='session'; card.dataset.sid=sid; card.dataset.meta=JSON.stringify({title:a.title||'App', url:a.url||''});
-  card.innerHTML = `
-    <div class="hdr">
-      <div class="title">${(a.title||'App')}</div>
-      <div class="muted" style="font-size:12px">${(a.desc||'')}</div>
-      <div class="tools">
-        <button class="hbtn" data-act="min" title="Minimizar">—</button>
-        <button class="hbtn" data-act="ref" title="Recarregar">↻</button>
-        <button class="hbtn" data-act="close" title="Fechar">✕</button>
-      </div>
-    </div>
-    <iframe src="${url||'about:blank'}" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen"></iframe>
-  `;
-  stackWrap.prepend(card);
-  card.querySelector('[data-act=min]').onclick = ()=>{ card.classList.toggle('min'); updateDock(); };
-  card.querySelector('[data-act=ref]').onclick = ()=>{ const fr=card.querySelector('iframe'); try{ fr.contentWindow.location.reload(); }catch{ fr.src=fr.src; } };
-  card.querySelector('[data-act=close]').onclick = ()=>{ card.remove(); updateDock(); };
-  if(openInside.checked) navTo('stack');
-  updateDock();
+function btn(txt, cls, onclick){ const b=document.createElement('button'); b.className='btn '+cls; b.textContent=txt; b.onclick=onclick; return b; }
+function toggleFav(id){ const fav=new Set(S.get(favKey,[])); fav.has(id)?fav.delete(id):fav.add(id); S.set(favKey,[...fav]); renderApps(S.get(appsKey,appsDefault)); renderFav(); }
+function openInViewer(app){
+  const vf=qs('#appViewer');
+  try{ vf.src = app.url || 'about:blank'; }catch(e){ vf.removeAttribute('src'); }
+  showTab('viewer'); addRecent(app.id);
 }
-
-/* ========= Trinity: ponte simples ========= */
-$('#btnOpenTrinity').onclick = ()=>{
-  const u = ($('#trinityUrl').value||'').trim(); if(!u) return;
-  openApp({title:'Trinity', url:u, desc:'Viewer integrado'});
-  $('#trinityLog').textContent = new Date().toLocaleTimeString()+' • aberto: '+u;
-};
-
-/* ========= Injection snippet (útil) ========= */
-function copyInjection(){
-  const inj = `
-<!-- INFODOSE: footer -->
-<style>
-.infodose-footer{position:fixed;left:0;right:0;bottom:0;z-index:99999;display:flex;gap:10px;justify-content:center;align-items:center;padding:10px 12px calc(10px + env(safe-area-inset-bottom));backdrop-filter:blur(14px) saturate(140%);background:rgba(0,0,0,.65);border-top:1px solid rgba(255,255,255,.18)}
-.infodose-footer .btn{appearance:none;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:.6rem 1rem;background:rgba(255,255,255,.08);color:#fff;font-weight:800;cursor:pointer}
-</style>
-<div class="infodose-footer">
-  <button class="btn" onclick="(function(){ try{ if(history.length>1) history.back(); else location.href='index.html'; }catch(e){ location.href='index.html'; } })()">⬅ Voltar ao Hub</button>
-</div>
-<!-- /INFODOSE -->
-`.trim();
-  navigator.clipboard.writeText(inj).then(()=>alert('Injection copiado!'),()=>alert('Falha ao copiar'));
+function addRecent(id){
+  const arr=S.get(recKey,[]); const without=arr.filter(x=>x!==id); without.push(id); S.set(recKey, without.slice(-12)); renderRecent();
 }
+function renderFav(){
+  const wrap=qs('#favGrid'); wrap.innerHTML='';
+  const apps=S.get(appsKey,appsDefault); const fav=new Set(S.get(favKey,[]));
+  apps.filter(a=>fav.has(a.id)).forEach(a=>{
+    const c=document.createElement('div'); c.className='card';
+    c.innerHTML=`<div class="app-icon">${iconSVG(a.icon)}</div><strong>${a.name}</strong><div class="meta">${a.grupo||'—'}</div>`;
+    const open=btn('Abrir','primary sm', ()=>openInViewer(a));
+    c.append(open); wrap.append(c);
+  });
+}
+function renderRecent(){
+  const wrap=qs('#recentGrid'); wrap.innerHTML='';
+  const apps=S.get(appsKey,appsDefault); const ids=S.get(recKey,[]);
+  ids.slice().reverse().forEach(id=>{
+    const a=apps.find(x=>x.id===id); if(!a) return;
+    const c=document.createElement('div'); c.className='card';
+    c.innerHTML=`<div class="app-icon">${iconSVG(a.icon)}</div><strong>${a.name}</strong><div class="meta">${a.grupo||'—'}</div>`;
+    const open=btn('Abrir','primary sm', ()=>openInViewer(a));
+    c.append(open); wrap.append(c);
+  });
+}
+qs('#groupFilter').addEventListener('change', ()=>renderApps(S.get(appsKey,appsDefault)));
+qs('#searchApps').addEventListener('input', ()=>renderApps(S.get(appsKey,appsDefault)));
+qs('#appsReset').addEventListener('click', ()=>{ S.set(appsKey,appsDefault); S.set(favKey,[]); S.set(recKey,[]); loadApps(); });
 
-/* ========= Boot ========= */
-(function boot(){
-  // restaura tema salvo (compatível com seus hubs)
-  const saved = (lsGet('dual.theme')||'theme-nebula');
-  document.body.classList.remove('theme-nebula','theme-luxara','theme-ignyra','theme-elysha');
-  if(saved) document.body.classList.add(saved);
-  // ações header/home
-})();
+qs('#appsImport').addEventListener('change', async (e)=>{
+  const f=e.target.files?.[0]; if(!f) return;
+  try{ const apps = JSON.parse(await f.text()); S.set(appsKey,apps); loadApps(); }catch(err){ alert('JSON inválido'); }
+});
+qs('#htmlUpload').addEventListener('change', (e)=>{
+  const f=e.target.files?.[0]; if(!f) return;
+  const url = URL.createObjectURL(f);
+  const temp = {id:'upload-'+Date.now(), name:f.name, grupo:'Uploads', url, tags:['upload'], icon:'dual'};
+  const apps = S.get(appsKey,appsDefault); apps.push(temp); S.set(appsKey,apps); loadApps(); openInViewer(temp);
+});
+
+/* =========== Brain (profile, training) =========== */
+const profKey='dual.brain.profile', trainKey='dual.brain.training', archKey='dual.archetypes';
+function autosaveProfile(){
+  const profile = {
+    name: qs('#profileName').value.trim(),
+    sk: qs('#profileSK').value.trim()
+  };
+  S.set(profKey, profile);
+}
+['#profileName','#profileSK'].forEach(sel=>qs(sel).addEventListener('input', ()=>{ autosaveProfile(); pingStatus(); }));
+qs('#training').addEventListener('input', ()=>S.set(trainKey, qs('#training').value));
+function loadBrain(){
+  const p=S.get(profKey,{name:'',sk:''}); qs('#profileName').value=p.name||''; qs('#profileSK').value=p.sk||'';
+  qs('#training').value = S.get(trainKey,'');
+}
+qs('#brainExport').addEventListener('click', ()=>{
+  const data = {
+    profile:S.get(profKey,{}), training:S.get(trainKey,''), apps:S.get(appsKey,appsDefault),
+    favorites:S.get(favKey,[]), recents:S.get(recKey,[]), archetypes:S.get(archKey, {})
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='dual_brain_export.json'; a.click();
+});
+qs('#brainImport').addEventListener('change', async e=>{
+  const f=e.target.files?.[0]; if(!f) return;
+  try{
+    const data=JSON.parse(await f.text());
+    if(data.profile) S.set(profKey, data.profile);
+    if('training' in data) S.set(trainKey, data.training);
+    if(Array.isArray(data.apps)) S.set(appsKey, data.apps);
+    if(Array.isArray(data.favorites)) S.set(favKey, data.favorites);
+    if(Array.isArray(data.recents)) S.set(recKey, data.recents);
+    if(data.archetypes) S.set(archKey, data.archetypes);
+    loadBrain(); loadApps(); alert('Brain importado!');
+  }catch(err){ alert('Arquivo inválido'); }
+});
+qs('#brainReset').addEventListener('click', ()=>{
+  [profKey,trainKey,appsKey,favKey,recKey,archKey].forEach(k=>localStorage.removeItem(k));
+  loadBrain(); loadApps(); renderArchetypes(); renderIntents();
+});
+
+/* =========== Archetypes Chips + Cue + Tríade =========== */
+function renderArchetypes(){
+  const wrap=qs('#archetypesChips'); wrap.innerHTML='';
+  const state=S.get(archKey, {});
+  archetypeList.forEach(name=>{
+    const on=!!state[name]; const el=document.createElement('button');
+    el.className='chip'; el.textContent=(on?'● ':'○ ')+name;
+    el.onclick=()=>{ state[name]=!state[name]; S.set(archKey,state); renderArchetypes(); };
+    wrap.append(el);
+  });
+}
+renderArchetypes();
+
+let audioCtx;
+qs('#playCue').addEventListener('click', ()=>{
+  audioCtx ||= new (window.AudioContext||window.webkitAudioContext)();
+  function click(t=0, f=1600){ const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+    o.type='square'; o.frequency.value=f; o.connect(g); g.connect(audioCtx.destination);
+    const now=audioCtx.currentTime + t; g.gain.setValueAtTime(.0001, now); g.gain.exponentialRampToValueAtTime(.3, now+.005); g.gain.exponentialRampToValueAtTime(.0001, now+.04);
+    o.start(now); o.stop(now+.05);
+  }
+  click(0,1500); click(.12,1200); click(.28,1800);
+});
+
+const triSets = [ ['⚡️','⭕️','⚡️'], ['✦','◐','☼'], ['⚙','🌀','🔮'], ['✨','🫧','⭕️'], ['🔥','🌹','⚡️'] ];
+function genTriade(){ const t=triSets[Math.floor(Math.random()*triSets.length)]; const s=t.join(' '); qs('#triade').textContent=s; qs('#triadeOut').value=s; }
+qs('#triadeGen').addEventListener('click', genTriade);
+
+/* =========== Viewer controls (minimize badge) =========== */
+const badgeEl=qs('#reopenBadge');
+function badge(show){ badgeEl.style.display = show ? 'flex' : 'none'; }
+qs('#viewerMin').addEventListener('click', ()=>{ badge(true); showTab('home'); });
+qs('#viewerOpen').addEventListener('click', ()=>{ badge(false); showTab('viewer'); });
+qs('#viewerBack').addEventListener('click', ()=>showTab('home'));
+qs('#viewerReload').addEventListener('click', ()=>{ const f=qs('#appViewer'); const u=f.src; f.src='about:blank'; setTimeout(()=>f.src=u,100) });
+
+/* =========== Trinity host <-> viewers =========== */
+function injectToTrinity(app){
+  const a=qs('#triA'); const b=qs('#triB');
+  if(!a.src) a.src=app.url; else if(!b.src) b.src=app.url; else a.src=app.url;
+  showTab('trinity');
+}
+function triPost(msg){ [qs('#triA').contentWindow, qs('#triB').contentWindow].forEach(w=>w && w.postMessage({dual:msg}, '*')); }
+qs('#triSyncTheme').addEventListener('click', ()=>triPost({type:'theme', theme:'nebula-pro'}));
+qs('#triSendPing').addEventListener('click', ()=>triPost({type:'ping', at:Date.now()}));
+window.addEventListener('message', (e)=>{
+  if(!e.data?.dual) return;
+  const log = qs('#triLog');
+  log.value += `[msg] ${JSON.stringify(e.data.dual)}\n`;
+  log.scrollTop = log.scrollHeight;
+});
+
+/* =========== Status pop (statusBtn) =========== */
+qs('#statusBtn').addEventListener('click', ()=>{
+  const p=S.get(profKey,{});
+  alert(`Perfil:\nNome: ${p.name||'—'}\nSK: ${p.sk?('•••'+p.sk.slice(-6)):'—'}\nApps: ${S.get(appsKey,appsDefault).length}\nFavoritos: ${S.get(favKey,[]).length}`);
+});
+function pingStatus(){ /* purely visual ping on save */ const d=qs('#statusBtn .dot'); d.style.background='var(--warn)'; setTimeout(()=>d.style.background='var(--ok)',350); }
+
+/* =========== Init =========== */
+loadApps(); loadBrain();
 </script>
 </body>
 </html>
