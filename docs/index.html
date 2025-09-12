@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<link rel="manifest" href="./manifest-dark.json"/>
+<link rel="manifest" href="./manifest-medium.json"/>
 <title>Hub Dual — Nebula Pro (PERFECT)</title>
 <style>
   /* ================= Nebula Pro — PERFECT ================= */
@@ -15,7 +15,7 @@
     --r:24px; --r-lg:28px; --shadow:0 10px 30px rgba(0,0,0,.35);
   }
   *{ box-sizing:border-box; min-width:0 }
-  html,body{ height:100%; margin:0 }
+  html,body{ height:100dvh; margin:0 }
   body{
     font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
     background:linear-gradient(42deg,var(--grad-a),var(--grad-b)) fixed;
@@ -134,10 +134,28 @@
   body.viewer-open .tabbar{ opacity:0; pointer-events:none; transform:translateY(6px); transition:opacity .12s ease }
 </style>
 
-<!-- iOS Splash Screens -->
-<link rel="apple-touch-startup-image" href="icons/splash/splash-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" />
-<link rel="apple-touch-startup-image" href="icons/splash/splash-2048x2732.png" media="(min-device-width: 768px) and (max-device-width: 1024px) and (-webkit-min-device-pixel-ratio: 2)" />
-<link rel="apple-touch-startup-image" href="icons/splash/splash-1280x720.png" media="(device-width: 1280px) and (device-height: 720px)" />
+<!-- Medium-Dark theme override -->
+<style id="dual-medium-dark">
+  :root{
+    --grad-a:#a76bff;
+    --grad-b:#29d3ff;
+    --text:#f7f9ff;
+    --muted:rgba(247,249,255,.75);
+    --surface:rgba(24,26,45,.55);
+    --surface-strong:rgba(18,20,36,.92);
+    --border:1px solid rgba(255,255,255,.12);
+    --shadow:0 12px 34px rgba(0,0,0,.35);
+    --r:20px; --r-lg:24px;
+  }
+  body{ background:linear-gradient(38deg,var(--grad-a),var(--grad-b)) fixed }
+  .tab.active{ box-shadow:0 0 0 2px rgba(255,255,255,.06) }
+  .bubble{ background:#7c5cff }
+  .update-btn{ background:linear-gradient(90deg,#7c5cff,#49c2ff); color:#0a0d1f }
+
+  /* Hide header/footer when viewer open */
+  body.viewer-open .masthead{ opacity:0; pointer-events:none; transform:translateY(-6px); transition:opacity .12s ease }
+  body.viewer-open .tabbar{ opacity:0; pointer-events:none; transform:translateY(6px); transition:opacity .12s ease }
+</style>
 
 
   <!-- iOS PWA / Splash & Capabilities -->
@@ -148,68 +166,6 @@
   <link rel="apple-touch-startup-image" href="./icons/splash/splash-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
   <link rel="apple-touch-startup-image" href="./icons/splash/splash-2048x2732.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
   <link rel="apple-touch-startup-image" href="./icons/splash/splash-1280x720.png" media="(device-width: 360px) and (device-height: 640px) and (-webkit-device-pixel-ratio: 4) and (orientation: landscape)">
-
-
-<!-- Full Dark theme override -->
-<style id="dual-dark-theme">
-  :root{
-    --grad-a:#0a0d1f; --grad-b:#0a0d1f;
-    --text:#e8ebff; --muted:rgba(232,235,255,.65);
-    --surface:rgba(10,12,20,.72); --surface-strong:rgba(7,9,16,.94);
-    --border:1px solid rgba(120,135,255,.10);
-    --shadow:0 16px 40px rgba(0,0,0,.55);
-    --r:22px; --r-lg:26px;
-  }
-  body{ background:linear-gradient(42deg,#0a0d1f,#0a0d1f) fixed }
-  .tab.active{ box-shadow:0 0 0 2px rgba(120,135,255,.10) }
-  .bubble{ background:#5863ff }
-  .update-btn{ background:linear-gradient(90deg,#5863ff,#29d3ff); color:#0a0d1f }
-  /* 1) Viewer atrás (header e tabbar por cima) */
-.masthead{ z-index: 200; }
-.tabbar{   z-index: 200; }
-
-/* o viewer fica ABAIXO deles e já ocupa o espaço útil */
-.viewer{
-  position: fixed;
-  /* respeita alturas do header e da tabbar sem sobrepor */
-  top: 78px;                    /* altura do header */
-  left: 0; right: 0;
-  bottom: calc(88px + 24px);    /* altura da tabbar + gap solto (24px) */
-  z-index: 100;                 /* atrás do header/tabbar */
-  display: none;
-}
-.viewer.open{ display: block; }
-.viewer .frame{ position:absolute; inset:12px 16px; border-radius:18px; overflow:hidden }
-
-/* 2) Tabbar solta (desgrudada do bottom) */
-.tabbar{
-  position: fixed;
-  left: 0; right: 0;
-  /* flutua acima do fundo ~24px, ainda respeitando a área segura */
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
-  height: 78px;
-  padding: 6px 14px;
-}
-
-/* centraliza a cápsula e dá “respiro” lateral */
-.tabbar .container{
-  margin: 0 16px;               /* “solta” das bordas curvas */
-  border-radius: 24px;
-  box-shadow: 0 16px 40px rgba(0,0,0,.35);
-}
-
-/* 3) Quick-actions acompanham a tabbar solta */
-.quick-actions{
-  right: calc(16px + env(safe-area-inset-right,0));
-  bottom: calc(24px + 78px + env(safe-area-inset-bottom,0) + 12px); /* gap + altura tabbar + safe-area + respiro */
-}
-
-/* 4) Remova o hide do header/footer ao abrir o viewer (se houver) */
-body.viewer-open .masthead,
-body.viewer-open .tabbar{
-  opacity: 1; pointer-events: auto; transform: none; /* neutraliza regras antigas */
-}
-</style>
 
 </head>
 <body>
@@ -249,12 +205,17 @@ body.viewer-open .tabbar{
     
       <li class="brain-item" id="brainUpload">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 20v-8m0 0l-4 4m4-4l4 4"/>
-          <path d="M20 20H4V4h8l2 2h6z"/>
+          <path d="M12 3v14"/><polyline points="7 8 12 3 17 8"/><rect x="4" y="17" width="16" height="4" rx="2"/>
         </svg>
-        <span>Upload Local (.html/.json)</span>
+        <span>Upload Local (.html / .json)</span>
+        <input id="filePicker" type="file" accept=".html,.htm,.json" multiple style="display:none"/>
       </li>
-
+      <li class="brain-item" id="brainClearOverride">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/>
+        </svg>
+        <span>Limpar override do apps.json</span><small>se ativo</small>
+      </li>
     
       <li class="brain-item" id="brainLocalMgr">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -781,6 +742,15 @@ function boot(){
   if(lamExport){ lamExport.onclick = exportAllLocalApps }
   if(lamClear){ lamClear.onclick = clearAllLocalApps }
 
+  const uploadLi = document.getElementById('brainUpload');
+  const filePicker = document.getElementById('filePicker');
+  if(uploadLi && filePicker){
+    uploadLi.onclick = ()=> filePicker.click();
+    filePicker.onchange = (e)=> handleLocalUpload(e.target.files);
+  }
+  const clearOv = document.getElementById('brainClearOverride');
+  if(clearOv){ clearOv.onclick = clearAppsOverride }
+
   document.getElementById('skHint').textContent = LS.raw('dual.keys.openrouter') ? '• OK' : '';
   document.getElementById('brainDownload').onclick = exportBackup;
   document.getElementById('brainSK').onclick = promptKey;
@@ -868,25 +838,6 @@ openApp = function(app){
 
 
 <script>
-// === Global fetch hook with loader threshold ===
-(function(){
-  const origFetch = window.fetch;
-  window.fetch = function(){
-    let shown = false;
-    const t = setTimeout(()=>{
-      dualShowLoaderAfter(0); // immediate show after 3s wait below
-      shown = true;
-    }, 3000);
-    return origFetch.apply(this, arguments).finally(()=>{
-      clearTimeout(t);
-      if(shown) dualHideLoader();
-    });
-  };
-})();
-</script>
-
-
-<script>
 // === Global fetch loader hook (slow fetches) ===
 (function(){
   const EXCEPTIONS = [
@@ -895,27 +846,23 @@ openApp = function(app){
     /manifest\.json$/i
   ];
   const OPT_OUT_HEADER = 'x-dual-loader';
-  const SLOW_MS = 3000; // threshold
+  const SLOW_MS = 3000;
 
   const _origFetch = window.fetch.bind(window);
   window.fetch = function(input, init){
     try {
       const req = new Request(input, init);
       const method = (req.method || 'GET').toUpperCase();
-      // opt-out via header
       if (req.headers && req.headers.get(OPT_OUT_HEADER) === 'off') {
         return _origFetch(input, init);
       }
-      // skip non-GET/POST/PUT/PATCH requests
       if (!['GET','POST','PUT','PATCH'].includes(method)) {
         return _origFetch(input, init);
       }
-      // exceptions by URL pattern
       const url = req.url || String(input||'');
       if (EXCEPTIONS.some(rx => rx.test(url))) {
         return _origFetch(input, init);
       }
-      // start slow timer
       dualShowLoaderAfter(SLOW_MS);
       return _origFetch(input, init)
         .finally(() => { try{ dualHideLoader() }catch(e){} });
@@ -924,58 +871,6 @@ openApp = function(app){
     }
   };
 })();
-</script>
-
-<input type="file" id="fileInputUpload" style="display:none" accept=".html,.json">
-
-<script>
-// === Upload Local App/JSON ===
-const fileInputUpload = document.getElementById('fileInputUpload');
-document.getElementById('brainUpload').onclick = () => fileInputUpload.click();
-
-fileInputUpload.addEventListener('change', (e) => {
-  const f = e.target.files[0];
-  if(!f) return;
-  const reader = new FileReader();
-  reader.onload = function(ev){
-    const content = ev.target.result;
-    if(f.name.endsWith('.json')){
-      try{
-        const parsed = JSON.parse(content);
-        localStorage.setItem('dual.local.apps.json', JSON.stringify(parsed));
-        toast('JSON carregado em dual.local.apps.json');
-        renderApps();
-      }catch(err){
-        alert('JSON inválido: '+err.message);
-      }
-    }else if(f.name.endsWith('.html')){
-      const key = 'dual.local.app.'+Date.now();
-      localStorage.setItem(key, content);
-      const apps = LS.get('dual.local.apps', []);
-      apps.push({ id:key, name:f.name, url:'data:text/html;base64,'+btoa(unescape(encodeURIComponent(content))), iconKey:'hub_config', defaultOpenMode:'embed' });
-      LS.set('dual.local.apps', apps);
-      toast('App local '+f.name+' salvo e adicionado');
-      renderApps();
-    }
-  };
-  reader.readAsText(f);
-});
-
-// Patch readApps to merge local uploads
-const __readApps_base = readApps;
-readApps = async function(){
-  const base = await __readApps_base();
-  let extra = [];
-  try{
-    const j = localStorage.getItem('dual.local.apps.json');
-    if(j) extra = extra.concat(JSON.parse(j));
-  }catch(e){}
-  try{
-    const apps = LS.get('dual.local.apps', []);
-    if(Array.isArray(apps)) extra = extra.concat(apps);
-  }catch(e){}
-  return base.concat(extra);
-}
 </script>
 
 
@@ -1294,52 +1189,58 @@ function restoreLocalAppsBackup(){
   renderLocalAppsManager(); renderApps(); updateRestoreButton();
 }
 </script>
-  <style>
-    /* 1) Viewer atrás (header e tabbar por cima) */
-.masthead{ z-index: 200; }
-.tabbar{   z-index: 200; }
+<style> /* === Viewer atrás do HUD (header+tabbar) === */
+.masthead{ z-index:200; }
+.tabbar{ z-index:200; }
 
-/* o viewer fica ABAIXO deles e já ocupa o espaço útil */
+/* Viewer ocupa o espaço útil entre header e tabbar solta */
 .viewer{
   position: fixed;
-  /* respeita alturas do header e da tabbar sem sobrepor */
-  top: 78px;                    /* altura do header */
+  top: 78px;               /* altura do header */
   left: 0; right: 0;
-  bottom: calc(88px + 24px);    /* altura da tabbar + gap solto (24px) */
-  z-index: 100;                 /* atrás do header/tabbar */
+  bottom: calc(88px + 24px); /* altura tabbar + gap “solto” */
+  z-index: 100;            /* ATRÁS do header/tabbar */
   display: none;
 }
-.viewer.open{ display: block; }
-.viewer .frame{ position:absolute; inset:12px 16px; border-radius:18px; overflow:hidden }
+.viewer.open{ display:block; }
 
-/* 2) Tabbar solta (desgrudada do bottom) */
+/* Tabbar flutuando (desgrudada do fundo) + safe-area */
 .tabbar{
   position: fixed;
   left: 0; right: 0;
-  /* flutua acima do fundo ~24px, ainda respeitando a área segura */
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+  bottom: calc(env(safe-area-inset-bottom,0px) + 24px);
   height: 78px;
   padding: 6px 14px;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200;
 }
 
-/* centraliza a cápsula e dá “respiro” lateral */
+/* Cápsula com respiro lateral e sombra */
 .tabbar .container{
-  margin: 0 16px;               /* “solta” das bordas curvas */
+  width: 100%;
+  max-width: 520px;
+  background: var(--surface);
+  border: var(--border);
   border-radius: 24px;
   box-shadow: 0 16px 40px rgba(0,0,0,.35);
+  display: flex; justify-content: space-around; align-items: center;
+  padding: 10px 16px;
+  margin: 0 16px; /* “solta” das bordas curvas */
 }
 
-/* 3) Quick-actions acompanham a tabbar solta */
+/* Quick-actions acompanham a tabbar solta */
 .quick-actions{
+  position: fixed;
+  bottom: calc(24px + 78px + env(safe-area-inset-bottom,0) + 12px);
   right: calc(16px + env(safe-area-inset-right,0));
-  bottom: calc(24px + 78px + env(safe-area-inset-bottom,0) + 12px); /* gap + altura tabbar + safe-area + respiro */
+  display: flex; gap: 12px; z-index: 195;
 }
 
-/* 4) Remova o hide do header/footer ao abrir o viewer (se houver) */
+/* Se você tinha regras que escondiam header/footer com body.viewer-open, neutraliza: */
 body.viewer-open .masthead,
 body.viewer-open .tabbar{
-  opacity: 1; pointer-events: auto; transform: none; /* neutraliza regras antigas */
+  opacity: 1; pointer-events: auto; transform: none;
 }
-  </style>
+</style>
 </body>
 </html>
