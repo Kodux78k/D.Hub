@@ -1,286 +1,445 @@
-<!doctype html>
-<html lang="pt-BR" data-theme="nebula">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>HUB • Botão Único (Glow)</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UNO Minimal – Áudio e Temas</title>
 <style>
-  :root{
-    --bg:#0a0d12; --bg2:#101522; --text:#d7d7d7;
-    --grad-a:#6a62ff; --grad-b:#7b2cff; --accent:#39FFB6;
-    --shadow:0 10px 30px rgba(0,0,0,.35);
-    --glass:rgba(255,255,255,.06); --glass-b:#ffffff12; --blur:18px;
-    --radius:22px; --fast:.15s; --med:.35s; --slow:.6s;
+  /* Base timing tokens */
+  :root {
+    --duration-fast: .15s;
+    --duration-med: .35s;
+    --duration-slow: .6s;
+    /* Fallback palette */
+    --bg1: #0a0d12;
+    --bg2: #101522;
+    --text: #d7d7d7;
+    --accent: #7b2cff;
+    --accent-rgb: 123, 44, 255;
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+    --blur: 20px;
+    --radius: 20px;
   }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0; color:var(--text); font:500 16px/1.35 "Montserrat",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-    background: radial-gradient(1200px 900px at 80% 10%, #1b2040 0%, var(--bg) 60%) fixed;
+  /* Theme definitions (override variables) */
+  body.theme-nebula {
+    --bg1: #0a0d12;
+    --bg2: #101522;
+    --text: #d7d7d7;
+    --accent: #7b2cff;
+    --accent-rgb: 123,44,255;
   }
-
-  /* layout base */
-  .app{min-height:100%; display:grid; place-items:center; padding:20px}
-  .phone{
-    width:min(420px,95vw); height:min(780px,85vh);
-    background: linear-gradient(180deg, #20314a 0%, #28284e 100%);
-    border-radius:32px; border:2px solid #131928; box-shadow:var(--shadow);
-    position:relative; overflow:hidden;
+  body.theme-medium {
+    --bg1: #1c1e24;
+    --bg2: #282a36;
+    --text: #e5e5e5;
+    --accent: #39ffb6;
+    --accent-rgb: 57,255,182;
   }
-  .phone::after{ /* brilho leve */
-    content:""; position:absolute; inset:0; pointer-events:none;
-    background: linear-gradient(120deg, #ffffff22 0%, #ffffff05 40%, transparent 60%);
-    mix-blend-mode:overlay;
+  body.theme-light {
+    --bg1: #f1f4f8;
+    --bg2: #e5edf5;
+    --text: #2b3050;
+    --accent: #6a62ff;
+    --accent-rgb: 106,98,255;
   }
-
-  /* botão único (FAB) */
-  .fab{
-    position:absolute; right:18px; bottom:18px; width:58px; height:58px;
-    border-radius:999px; border:1px solid #ffffff22; display:grid; place-items:center;
-    background: linear-gradient(160deg, var(--grad-a), var(--grad-b));
-    color:#fff; font-size:26px; box-shadow: 0 16px 34px #7b2cff3a, 0 6px 16px #0008;
-    transition:transform var(--fast), filter var(--fast);
-    cursor:pointer; user-select:none;
+  body {
+    margin: 0;
+    background: radial-gradient(120% 80% at 50% 0%, var(--bg2) 0%, var(--bg1) 100%);
+    color: var(--text);
+    font-family: 'Montserrat', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
-  .fab:active{transform:translateY(1px) scale(.98)}
-  .fab .pulse{position:absolute; inset:-6px; border-radius:inherit; pointer-events:none;
-    box-shadow:0 0 0 0 #7b2cff66; animation:pulse 2s infinite;}
-  @keyframes pulse{ 0%{box-shadow:0 0 0 0 #7b2cff55} 70%{box-shadow:0 0 0 24px #7b2cff00} 100%{box-shadow:0 0 0 0 #7b2cff00}}
-
-  /* menu do botão único */
-  .menu{
-    position:absolute; right:18px; bottom:86px; display:flex; flex-direction:column; gap:10px;
-    opacity:0; transform:translateY(10px); pointer-events:none; transition:opacity var(--med), transform var(--med);
+  /* Central archetype circle */
+  #circleWrapper {
+    position: relative;
+    width: min(80vw, 500px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.15);
+    overflow: hidden;
+    background: radial-gradient(circle at center, rgba(255,255,255,.05), rgba(255,255,255,.02) 70%);
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .3s ease;
+    /* CSS variable that the audio analyser updates (0–1) */
+    --pulse: 0;
   }
-  .menu.open{opacity:1; transform:translateY(0); pointer-events:auto}
-  .chip{
-    display:flex; align-items:center; gap:10px; min-width:180px; max-width:260px; padding:12px 14px;
-    border-radius:14px; color:#e8ecff; background:linear-gradient(160deg,#2a2f49,#1e2338);
-    border:1px solid #ffffff1f; box-shadow:var(--shadow); cursor:pointer;
+  /* Pulsating overlay based on audio */
+  #circleWrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at center,
+      rgba(var(--accent-rgb), calc(var(--pulse) * 0.6)) 0%,
+      rgba(var(--accent-rgb), 0) 70%);
+    pointer-events: none;
+    transition: background .1s linear;
+  }
+  #circleWrapper iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: transparent;
+  }
+  /* Dot logo in the circle */
+  #dotLogo {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: conic-gradient(var(--accent), var(--accent) 30%, rgba(255,255,255,.2));
+    box-shadow: 0 0 10px rgba(255,255,255,.4);
+    pointer-events: none;
+  }
+  /* Archetype switch buttons */
+  #archControls {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+  }
+  #archControls button {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.18);
+    color: var(--text);
+    padding: 6px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background var(--duration-fast), transform var(--duration-fast);
     backdrop-filter: blur(var(--blur));
   }
-  .chip:hover{filter:brightness(1.05)}
-  .chip .dot{width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 12px var(--accent)}
-  .chip .label{font-size:.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-inline-size:20ch}
-
-  /* overlay + iframe wrapper */
-  .overlay{position:fixed; inset:0; display:none; place-items:center; background:#0008; z-index:1000}
-  .overlay.show{display:grid; animation:fadeIn var(--slow)}
-  @keyframes fadeIn{from{opacity:0} to{opacity:1}}
-  .ifr-wrap{
-    width:min(960px,92vw); height:min(640px,80vh); border-radius:20px; overflow:hidden;
-    background:linear-gradient(180deg,#0f1425,#0b0f1a);
-    border:1px solid #ffffff1f; box-shadow: 0 28px 80px #000c;
-    position:relative; display:flex; flex-direction:column;
+  #archControls button:hover { background: rgba(255,255,255,.12); }
+  #archControls button:active { transform: scale(.95); }
+  /* Floating Action Button (FAB) */
+  #fab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(160deg, var(--accent), var(--accent));
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-size: 32px;
+    border: 1px solid rgba(255,255,255,.25);
+    box-shadow: 0 16px 32px rgba(0,0,0,.45), 0 4px 12px rgba(0,0,0,.3);
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .3s ease;
   }
-  .ifr-title{
-    display:flex; align-items:center; gap:10px; padding:10px 12px; background:linear-gradient(180deg,#131b2f,#0f1528);
-    border-bottom:1px solid #ffffff1a;
+  #fab:active { transform: scale(.95); }
+  #fab .pulse {
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    pointer-events: none;
+    box-shadow: 0 0 0 0 var(--accent);
+    animation: fabPulse 2.5s infinite;
   }
-  .title-dot{width:8px; height:8px; border-radius:50%; background:#7b2cff}
-  .title-text{font-weight:600; font-size:.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  .ifr-controls{margin-left:auto; display:flex; gap:8px}
-  .ctrl{
-    width:34px; height:34px; display:grid; place-items:center; border-radius:10px; cursor:pointer;
-    background:linear-gradient(160deg,#262b42,#1d2238); border:1px solid #ffffff1a; color:#e3e7ff;
+  @keyframes fabPulse {
+    0% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), .6); }
+    70% { box-shadow: 0 0 0 28px rgba(var(--accent-rgb), 0); }
+    100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0); }
   }
-  .ctrl:hover{filter:brightness(1.1)}
-  iframe{flex:1; border:0; background:#0a0f1b}
-
-  /* badge reabrir (aparece ao minimizar) */
-  .badge-reopen{
-    position:fixed; right:16px; bottom:90px; display:none; z-index:1001;
-    background:linear-gradient(160deg,#2f3552,#212741); padding:10px 12px; border-radius:14px; border:1px solid #ffffff22;
-    color:#dfe6ff; font-size:.9rem; box-shadow:var(--shadow); cursor:pointer;
+  /* Menu container */
+  #menu {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+    transition: opacity var(--duration-med), transform var(--duration-med);
+    z-index: 100;
   }
-
-  /* helpers */
-  .hidden{display:none !important}
-  .svg-container{display:inline-flex}
-  .ellip{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-
-  /* tema swap suave */
-  html{transition:filter .6s ease}
-  html.theme-blur{filter:blur(20px)}
-  html.theme-blur.theme-on{filter:blur(0)}
+  #menu.open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .menu-item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    min-width: 200px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.18);
+    color: var(--text);
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(var(--blur));
+    font-size: 14px;
+    font-weight: 600;
+    transition: background var(--duration-fast);
+  }
+  .menu-item:hover {
+    background: rgba(255,255,255,.08);
+  }
+  .menu-item .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+  /* Highlight audio-on state */
+  .menu-item.audio-on {
+    background: rgba(255,255,255,.12);
+  }
+  /* Theme group inside menu */
+  #themeItem { display: flex; align-items: center; gap: 10px; }
+  #themeGroup {
+    display: flex;
+    gap: 8px;
+  }
+  .theme-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.25);
+    cursor: pointer;
+  }
+  .swatch-nebula { background: linear-gradient(135deg,#151d38,#3c0d4d); }
+  .swatch-medium { background: linear-gradient(135deg,#2e324a,#57607d); }
+  .swatch-light { background: linear-gradient(135deg,#e2e8f0,#cbd5e1); }
+  /* Fractal overlay */
+  #overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    display: none;
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #overlay.show {
+    display: flex;
+    animation: fadeIn var(--duration-slow);
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  #overlayContent {
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: rgba(15,17,32,.75);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 20px;
+    color: var(--text);
+    font-family: 'Courier New', monospace;
+    white-space: pre-wrap;
+    line-height: 1.4;
+    font-size: 14px;
+  }
 </style>
 </head>
-<body>
-  <div class="app">
-    <div class="phone" id="phone">
-      <!-- Botão Único -->
-      <button id="btnKOBLLUX" class="fab" aria-haspopup="true" aria-expanded="false" title="Ações">
-        <span>+</span><span class="pulse" aria-hidden="true"></span>
-      </button>
-
-      <!-- Menu do Botão Único -->
-      <div class="menu" id="mainMenu" role="menu" aria-label="Menu Principal">
-        <div class="chip" data-action="uno"><span class="dot"></span><span class="label">UNO</span></div>
-        <div class="chip" data-action="dual"><span class="dot"></span><span class="label">DUAL</span></div>
-        <div class="chip" data-action="trinity"><span class="dot"></span><span class="label">TRINITY</span></div>
-        <div class="chip" data-action="uploadHtml"><span class="dot"></span><span class="label ellip" title="Upload HTML (abrir no iFrame)">Upload HTML</span></div>
-        <div class="chip" data-action="uploadReact"><span class="dot"></span><span class="label ellip" title="Upload React (URL)">Upload React</span></div>
-        <div class="chip" data-action="toggleTheme"><span class="dot"></span><span class="label">Trocar Tema</span></div>
+<body class="theme-nebula">
+  <!-- Central archetype circle and controls -->
+  <div id="circleWrapper">
+    <iframe id="archFrame" srcdoc="<html><body style='margin:0;display:flex;align-items:center;justify-content:center;height:100%;background:transparent;color:#fff;font-family:sans-serif;'><div style='text-align:center;font-size:18px;opacity:.7'>Carregue um arquétipo<br/>ou escolha no menu</div></body></html>"></iframe>
+    <div id="dotLogo"></div>
+    <div id="archControls">
+      <button id="prevArch" title="Anterior">◀</button>
+      <button id="nextArch" title="Próximo">▶</button>
+    </div>
+  </div>
+  <!-- Floating action button to toggle menu -->
+  <button id="fab" aria-label="Menu">
+    <span>+</span>
+    <span class="pulse" aria-hidden="true"></span>
+  </button>
+  <!-- Menu with actions -->
+  <div id="menu">
+    <div class="menu-item" data-action="uno"><span class="dot"></span><span>UNO</span></div>
+    <div class="menu-item" data-action="dual"><span class="dot"></span><span>DUAL</span></div>
+    <div class="menu-item" data-action="trinity"><span class="dot"></span><span>TRINITY</span></div>
+    <div class="menu-item" data-action="audio"><span class="dot"></span><span id="audioLabel">Áudio Off</span></div>
+    <div class="menu-item" id="themeItem">
+      <span>Temas:</span>
+      <div id="themeGroup">
+        <div class="theme-swatch swatch-nebula" data-theme="nebula" title="Nebula"></div>
+        <div class="theme-swatch swatch-medium" data-theme="medium" title="Medium"></div>
+        <div class="theme-swatch swatch-light" data-theme="light" title="Light"></div>
       </div>
     </div>
   </div>
-
-  <!-- Overlay & iFrame -->
-  <div class="overlay" id="overlay" aria-hidden="true">
-    <div class="ifr-wrap" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
-      <div class="ifr-title">
-        <span class="title-dot"></span>
-        <div class="title-text ellip" id="dlgTitle">Preview</div>
-        <div class="ifr-controls">
-          <button class="ctrl" id="btnMin" title="Minimizar">—</button>
-          <button class="ctrl" id="btnMax" title="Maximizar">▢</button>
-          <button class="ctrl" id="btnPop" title="Popout">↗</button>
-          <button class="ctrl" id="btnClose" title="Fechar">✕</button>
-        </div>
-      </div>
-      <iframe id="preview" srcdoc="<html><body style='margin:0;background:#0a0f1b;color:#cfe3ff;font-family:system-ui,Segoe UI,Roboto,sans-serif;display:grid;place-items:center;height:100vh'><div style='opacity:.7'>Carregue um HTML ou abra um modo (UNO/DUAL/TRINITY)</div></body></html>"></iframe>
-    </div>
+  <!-- Fractal overlay -->
+  <div id="overlay">
+    <div id="overlayContent"></div>
   </div>
-
-  <!-- Badge para reabrir quando minimizado -->
-  <button class="badge-reopen" id="reopen">Reabrir Preview</button>
-
-<script>
-/* ========= ArteASC (placeholder) ========= */
-window.ArteASC = {
-  render:(n,v={})=>({
-    portal369:`╔═══🌌═══╗\n ✪ (°ロ°)☝\n 🧭 ${v.tri||'TRI'} | ${v.hz||432}hz`,
-    seal_trinity_v2:`⟐ Trinity v2\n⚡ Pulso:${v.pulso||'ON'}`
-  }[n]||'[ArteASC]')
-};
-
-/* ========= Helpers ========= */
-const $ = sel => document.querySelector(sel);
-const on = (el,ev,fn) => el.addEventListener(ev,fn);
-
-/* ========= Botão Único ========= */
-const fab = $('#btnKOBLLUX');
-const menu = $('#mainMenu');
-let menuOpen = false;
-
-function toggleMenu(state){
-  menuOpen = state ?? !menuOpen;
-  fab.setAttribute('aria-expanded', menuOpen);
-  menu.classList.toggle('open', menuOpen);
-}
-on(fab,'click',()=>toggleMenu());
-
-/* ========= Overlay / iFrame ========= */
-const overlay = $('#overlay');
-const iframe  = $('#preview');
-const dlgTitle= $('#dlgTitle');
-const btnClose= $('#btnClose');
-const btnMin  = $('#btnMin');
-const btnMax  = $('#btnMax');
-const btnPop  = $('#btnPop');
-const badge   = $('#reopen');
-
-function openOverlay(title, urlOrDoc, isUrl=false){
-  dlgTitle.textContent = title || 'Preview';
-  if(isUrl){ iframe.src = urlOrDoc; }
-  else{ iframe.removeAttribute('src'); iframe.srcdoc = urlOrDoc; }
-  overlay.classList.add('show'); overlay.setAttribute('aria-hidden','false');
-}
-function closeOverlay(){
-  overlay.classList.remove('show'); overlay.setAttribute('aria-hidden','true');
-  // limpa para evitar tocar áudio em bg
-  iframe.src = 'about:blank'; iframe.srcdoc = '';
-}
-function minimizeOverlay(){
-  overlay.classList.remove('show'); badge.style.display = 'block';
-}
-function maximizeOverlay(){
-  // efeito simples de expandir em tela cheia (toggle)
-  const wrap = overlay.querySelector('.ifr-wrap');
-  const isFull = wrap.style.width === '100vw';
-  wrap.style.width  = isFull ? 'min(960px,92vw)' : '100vw';
-  wrap.style.height = isFull ? 'min(640px,80vh)' : '100vh';
-  wrap.style.borderRadius = isFull ? '20px' : '0';
-}
-on(btnClose, 'click', closeOverlay);
-on(btnMin,   'click', minimizeOverlay);
-on(btnMax,   'click', maximizeOverlay);
-on(btnPop,   'click', ()=> { try{ window.open(iframe.src || 'about:blank','_blank'); }catch(e){} });
-on(overlay,  'click', e=>{ if(e.target===overlay) closeOverlay(); });
-on(document, 'keydown', e=>{ if(e.key==='Escape') { if(menuOpen) toggleMenu(false); if(overlay.classList.contains('show')) closeOverlay(); } });
-on(badge,    'click', ()=>{ overlay.classList.add('show'); badge.style.display='none'; });
-
-/* ========= Ações do Menu ========= */
-const htmlTemplate = (title, body) => `
-<!doctype html><html lang='pt-BR'><head>
-<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
-<title>${title}</title>
-<style>
-  body{margin:0;background:linear-gradient(180deg,#0b1020,#090d19);color:#e5eaff;font:500 16px/1.45 system-ui,Segoe UI,Roboto,sans-serif;display:grid;place-items:center;height:100vh}
-  .card{background:#131a2b;border:1px solid #ffffff22;border-radius:16px;padding:26px 22px;box-shadow:0 14px 40px #0008;max-width:640px}
-  h1{margin:0 0 10px;font:700 1.2rem/1.2 system-ui}
-  p{opacity:.9;margin:0}
-</style></head><body>
-  <div class="card">
-    <h1>${title}</h1>
-    <p>${body}</p>
-  </div>
-</body></html>`;
-
-const handlers = {
-  uno(){
-    const seal = window.ArteASC.render('portal369',{tri:'UNO',hz:528});
-    openOverlay('UNO Mode', htmlTemplate('UNO', 'Modo UNO ativo. '+seal));
-  },
-  dual(){
-    const seal = window.ArteASC.render('portal369',{tri:'DUAL',hz:432});
-    openOverlay('DUAL Mode', htmlTemplate('DUAL', 'Modo DUAL ativo. '+seal));
-  },
-  trinity(){
-    const seal = window.ArteASC.render('seal_trinity_v2',{pulso:'∞'});
-    openOverlay('TRINITY Mode', htmlTemplate('TRINITY', 'Modo TRINITY ativo. '+seal));
-  },
-  uploadHtml(){
-    // abre um file picker e injeta no iframe
-    const input = Object.assign(document.createElement('input'),{type:'file',accept:'.html,text/html'});
-    input.onchange = async () => {
-      const file = input.files?.[0]; if(!file) return;
-      const text = await file.text();
-      openOverlay(file.name, text, false);
-    };
-    input.click();
-  },
-  uploadReact(){
-    // pede uma URL de build (ex: /index.html) e abre em pop-in
-    const url = prompt('Cole a URL do seu build React/SPA:');
-    if(url) openOverlay('React Preview', url, true);
-  },
-  toggleTheme(){
-    // troca data-theme com transição suave
-    const html = document.documentElement;
-    html.classList.add('theme-blur');
-    const themes = ['nebula','matrix','cyberpunk','tesseract','turbo'];
-    const cur = themes.indexOf(html.getAttribute('data-theme'));
-    const next = themes[(cur+1)%themes.length] || 'nebula';
-    html.setAttribute('data-theme', next);
-    requestAnimationFrame(()=>html.classList.add('theme-on'));
-    setTimeout(()=>html.classList.remove('theme-blur','theme-on'), 650);
-  }
-};
-
-menu.querySelectorAll('.chip').forEach(chip=>{
-  on(chip,'click',()=>{
-    const act = chip.dataset.action;
-    toggleMenu(false);
-    handlers[act]?.();
-  });
-});
-
-/* acessibilidade: fecha menu com blur fora do phone */
-on(document,'click',e=>{
-  const inside = e.target.closest('#phone');
-  if(!inside && menuOpen) toggleMenu(false);
-});
-</script>
+  <script>
+  (function(){
+    /* Archetypes available (files relative to this HTML) */
+    const ARCH = ['hub_dual_variant_b_truncado.html','unificado_universal.html','unificado_7.html'];
+    let currentArch = 0;
+    const archFrame = document.getElementById('archFrame');
+    const circleWrapper = document.getElementById('circleWrapper');
+    const fab = document.getElementById('fab');
+    const menu = document.getElementById('menu');
+    const overlay = document.getElementById('overlay');
+    const overlayContent = document.getElementById('overlayContent');
+    const audioLabel = document.getElementById('audioLabel');
+    let menuOpen = false;
+    let audioMode = false;
+    let audioCtx, analyser, microphone;
+    /* Initialize state from localStorage */
+    function initState(){
+      const savedTheme = localStorage.getItem('unoTheme');
+      if(savedTheme){ setTheme(savedTheme, false); }
+      const savedIndex = parseInt(localStorage.getItem('unoArch')||'0',10);
+      if(!isNaN(savedIndex) && savedIndex >= 0 && savedIndex < ARCH.length){ currentArch = savedIndex; }
+      loadArch(currentArch);
+      const savedAudio = localStorage.getItem('unoAudio');
+      if(savedAudio === 'on'){ enableAudio(); }
+    }
+    /* Load an archetype by index */
+    function loadArch(idx){
+      currentArch = (idx + ARCH.length) % ARCH.length;
+      localStorage.setItem('unoArch', String(currentArch));
+      const file = ARCH[currentArch];
+      /* Directly assign the src. When opened via file:// protocol the fetch API may be blocked,
+         so we simply set the iframe's src. If the file cannot be loaded the iframe will show blank. */
+      archFrame.src = file;
+      archFrame.removeAttribute('srcdoc');
+    }
+    document.getElementById('prevArch').addEventListener('click', ()=>loadArch(currentArch - 1));
+    document.getElementById('nextArch').addEventListener('click', ()=>loadArch(currentArch + 1));
+    /* Menu toggle */
+    fab.addEventListener('click', ()=>{
+      menuOpen = !menuOpen;
+      menu.classList.toggle('open', menuOpen);
+    });
+    /* Menu actions handler */
+    menu.addEventListener('click', (ev)=>{
+      const target = ev.target.closest('.menu-item, .theme-swatch');
+      if(!target) return;
+      const action = target.getAttribute('data-action');
+      if(action){
+        if(action === 'uno') showAscii('UNO');
+        else if(action === 'dual') showAscii('DUAL');
+        else if(action === 'trinity') showAscii('TRINITY');
+        else if(action === 'audio') toggleAudio();
+        // Close menu when showing ascii fractal; keep open when toggling audio
+        if(action !== 'audio'){ toggleMenu(false); }
+      } else {
+        const theme = target.getAttribute('data-theme');
+        if(theme){ setTheme(theme, true); toggleMenu(false); }
+      }
+    });
+    function toggleMenu(state){
+      menuOpen = (state !== undefined) ? state : !menuOpen;
+      menu.classList.toggle('open', menuOpen);
+    }
+    /* Show ASCII fractal for UNO, DUAL, TRINITY */
+    function showAscii(mode){
+      const art = ascii369(mode);
+      overlayContent.textContent = art;
+      overlay.classList.add('show');
+      // Clicking anywhere hides overlay
+      overlay.addEventListener('click', hideOverlay, { once: true });
+    }
+    function hideOverlay(){ overlay.classList.remove('show'); }
+    /* Generate a simple repeating fractal pattern */
+    function ascii369(type){
+      const base = type === 'DUAL' ? '●○' : type === 'TRINITY' ? '▲▼' : '●';
+      const lines = [];
+      for(let i=0; i<16; i++){
+        let line = '';
+        for(let j=0; j<14; j++){
+          line += base[(i + j) % base.length] + ' ';
+        }
+        lines.push(line.trim());
+      }
+      return lines.join('\n');
+    }
+    /* Theme switching */
+    function setTheme(name, persist){
+      document.body.classList.remove('theme-nebula','theme-medium','theme-light');
+      if(name === 'nebula') document.body.classList.add('theme-nebula');
+      else if(name === 'medium') document.body.classList.add('theme-medium');
+      else if(name === 'light') document.body.classList.add('theme-light');
+      if(persist) localStorage.setItem('unoTheme', name);
+    }
+    /* Audio toggling */
+    function enableAudio(){
+      audioMode = true;
+      localStorage.setItem('unoAudio','on');
+      audioLabel.textContent = 'Áudio On';
+      document.querySelector('.menu-item[data-action="audio"]').classList.add('audio-on');
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream=>{
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        microphone = audioCtx.createMediaStreamSource(stream);
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        microphone.connect(analyser);
+        processAudio();
+      }).catch(err=>{
+        console.warn('Erro ao acessar microfone', err);
+      });
+    }
+    function disableAudio(){
+      audioMode = false;
+      localStorage.setItem('unoAudio','off');
+      audioLabel.textContent = 'Áudio Off';
+      const audioItem = document.querySelector('.menu-item[data-action="audio"]');
+      audioItem && audioItem.classList.remove('audio-on');
+      if(analyser){ analyser.disconnect(); analyser = null; }
+      if(microphone){ microphone.disconnect(); microphone = null; }
+      if(audioCtx){ audioCtx.close(); audioCtx = null; }
+      circleWrapper.style.setProperty('--pulse', 0);
+    }
+    function toggleAudio(){
+      if(audioMode){ disableAudio(); }
+      else { enableAudio(); }
+    }
+    function processAudio(){
+      if(!audioMode || !analyser) return;
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const loop = () => {
+        if(!audioMode) return;
+        analyser.getByteTimeDomainData(dataArray);
+        let sum = 0;
+        for(let i=0; i<dataArray.length; i++){
+          const v = (dataArray[i] - 128) / 128;
+          sum += v * v;
+        }
+        const rms = Math.sqrt(sum / dataArray.length);
+        // Map RMS amplitude to 0–1 scale (scaling factor for visual effect)
+        const pulse = Math.min(Math.max(rms * 3, 0), 1);
+        circleWrapper.style.setProperty('--pulse', pulse.toString());
+        requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    }
+    /* Initialize on load */
+    initState();
+  })();
+  </script>
 </body>
 </html>
