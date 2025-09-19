@@ -20,28 +20,9 @@
     --blur: 20px;
     --radius: 20px;
   }
-  /* Theme definitions (override variables) */
-  body.theme-nebula {
-    --bg1: #0a0d12;
-    --bg2: #101522;
-    --text: #d7d7d7;
-    --accent: #7b2cff;
-    --accent-rgb: 123,44,255;
-  }
-  body.theme-medium {
-    --bg1: #1c1e24;
-    --bg2: #282a36;
-    --text: #e5e5e5;
-    --accent: #39ffb6;
-    --accent-rgb: 57,255,182;
-  }
-  body.theme-light {
-    --bg1: #f1f4f8;
-    --bg2: #e5edf5;
-    --text: #2b3050;
-    --accent: #6a62ff;
-    --accent-rgb: 106,98,255;
-  }
+  /* Note: theme definitions removed.  Themes are now defined in JavaScript via the THEMES object.
+     Colours are controlled through CSS variables (--bg1, --bg2, --text, --accent, --accent-rgb).
+     See the <script> section for details. */
   body {
     margin: 0;
     background: radial-gradient(120% 80% at 50% 0%, var(--bg2) 0%, var(--bg1) 100%);
@@ -88,6 +69,8 @@
     height: 100%;
     border: 0;
     background: transparent;
+    /* Disable pointer events so clicks fall through to the wrapper (opens menu) */
+    pointer-events: none;
   }
   /* Dot logo in the circle */
   #dotLogo {
@@ -125,38 +108,8 @@
   }
   #archControls button:hover { background: rgba(255,255,255,.12); }
   #archControls button:active { transform: scale(.95); }
-  /* Floating Action Button (FAB) */
-  #fab {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: linear-gradient(160deg, var(--accent), var(--accent));
-    display: grid;
-    place-items: center;
-    color: #fff;
-    font-size: 32px;
-    border: 1px solid rgba(255,255,255,.25);
-    box-shadow: 0 16px 32px rgba(0,0,0,.45), 0 4px 12px rgba(0,0,0,.3);
-    cursor: pointer;
-    transition: transform .15s ease, box-shadow .3s ease;
-  }
-  #fab:active { transform: scale(.95); }
-  #fab .pulse {
-    position: absolute;
-    inset: -6px;
-    border-radius: 50%;
-    pointer-events: none;
-    box-shadow: 0 0 0 0 var(--accent);
-    animation: fabPulse 2.5s infinite;
-  }
-  @keyframes fabPulse {
-    0% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), .6); }
-    70% { box-shadow: 0 0 0 28px rgba(var(--accent-rgb), 0); }
-    100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0); }
-  }
+  /* Removed Floating Action Button (FAB) styles.
+     The central archetype circle now toggles the menu. */
   /* Menu container */
   #menu {
     position: fixed;
@@ -180,7 +133,8 @@
     display: flex;
     gap: 10px;
     align-items: center;
-    min-width: 200px;
+    /* Fix menu width so long labels don't stretch it */
+    width: 230px;
     padding: 10px 14px;
     border-radius: 14px;
     background: rgba(255,255,255,.04);
@@ -195,6 +149,12 @@
   }
   .menu-item:hover {
     background: rgba(255,255,255,.08);
+  }
+  /* Ensure the text within menu items wraps instead of forcing the container wider */
+  .menu-item span:last-child {
+    flex: 1;
+    white-space: normal;
+    word-break: break-word;
   }
   .menu-item .dot {
     width: 10px;
@@ -212,6 +172,8 @@
   #themeGroup {
     display: flex;
     gap: 8px;
+    flex-wrap: wrap;
+    max-width: 220px;
   }
   .theme-swatch {
     width: 24px;
@@ -223,6 +185,16 @@
   .swatch-nebula { background: linear-gradient(135deg,#151d38,#3c0d4d); }
   .swatch-medium { background: linear-gradient(135deg,#2e324a,#57607d); }
   .swatch-light { background: linear-gradient(135deg,#e2e8f0,#cbd5e1); }
+  /* Additional theme swatches (12 total presets) */
+  .swatch-sunset { background: linear-gradient(135deg,#372322,#9b4d32); }
+  .swatch-ocean { background: linear-gradient(135deg,#002e4d,#007ba7); }
+  .swatch-forest { background: linear-gradient(135deg,#1a2d1a,#2b5537); }
+  .swatch-sunrise { background: linear-gradient(135deg,#fdf2d0,#f6a367); }
+  .swatch-rose { background: linear-gradient(135deg,#362432,#9d4b6c); }
+  .swatch-violet { background: linear-gradient(135deg,#2d2140,#683ca2); }
+  .swatch-cyan { background: linear-gradient(135deg,#00383d,#008ca9); }
+  .swatch-lime { background: linear-gradient(135deg,#213823,#5f7f1a); }
+  .swatch-orange { background: linear-gradient(135deg,#332417,#b55e22); }
   /* Fractal overlay */
   #overlay {
     position: fixed;
@@ -259,7 +231,7 @@
   }
 </style>
 </head>
-<body class="theme-nebula">
+<body>
   <!-- Central archetype circle and controls -->
   <div id="circleWrapper">
     <iframe id="archFrame" srcdoc="<html><body style='margin:0;display:flex;align-items:center;justify-content:center;height:100%;background:transparent;color:#fff;font-family:sans-serif;'><div style='text-align:center;font-size:18px;opacity:.7'>Carregue um arquétipo<br/>ou escolha no menu</div></body></html>"></iframe>
@@ -270,22 +242,42 @@
     </div>
   </div>
   <!-- Floating action button to toggle menu -->
-  <button id="fab" aria-label="Menu">
-    <span>+</span>
-    <span class="pulse" aria-hidden="true"></span>
-  </button>
+  <!-- Note: Floating action button removed. The central circle toggles the menu. -->
   <!-- Menu with actions -->
   <div id="menu">
+    <!-- Core fractal options -->
     <div class="menu-item" data-action="uno"><span class="dot"></span><span>UNO</span></div>
     <div class="menu-item" data-action="dual"><span class="dot"></span><span>DUAL</span></div>
     <div class="menu-item" data-action="trinity"><span class="dot"></span><span>TRINITY</span></div>
-    <div class="menu-item" data-action="audio"><span class="dot"></span><span id="audioLabel">Áudio Off</span></div>
+    <!-- Upload actions -->
+    <div class="menu-item" data-action="upload-html"><span class="dot"></span><span>Upload HTML</span>
+      <input type="file" id="uploadHtmlInput" accept=".html,text/html" style="display:none;" />
+    </div>
+    <div class="menu-item" data-action="upload-bg"><span class="dot"></span><span>Upload Background</span>
+      <input type="file" id="uploadBgInput" accept="image/*" style="display:none;" />
+    </div>
+    <div class="menu-item" data-action="upload-css"><span class="dot"></span><span>Upload CSS</span>
+      <input type="file" id="uploadCssInput" accept=".css,text/css" style="display:none;" />
+    </div>
+    <!-- Feature toggle & training -->
+    <div class="menu-item" data-action="activations"><span class="dot"></span><span>Ativações</span></div>
+    <div class="menu-item" data-action="trainings"><span class="dot"></span><span>Treinamentos</span></div>
+    <!-- Theme picker -->
     <div class="menu-item" id="themeItem">
       <span>Temas:</span>
       <div id="themeGroup">
         <div class="theme-swatch swatch-nebula" data-theme="nebula" title="Nebula"></div>
         <div class="theme-swatch swatch-medium" data-theme="medium" title="Medium"></div>
         <div class="theme-swatch swatch-light" data-theme="light" title="Light"></div>
+        <div class="theme-swatch swatch-sunset" data-theme="sunset" title="Sunset"></div>
+        <div class="theme-swatch swatch-ocean" data-theme="ocean" title="Ocean"></div>
+        <div class="theme-swatch swatch-forest" data-theme="forest" title="Forest"></div>
+        <div class="theme-swatch swatch-sunrise" data-theme="sunrise" title="Sunrise"></div>
+        <div class="theme-swatch swatch-rose" data-theme="rose" title="Rose"></div>
+        <div class="theme-swatch swatch-violet" data-theme="violet" title="Violet"></div>
+        <div class="theme-swatch swatch-cyan" data-theme="cyan" title="Cyan"></div>
+        <div class="theme-swatch swatch-lime" data-theme="lime" title="Lime"></div>
+        <div class="theme-swatch swatch-orange" data-theme="orange" title="Orange"></div>
       </div>
     </div>
   </div>
@@ -300,14 +292,28 @@
     let currentArch = 0;
     const archFrame = document.getElementById('archFrame');
     const circleWrapper = document.getElementById('circleWrapper');
-    const fab = document.getElementById('fab');
+    // Floating action button removed; use circleWrapper instead
     const menu = document.getElementById('menu');
     const overlay = document.getElementById('overlay');
     const overlayContent = document.getElementById('overlayContent');
-    const audioLabel = document.getElementById('audioLabel');
     let menuOpen = false;
     let audioMode = false;
     let audioCtx, analyser, microphone;
+    /* Theme definitions.  Each theme defines a palette used to set CSS variables. */
+    const THEMES = {
+      nebula:  { bg1: '#0a0d12', bg2: '#101522', text: '#d7d7d7', accent: '#7b2cff' },
+      medium:  { bg1: '#1c1e24', bg2: '#282a36', text: '#e5e5e5', accent: '#39ffb6' },
+      light:   { bg1: '#f1f4f8', bg2: '#e5edf5', text: '#2b3050', accent: '#6a62ff' },
+      sunset:  { bg1: '#372322', bg2: '#552e24', text: '#f5e9e6', accent: '#ff6e40' },
+      ocean:   { bg1: '#002e4d', bg2: '#014e78', text: '#d0e8f2', accent: '#00bfff' },
+      forest:  { bg1: '#0d2512', bg2: '#154323', text: '#d6e7d7', accent: '#31a24c' },
+      sunrise: { bg1: '#fff4e5', bg2: '#ffe7c3', text: '#5a3e2a', accent: '#ffa726' },
+      rose:    { bg1: '#362432', bg2: '#50324b', text: '#f3e5ee', accent: '#d64e78' },
+      violet:  { bg1: '#2d2140', bg2: '#432f5e', text: '#eadef5', accent: '#a867e8' },
+      cyan:    { bg1: '#00383d', bg2: '#005b6b', text: '#d0f3f6', accent: '#00bcd4' },
+      lime:    { bg1: '#213823', bg2: '#355c2d', text: '#e1f6d8', accent: '#b6ff00' },
+      orange:  { bg1: '#332417', bg2: '#56351f', text: '#f9e8d5', accent: '#ff874a' }
+    };
     /* Initialize state from localStorage */
     function initState(){
       const savedTheme = localStorage.getItem('unoTheme');
@@ -330,10 +336,11 @@
     }
     document.getElementById('prevArch').addEventListener('click', ()=>loadArch(currentArch - 1));
     document.getElementById('nextArch').addEventListener('click', ()=>loadArch(currentArch + 1));
-    /* Menu toggle */
-    fab.addEventListener('click', ()=>{
-      menuOpen = !menuOpen;
-      menu.classList.toggle('open', menuOpen);
+    /* Menu toggle: click on the central circle toggles the menu */
+    circleWrapper.addEventListener('click', (ev)=>{
+      // Ignore clicks on archetype navigation buttons so they don't open the menu
+      if(ev.target.closest('#archControls')) return;
+      toggleMenu();
     });
     /* Menu actions handler */
     menu.addEventListener('click', (ev)=>{
@@ -341,15 +348,39 @@
       if(!target) return;
       const action = target.getAttribute('data-action');
       if(action){
-        if(action === 'uno') showAscii('UNO');
-        else if(action === 'dual') showAscii('DUAL');
-        else if(action === 'trinity') showAscii('TRINITY');
-        else if(action === 'audio') toggleAudio();
-        // Close menu when showing ascii fractal; keep open when toggling audio
-        if(action !== 'audio'){ toggleMenu(false); }
+        if(action === 'uno'){
+          showAscii('UNO');
+          toggleMenu(false);
+        }
+        else if(action === 'dual'){
+          showAscii('DUAL');
+          toggleMenu(false);
+        }
+        else if(action === 'trinity'){
+          showAscii('TRINITY');
+          toggleMenu(false);
+        }
+        else if(action === 'upload-html'){
+          document.getElementById('uploadHtmlInput').click();
+        }
+        else if(action === 'upload-bg'){
+          document.getElementById('uploadBgInput').click();
+        }
+        else if(action === 'upload-css'){
+          document.getElementById('uploadCssInput').click();
+        }
+        else if(action === 'activations'){
+          showActivations();
+        }
+        else if(action === 'trainings'){
+          showTrainings();
+        }
       } else {
         const theme = target.getAttribute('data-theme');
-        if(theme){ setTheme(theme, true); toggleMenu(false); }
+        if(theme){
+          setTheme(theme, true);
+          toggleMenu(false);
+        }
       }
     });
     function toggleMenu(state){
@@ -365,7 +396,50 @@
       overlay.addEventListener('click', hideOverlay, { once: true });
     }
     function hideOverlay(){ overlay.classList.remove('show'); }
-    /* Generate a simple repeating fractal pattern */
+    /* Show Activations overlay: toggles for features */
+    function showActivations(){
+      // Build simple toggles for features (currently only audio)
+      overlayContent.innerHTML = '';
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'column';
+      wrapper.style.gap = '12px';
+      wrapper.style.padding = '10px';
+      wrapper.style.maxWidth = '400px';
+      const title = document.createElement('h3');
+      title.textContent = 'Ativações';
+      title.style.margin = '0 0 10px 0';
+      title.style.fontSize = '18px';
+      title.style.color = 'var(--text)';
+      wrapper.appendChild(title);
+      // Audio toggle
+      const audioRow = document.createElement('label');
+      audioRow.style.display = 'flex';
+      audioRow.style.alignItems = 'center';
+      audioRow.style.gap = '10px';
+      audioRow.style.cursor = 'pointer';
+      const audioInput = document.createElement('input');
+      audioInput.type = 'checkbox';
+      audioInput.checked = audioMode;
+      audioInput.addEventListener('change', () => {
+        if(audioInput.checked) enableAudio(); else disableAudio();
+      });
+      const audioText = document.createElement('span');
+      audioText.textContent = 'Áudio';
+      audioRow.appendChild(audioInput);
+      audioRow.appendChild(audioText);
+      wrapper.appendChild(audioRow);
+      overlayContent.appendChild(wrapper);
+      overlay.classList.add('show');
+      overlay.addEventListener('click', hideOverlay, { once: true });
+    }
+    /* Show Trainings overlay: fractal pattern for meditation */
+    function showTrainings(){
+      overlayContent.textContent = ascii369('TRAIN');
+      overlay.classList.add('show');
+      overlay.addEventListener('click', hideOverlay, { once: true });
+    }
+    /* Generate a simple repeating fractal pattern (supports TRAIN type) */
     function ascii369(type){
       const base = type === 'DUAL' ? '●○' : type === 'TRINITY' ? '▲▼' : '●';
       const lines = [];
@@ -378,20 +452,28 @@
       }
       return lines.join('\n');
     }
-    /* Theme switching */
+    /* Theme switching: applies variables from THEMES and persists selection */
     function setTheme(name, persist){
-      document.body.classList.remove('theme-nebula','theme-medium','theme-light');
-      if(name === 'nebula') document.body.classList.add('theme-nebula');
-      else if(name === 'medium') document.body.classList.add('theme-medium');
-      else if(name === 'light') document.body.classList.add('theme-light');
+      const theme = THEMES[name];
+      if(!theme) return;
+      const root = document.documentElement;
+      root.style.setProperty('--bg1', theme.bg1);
+      root.style.setProperty('--bg2', theme.bg2);
+      root.style.setProperty('--text', theme.text);
+      root.style.setProperty('--accent', theme.accent);
+      // Convert hex accent to rgb for accent-rgb
+      const hex = theme.accent.replace('#','');
+      const r = parseInt(hex.substring(0,2),16);
+      const g = parseInt(hex.substring(2,4),16);
+      const b = parseInt(hex.substring(4,6),16);
+      root.style.setProperty('--accent-rgb', `${r},${g},${b}`);
       if(persist) localStorage.setItem('unoTheme', name);
     }
     /* Audio toggling */
     function enableAudio(){
       audioMode = true;
       localStorage.setItem('unoAudio','on');
-      audioLabel.textContent = 'Áudio On';
-      document.querySelector('.menu-item[data-action="audio"]').classList.add('audio-on');
+      // Update toggles in activations overlay (if open) via checkbox state
       navigator.mediaDevices.getUserMedia({ audio: true }).then(stream=>{
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         microphone = audioCtx.createMediaStreamSource(stream);
@@ -406,9 +488,7 @@
     function disableAudio(){
       audioMode = false;
       localStorage.setItem('unoAudio','off');
-      audioLabel.textContent = 'Áudio Off';
-      const audioItem = document.querySelector('.menu-item[data-action="audio"]');
-      audioItem && audioItem.classList.remove('audio-on');
+      // Update toggles in activations overlay (if open)
       if(analyser){ analyser.disconnect(); analyser = null; }
       if(microphone){ microphone.disconnect(); microphone = null; }
       if(audioCtx){ audioCtx.close(); audioCtx = null; }
@@ -437,6 +517,47 @@
       };
       requestAnimationFrame(loop);
     }
+
+    /* File upload handlers */
+    // Handle uploading an HTML file as a new archetype
+    document.getElementById('uploadHtmlInput').addEventListener('change', function(){
+      const file = this.files && this.files[0];
+      if(!file) return;
+      const url = URL.createObjectURL(file);
+      archFrame.src = url;
+      archFrame.removeAttribute('srcdoc');
+      // Mark as custom archetype
+      currentArch = -1;
+      toggleMenu(false);
+    });
+    // Handle uploading a background image
+    document.getElementById('uploadBgInput').addEventListener('change', function(){
+      const file = this.files && this.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const dataUrl = e.target.result;
+        document.body.style.backgroundImage = `url('${dataUrl}')`;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+        document.body.style.backgroundRepeat = 'no-repeat';
+      };
+      reader.readAsDataURL(file);
+      toggleMenu(false);
+    });
+    // Handle uploading CSS injection
+    document.getElementById('uploadCssInput').addEventListener('change', function(){
+      const file = this.files && this.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const style = document.createElement('style');
+        style.textContent = e.target.result;
+        document.head.appendChild(style);
+      };
+      reader.readAsText(file);
+      toggleMenu(false);
+    });
     /* Initialize on load */
     initState();
   })();
