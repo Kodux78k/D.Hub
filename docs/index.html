@@ -13,7 +13,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
-  <title>HUB UNO — Unified Minimal Glow + Revo</title>
+  <title>HUB UNO</title>
   <meta name="theme-color" content="#0b0f14" />
   <style>
     :root {
@@ -115,6 +115,26 @@
     #v-home #unoCard {
       display: none;
     }
+
+    /* Esconde a grade de cards na Home */
+    #v-home .cards { display: none !important; }
+
+    /* Área de texto/respostas da IA */
+    #iaFeed {
+      margin: 12px auto 0;
+      max-width: 820px;
+      background: var(--surface);
+      border: var(--bd);
+      border-radius: var(--r2);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    #iaFeed .msg { margin: 8px 0; }
+    #iaFeed .msg.user { opacity:.9; }
+    #iaFeed .msg.ai { font-weight:700; }
+    #iaFeed .status { color: var(--mut); font-size: 12px; }
 
     /* ===== Apps Page customizations ===== */
     /* Estilizar botão de upload de HTML local para destaque */
@@ -225,6 +245,17 @@
     .session iframe { display: block; width: 100%; height: 60vh; border: 0; background: #000 }
     .session.min iframe { display: none }
 
+    /* Permite redimensionar a altura do iframe dentro das sessões arrastando o canto inferior esquerdo */
+    .session { position: relative; }
+    .session .resize-handle {
+      position: absolute; left: 8px; bottom: 8px;
+      width: 16px; height: 16px; cursor: ns-resize;
+      border-radius: 4px;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.25);
+    }
+    .session .resize-handle:hover { background: rgba(255,255,255,.25); }
+
     /* ===== Dock + Tabs ===== */
     .dock { position: fixed; left: 10px; right: 10px; bottom: calc(var(--tabsH) + 8px + env(safe-area-inset-bottom)); display: flex; gap: 8px; flex-wrap: wrap; z-index: 80 }
     .badge { display: inline-flex; gap: 6px; align-items: center; padding: .38rem .65rem; border: 1px solid #ffffff18; background: #0f1428; border-radius: 999px; font-weight: 800; position: relative }
@@ -238,9 +269,10 @@
     /* === Área de Arquétipos (central circle) === */
     .arch-container {
       /* Organize o círculo e o seletor em coluna.  Alinhe os elementos ao centro
-         e adicione um pequeno espaçamento vertical.  Isso permite que o
-         seletor de arquétipos fique fora da área do círculo sem exigir
-         overflow visível. */
+         e adicione um pequeno espaçamento vertical.  A propriedade position
+         relative permite posicionar o menu de opções de forma absoluta logo
+         abaixo do círculo. */
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -259,6 +291,13 @@
       border: 1px solid rgba(255,255,255,0.12);
       background: radial-gradient(60% 60% at 50% 50%, rgba(0,255,255,.1), rgba(255,255,255,.02));
       box-shadow: var(--shadow, 0 14px 40px rgba(0,0,0,.45));
+      /* Animação de clique: quando a classe .pressed é aplicada via JS, reduza
+         levemente o tamanho para simular pressão. */
+      transition: transform .18s var(--ease);
+    }
+
+    .arch-circle.pressed {
+      transform: scale(0.96);
     }
 
     .arch-circle iframe {
@@ -310,41 +349,81 @@
     border-radius: 8px;
   }
 
-    .arch-dotlogo {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: conic-gradient(#00c5e5, #ff52e5, #00c5e5);
-      box-shadow: 0 0 18px rgba(0,255,255,.4);
-    }
-
     /* Quando o modo áudio está ativo, destaque o círculo com uma borda sutil */
     .arch-circle.audio-on {
       box-shadow: 0 0 0 2px var(--ok), var(--shadow);
     }
 
-    /* Mensagem exibida dentro do círculo do arquétipo. Fica na parte inferior
-       do círculo, com plano de fundo translúcido e sem interceptar eventos. */
+    /* Mensagem exibida fora do círculo do arquétipo.  Ela fica abaixo
+       da bolinha e utiliza um fundo translúcido para garantir
+       legibilidade.  O elemento aparece e desaparece com uma transição
+       de opacidade. */
     .arch-msg {
-      position: absolute;
-      bottom: 12px;
-      left: 50%;
-      transform: translateX(-50%);
+      margin-top: 8px;
       padding: 6px 10px;
       border-radius: 12px;
       background: rgba(15,17,32,.72);
       color: var(--fg);
       font-size: 13px;
-      max-width: 80%;
+      max-width: 90%;
       text-align: center;
       pointer-events: none;
       opacity: 0;
       transition: opacity .3s ease;
     }
     .arch-msg.show { opacity: 1; }
+
+    /* Estilização do menu de arquétipos acionado ao tocar a bola.  O menu
+       exibe opções de navegação (Apps, Stack, Usuário, Arquétipo e Revo)
+       e fica escondido por padrão.  Quando a classe .show é aplicada,
+       ele usa flexbox para alinhar os botões. */
+    .arch-menu {
+      /* O menu é posicionado de forma absoluta abaixo do círculo.  Por
+         padrão, ele fica invisível até que a classe .show seja aplicada.
+         A propriedade transform centraliza o menu horizontalmente em
+         relação ao contêiner. */
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      gap: 10px;
+      z-index: 70;
+    }
+    .arch-menu.show {
+      display: flex;
+    }
+    .arch-menu button {
+      border: var(--bd);
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg);
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .arch-menu button:hover {
+      box-shadow: 0 10px 24px rgba(0,0,0,.5);
+    }
+
+    /* Quando o botão de áudio está ativado, destaque-o com a cor "ok" */
+    .arch-menu button.on {
+      background: var(--ok);
+      color: var(--surface-strong);
+    }
+    .arch-menu button.on img {
+      filter: none;
+    }
+    .arch-menu button img {
+      width: 20px;
+      height: 20px;
+      margin-bottom: 2px;
+      filter: invert(1) brightness(1.2);
+    }
     #arch-fadeCover {
       position: absolute;
       inset: 0;
@@ -390,8 +469,8 @@
       <span class="ripple"></span>
     </button>
     <div class="title">
-      <h1>HUB UNO — Monólito + Revo</h1>
-      <small>Dual · Trinity · Minimal · Ultra</small>
+      <h1>HUB UNO</h1>
+      <small>Dual · Trinity</small>
     </div>
     <button class="ib fx-trans fx-press ring" id="btnDownload" title="Baixar HTML">
 <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/download.svg" alt="Download" width="20" height="20" onerror="this.onerror=null;this.src='icons/download.svg'">
@@ -449,13 +528,43 @@
           </div>
           <div class="arch-circle">
             <div id="arch-fadeCover"></div>
-            <div class="arch-dotlogo" title="arquétipo ativo"></div>
-            <!-- Mensagens exibidas dentro da bolinha de arquétipo -->
-            <div id="archMsg" class="arch-msg"></div>
-            <!-- Camada de ripple auditivo inserida dentro do círculo -->
+            <!-- Camada de ripple auditivo fica sobre o conteúdo do círculo -->
             <div id="audioRipple" class="audio-ripple"></div>
             <iframe id="arch-frame" title="Archetype Core" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe>
           </div>
+          <!-- Mensagem de feedback aparece fora da bolinha, logo abaixo dela -->
+          <div id="archMsg" class="arch-msg"></div>
+          <!-- Menu de arquétipos: permite acessar Apps, Stack, Usuário, Revo e Home -->
+          <div id="archMenu" class="arch-menu">
+            <button data-nav="apps">
+              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="20" height="20" onerror="this.onerror=null;this.src='icons/folder-open.svg'">
+              <span>Apps</span>
+            </button>
+            <button data-nav="stack">
+              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="20" height="20" onerror="this.onerror=null;this.src='icons/layer-group.svg'">
+              <span>Stack</span>
+            </button>
+            <button data-nav="brain">
+              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/user.svg" alt="Usuário" width="20" height="20" onerror="this.onerror=null;this.src='icons/user.svg'">
+              <span>Usuário</span>
+            </button>
+            <button data-nav="home">
+              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="20" height="20" onerror="this.onerror=null;this.src='icons/yin-yang.svg'">
+              <span>Arquétipo</span>
+            </button>
+            <button data-nav="revo">
+              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/globe.svg" alt="Revo" width="20" height="20" onerror="this.onerror=null;this.src='icons/globe.svg'">
+              <span>Revo</span>
+            </button>
+          <button data-audio="true" id="archAudioBtn">
+            <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone-lines.svg" alt="Áudio" width="20" height="20" onerror="this.onerror=null;this.src='icons/microphone-lines.svg'">
+            <span>Áudio</span>
+          </button>
+          </div>
+        </div>
+        <!-- Área de respostas e status da IA na Home -->
+        <div id="iaFeed" aria-live="polite" aria-atomic="false">
+          <div class="status">Toque a bolinha para falar com a IA.</div>
         </div>
         <div class="cards">
           <button class="card fx-trans fx-press ring" data-nav="apps">
@@ -512,14 +621,26 @@
               <label class="mut" style="display:inline-flex;gap:6px;align-items:center">
                 <input id="openInside" type="checkbox" checked /> abrir dentro
               </label>
-              <button id="btnToggleLocal" class="btn fx-trans fx-press ring">Mostrar Locais<span class="ripple"></span></button>
+              <button id="btnToggleLocal" class="btn fx-trans fx-press ring">
+                <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Locais" width="16" height="16" onerror="this.onerror=null;this.src='icons/folder-open.svg'" style="margin-right:4px">
+                Mostrar Locais<span class="ripple"></span>
+              </button>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
               <!-- Aceita arquivos .json além de HTML/TXT para permitir upload de catálogos personalizados -->
               <input id="fileLocal" type="file" accept=".html,.htm,.txt,.json" multiple class="input ring" />
-              <button id="btnImport" class="btn fx-trans fx-press ring">Adicionar Locais<span class="ripple"></span></button>
-              <button id="btnExport" class="btn fx-trans fx-press ring">Exportar Locais<span class="ripple"></span></button>
-              <button id="btnClear" class="btn fx-trans fx-press ring">Limpar Locais<span class="ripple"></span></button>
+              <button id="btnImport" class="btn fx-trans fx-press ring">
+                <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/plus-circle.svg" alt="Adicionar" width="16" height="16" onerror="this.onerror=null;this.src='icons/plus-circle.svg'" style="margin-right:4px">
+                Adicionar Locais<span class="ripple"></span>
+              </button>
+              <button id="btnExport" class="btn fx-trans fx-press ring">
+                <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/file-export.svg" alt="Exportar" width="16" height="16" onerror="this.onerror=null;this.src='icons/file-export.svg'" style="margin-right:4px">
+                Exportar Locais<span class="ripple"></span>
+              </button>
+              <button id="btnClear" class="btn fx-trans fx-press ring">
+                <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/trash.svg" alt="Limpar" width="16" height="16" onerror="this.onerror=null;this.src='icons/trash.svg'" style="margin-right:4px">
+                Limpar Locais<span class="ripple"></span>
+              </button>
             </div>
             <div id="appsCount" class="mut">—</div>
           </div>
@@ -597,10 +718,13 @@
           <!-- Vozes dos Arquétipos -->
           <div class="card fx-trans fx-lift" style="display:block">
             <div style="font-weight:800; margin-bottom:6px">Vozes dos Arquétipos</div>
-            <!-- A lista de arquétipos (vozes) não possui interações
-                 para o usuário final, portanto a escondemos para
-                 simplificar a interface. -->
-            <div id="voicesWrap" style="display:none"></div>
+            <!-- Área de seleção de voz por arquétipo.  Cada arquétipo possui
+                 um seletor de voz e um botão de teste.  Essa grade será
+                 preenchida dinamicamente pelo código em initVoices(). -->
+            <div id="voicesWrap" style="display:grid; gap:10px"></div>
+            <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap">
+              <button id="btnSaveVoicePresets" class="btn fx-trans fx-press ring">Salvar Presets PT-BR<span class="ripple"></span></button>
+            </div>
 
           <!-- Preferências de Performance -->
           <div class="card fx-trans fx-lift" style="display:block">
@@ -796,29 +920,25 @@
         bgContainer.innerHTML = '';
         return;
       }
-      // Carregar dados do fundo
-      const bgData = LS.get('uno:bg', '');
+      // Carregar dados do fundo. Pode ser imagem (data URL) ou vídeo via URL temporário (ObjectURL).
+      const kind = LS.get('uno:bgKind','');
+      const data = LS.get('uno:bg','');
+      const url  = LS.get('uno:bgUrl','');
       bgContainer.innerHTML = '';
-      if (!bgData) return;
-      // Determine se é vídeo ou imagem
-      if (/^data:video\//.test(bgData)) {
+      if (kind === 'video-url' && url) {
         const vid = document.createElement('video');
-        vid.src = bgData;
-        vid.autoplay = true;
-        vid.loop = true;
-        vid.muted = true;
-        vid.playsInline = true;
-        vid.style.width = '100%';
-        vid.style.height = '100%';
-        vid.style.objectFit = 'cover';
+        vid.src = url; vid.autoplay = true; vid.loop = true; vid.muted = true; vid.playsInline = true;
+        vid.style.width='100%'; vid.style.height='100%'; vid.style.objectFit='cover';
         bgContainer.appendChild(vid);
-      } else {
+      } else if (/^data:video\//.test(data)) {
+        const vid = document.createElement('video');
+        vid.src = data; vid.autoplay = true; vid.loop = true; vid.muted = true; vid.playsInline = true;
+        vid.style.width='100%'; vid.style.height='100%'; vid.style.objectFit='cover';
+        bgContainer.appendChild(vid);
+      } else if (data) {
         const img = document.createElement('img');
-        img.src = bgData;
-        img.alt = '';
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'cover';
+        img.src = data; img.alt = '';
+        img.style.width='100%'; img.style.height='100%'; img.style.objectFit='cover';
         bgContainer.appendChild(img);
       }
     }
@@ -844,9 +964,9 @@
       const archList = [ 'Luxara','Rhea','Aion','Atlas','Nova','Genus','Lumine','Kaion','Kaos','Horus','Elysha','Serena' ];
       function populateVoices() {
         let voices = speechSynthesis.getVoices();
-        // Filtrar por idiomas suportados (Português e Inglês) se disponível
-        const filtered = voices.filter(v => v.lang && (v.lang.startsWith('pt') || v.lang.startsWith('en')));
-        voices = filtered.length ? filtered : voices;
+        // Prioriza vozes em Português (pt). Se não houver, utiliza todas as vozes disponíveis.
+        const pt = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('pt'));
+        voices = pt.length ? pt : voices;
         const saved = LS.get('infodose:voices', {}) || {};
         // Se ainda não houver vozes salvas, defina um mapeamento padrão
         if (Object.keys(saved).length === 0 && voices.length) {
@@ -904,23 +1024,42 @@
       window.speechSynthesis.onvoiceschanged = () => populateVoices();
     }
 
+  // Gera mapeamento de voz + variação (pitch/rate) por arquétipo (PT-BR). Usado para presets PT.
+  function generatePtPresets() {
+    const archList = [ 'Luxara','Rhea','Aion','Atlas','Nova','Genus','Lumine','Kaion','Kaos','Horus','Elysha','Serena' ];
+    const all = speechSynthesis.getVoices();
+    const pt = all.filter(v => v.lang && v.lang.toLowerCase().startsWith('pt'));
+    const bank = pt.length ? pt : all;
+    const presets = {};
+    let idx = 0;
+    archList.forEach((name,i)=>{
+      const v = bank[idx % bank.length];
+      const pitch = 0.9 + ((i % 4) * 0.1);
+      const rate  = 0.95 + ((i % 3) * 0.05);
+      presets[name] = { name: v?.name || '', pitch: Math.min(2, pitch), rate: Math.min(2, rate) };
+      idx++;
+    });
+    return presets;
+  }
+  // Salva os presets PT-BR ao clicar no botão de presets
+  (function bindSavePresets(){
+    const btn = document.getElementById('btnSaveVoicePresets');
+    if(!btn) return;
+    btn.onclick = ()=>{
+      const p = generatePtPresets();
+      LS.set('infodose:voicePresets', p);
+      toast('Presets PT-BR salvos', 'ok');
+    };
+  })();
+
     // Pronuncia o nome do arquétipo usando a voz selecionada
     function speakArchetype(name) {
       try {
-        const archName = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
-        const saved = LS.get('infodose:voices', {});
+        const key = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
         const voices = speechSynthesis.getVoices();
-        let voice = null;
-        if (saved && saved[archName]) {
-          voice = voices.find(v => v.name === saved[archName]);
-        }
-        if (!voice) {
-          voice = voices.find(v => v.lang && (v.lang.startsWith('pt') || v.lang.startsWith('en')));
-        }
-        if (!voice && voices.length) voice = voices[0];
-        if (!voice) return;
-        const utter = new SpeechSynthesisUtterance(`Olá, eu sou ${archName}`);
-        utter.voice = voice;
+        let fallback = voices.find(v => v.lang?.toLowerCase().startsWith('pt')) || voices[0];
+        const utter = new SpeechSynthesisUtterance(`Olá, eu sou ${key}`);
+        applyUtterPrefs(key, utter, fallback);
         speechSynthesis.cancel();
         speechSynthesis.speak(utter);
       } catch (e) {}
@@ -932,25 +1071,28 @@
     function speakWithActiveArch(text) {
       try {
         const select = document.getElementById('arch-select');
-        let archFile = select ? select.value || '' : '';
-        let base = archFile.replace(/\.html$/i, '');
+        let base = (select?.value || '').replace(/\.html$/i, '');
         const key = base.charAt(0).toUpperCase() + base.slice(1).toLowerCase();
-        const saved = LS.get('infodose:voices', {}) || {};
         const voices = speechSynthesis.getVoices();
-        let voice = null;
-        if (saved[key]) {
-          voice = voices.find(v => v.name === saved[key]);
-        }
-        if (!voice) {
-          voice = voices.find(v => v.lang && (v.lang.startsWith('pt') || v.lang.startsWith('en')));
-        }
-        if (!voice && voices.length) voice = voices[0];
-        if (!voice) return;
+        let fallback = voices.find(v => v.lang?.toLowerCase().startsWith('pt')) || voices[0];
         const utter = new SpeechSynthesisUtterance(text);
-        utter.voice = voice;
+        applyUtterPrefs(key, utter, fallback);
         speechSynthesis.cancel();
         speechSynthesis.speak(utter);
       } catch (e) {}
+    }
+
+    // Aplica preferências de voz (voz, pitch, rate) baseadas nos presets PT-BR para o arquétipo.
+    function applyUtterPrefs(archKey, utter, fallbackVoice){
+      const map = LS.get('infodose:voicePresets', {});
+      const voices = speechSynthesis.getVoices();
+      let chosen = fallbackVoice;
+      if (map[archKey]?.name) {
+        chosen = voices.find(v => v.name === map[archKey].name) || chosen;
+      }
+      if (chosen) utter.voice = chosen;
+      if (map[archKey]?.pitch) utter.pitch = map[archKey].pitch;
+      if (map[archKey]?.rate)  utter.rate  = map[archKey].rate;
     }
 
     // Exibe uma mensagem dentro do círculo do arquétipo. A mensagem desaparece após alguns segundos.
@@ -1041,7 +1183,15 @@
         archCircleEl.style.boxShadow = `0 0 ${blur}px rgba(255,255,255,${intensity})`;
         requestAnimationFrame(animate);
       }
+      // Clique simples no círculo inicia a interação Dual: anima a bolinha,
+      // faz a saudação e inicia a captura de voz para conversar com a IA.
       clickLayer.addEventListener('click', () => {
+        startDualInteraction();
+      });
+
+      // Função global para alternar o modo de visualização do áudio (ripple).  
+      // Mantemos para compatibilidade com o botão de áudio no menu.
+      window.toggleAudio = function () {
         enabled = !enabled;
         archCircleEl.classList.toggle('audio-on', enabled);
         if (enabled) {
@@ -1049,7 +1199,7 @@
         } else {
           stop();
         }
-      });
+      };
     }
 
     // Mensagem de boas-vindas/ativação
@@ -1150,6 +1300,199 @@
       } catch (e) {}
     }
 
+    // Alterna a visibilidade do menu de arquétipos.  O menu fica
+    // escondido/mostrado ao clicar no círculo (toque curto).  Este
+    // helper é chamado por initAudioRipple().
+    function toggleArchMenu() {
+      const menu = document.getElementById('archMenu');
+      if (!menu) return;
+      menu.classList.toggle('show');
+    }
+
+    // Função auxiliar para adicionar mensagens ao feed de IA.
+    // 'type' pode ser 'user', 'ai' ou 'status'; o texto será anexado e o feed rolado ao final.
+    function feedPush(type, text){
+      const box = document.getElementById('iaFeed');
+      if(!box) return;
+      const div = document.createElement('div');
+      div.className = 'msg ' + (type || 'status');
+      div.textContent = text;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    /**
+     * Inicia a interação Dual ao tocar a bolinha.  Esta função aplica uma
+     * animação breve de pressão à bolinha, fala a saudação “Oi DUAL” (ou
+     * outra frase definida) usando a voz do arquétipo ativo e, em seguida,
+     * verifica se o usuário está conectado (nome, chave do OpenRouter e
+     * modelo selecionados).  Caso esteja tudo configurado, ativa o
+     * reconhecimento de voz para captar a fala do usuário e prosseguir
+     * com a conversa.  Caso contrário, exibe uma mensagem orientando o
+     * usuário a preencher suas configurações no Brain.
+     */
+    function startDualInteraction() {
+      const archCircle = document.querySelector('.arch-circle');
+      if (!archCircle) return;
+      // Animação de clique: adiciona classe 'pressed' brevemente
+      archCircle.classList.add('pressed');
+      setTimeout(() => archCircle.classList.remove('pressed'), 180);
+      // Saudação falada
+      const greet = 'Oi Dual';
+      showArchMessage(greet, 'ok');
+      try { speakWithActiveArch(greet); } catch {}
+      // Após a saudação, aguarde um curto intervalo antes de iniciar a verificação
+      setTimeout(() => {
+        const sk = localStorage.getItem('dual.keys.openrouter') || '';
+        const userName = (localStorage.getItem('infodose:userName') || '').trim();
+        const model = LS.get('dual.openrouter.model');
+        if (!sk || !userName || !model) {
+          const warn = 'Configure nome, chave e modelo no Brain para conversar.';
+          showArchMessage(warn, 'warn');
+          return;
+        }
+        // Se estiver tudo configurado, inicie o reconhecimento de voz
+        startSpeechConversation(userName, sk, model);
+      }, 600);
+    }
+
+    /**
+     * Inicia o reconhecimento de fala via Web Speech API.  Quando o usuário
+     * terminar de falar, a transcrição é encaminhada para a função de
+     * manipulação de mensagens, que enviará a pergunta ao modelo de IA e
+     * lidará com a resposta.
+     * @param {string} userName Nome do usuário (para personalizar respostas)
+     * @param {string} sk Chave da API do OpenRouter
+     * @param {string} model Modelo selecionado
+     */
+    function startSpeechConversation(userName, sk, model) {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        showArchMessage('Reconhecimento de fala não suportado.', 'err');
+        return;
+      }
+      const recognition = new SR();
+      recognition.lang = 'pt-BR';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      recognition.onstart = () => {
+        showArchMessage('Estou ouvindo…', 'ok');
+        feedPush('status','🎙️ Ouvindo…');
+      };
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript.trim();
+        if (transcript) {
+          feedPush('user','Você: ' + transcript);
+          showArchMessage('Pulso enviado. Recebendo intenção…','ok');
+          feedPush('status','⚡ Pulso enviado · recebendo intenção…');
+          handleUserMessage(transcript, userName, sk, model);
+        }
+      };
+      recognition.onerror = (e) => {
+        showArchMessage('Erro no reconhecimento de fala.', 'err');
+        feedPush('status','❌ Erro no reconhecimento de fala.');
+      };
+      recognition.start();
+    }
+
+    /**
+     * Processa a mensagem falada pelo usuário.  Exibe a transcrição no
+     * feedback, envia a mensagem ao modelo de IA via OpenRouter e, ao
+     * receber a resposta, exibe e fala a resposta de volta.
+     * @param {string} text Texto transcrito da fala do usuário
+     * @param {string} userName Nome do usuário
+     * @param {string} sk Chave OpenRouter
+     * @param {string} model Modelo de IA
+     */
+    async function handleUserMessage(text, userName, sk, model) {
+      // Exibe no feed o texto do usuário e prepara prompt para IA
+      showArchMessage('Você: ' + text, 'ok');
+      feedPush('user','Você: ' + text);
+      // Monta prompt incluindo o nome do usuário para personalização
+      const prompt = `${userName} disse: ${text}`;
+      // Envia ao modelo de IA
+      let reply = '';
+      try {
+        reply = await sendAIMessage(prompt, sk, model);
+      } catch (err) {
+        console.error('Falha ao consultar IA:', err);
+        reply = 'Desculpe, não consegui responder no momento.';
+      }
+      if (reply) {
+        feedPush('ai', 'Dual: ' + reply);
+        showArchMessage(reply, 'ok');
+        try { speakWithActiveArch(reply); } catch {}
+      }
+    }
+
+    /**
+     * Envia uma mensagem ao endpoint de chat do OpenRouter.  Esta função
+     * utiliza a API de chat completions para obter uma resposta do modelo
+     * selecionado.  Caso não seja possível acessar a API (por exemplo,
+     * se a aplicação estiver offline), uma resposta de erro é retornada.
+     * @param {string} content Conteúdo da mensagem/prompt
+     * @param {string} sk Chave de API
+     * @param {string} model Identificador do modelo
+     * @returns {Promise<string>} Resposta do modelo
+     */
+    async function sendAIMessage(content, sk, model) {
+      // Estrutura de payload conforme especificação do OpenRouter
+      const payload = {
+        model: model,
+        messages: [
+          { role: 'system', content: 'Você é um assistente amistoso que responde em português.' },
+          { role: 'user', content: content }
+        ],
+        max_tokens: 200,
+        temperature: 0.7
+      };
+      const url = 'https://openrouter.ai/api/v1/chat/completions';
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sk}`
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) {
+        throw new Error('Erro na API: ' + res.status);
+      }
+      const data = await res.json();
+      const reply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+      return reply || '';
+    }
+
+    // Delegue cliques dentro do menu para a função de navegação.
+    document.addEventListener('DOMContentLoaded', () => {
+      const menu = document.getElementById('archMenu');
+      if (menu) {
+      menu.addEventListener('click', (e) => {
+        // Primeiro verifique se o botão de áudio foi clicado
+        const audioBtn = e.target.closest('button[data-audio]');
+        if (audioBtn) {
+          // Alterna modo áudio usando a função global
+          if (typeof toggleAudio === 'function') {
+            toggleAudio();
+          }
+          // Atualize o estado visual do botão
+          const archCircle = document.querySelector('.arch-circle');
+          if (archCircle) {
+            audioBtn.classList.toggle('on', archCircle.classList.contains('audio-on'));
+          }
+          // Não feche o menu ao alternar áudio
+          return;
+        }
+        // Caso contrário, delegue a navegação para botões com data-nav
+        const btn = e.target.closest('button[data-nav]');
+        if (btn) {
+          nav(btn.getAttribute('data-nav'));
+          menu.classList.remove('show');
+        }
+      });
+      }
+    });
+
     // Helper: se a aba Revo estiver ativa, envia a lista atual de apps ao iframe.  
     function maybeSendAppsToRevo() {
       try {
@@ -1244,20 +1587,38 @@
         upload.addEventListener('change', (e) => {
           const f = e.target.files && e.target.files[0];
           if (!f) return;
-          const reader = new FileReader();
-          reader.onload = () => {
-            try {
-              LS.set('uno:bg', reader.result);
-              LS.set('uno:theme', 'custom');
+          // Imagem pequena: pode ir em base64; Vídeo: usa ObjectURL (persistência até reload)
+          if (f.type.startsWith('video/')) {
+            const url = URL.createObjectURL(f);
+            LS.set('uno:bgKind','video-url');
+            LS.set('uno:bgUrl', url);
+            LS.set('uno:theme','custom');
+            if (sel) sel.value = 'custom';
+            applyTheme();
+            toast('Vídeo aplicado no background', 'ok');
+          } else {
+            const reader = new FileReader();
+            reader.onload = () => {
+              LS.set('uno:bg','' + reader.result);
+              LS.set('uno:bgKind','image-data');
+              LS.set('uno:theme','custom');
               if (sel) sel.value = 'custom';
               applyTheme();
-              toast('Fundo personalizado salvo', 'ok');
-              try { updateHomeStatus(); } catch {}
-            } catch (err) { console.error(err); toast('Erro ao salvar fundo', 'err'); }
-          };
-          reader.readAsDataURL(f);
+              toast('Imagem aplicada no background', 'ok');
+            };
+            reader.readAsDataURL(f);
+          }
         });
       }
+    })();
+
+    // Persistir preferência "Abrir dentro". Define o estado inicial a partir do localStorage e atualiza ao alterar.
+    (function initOpenInside(){
+      const chk = document.getElementById('openInside');
+      if(!chk) return;
+      const saved = LS.get('uno:openInside', true);
+      chk.checked = saved;
+      chk.addEventListener('change', () => LS.set('uno:openInside', chk.checked));
     })();
 
     /* ===================== Ícones inline (data SVG) ===================== */
@@ -1579,7 +1940,28 @@
             </button>
           </div>
         </div>
-        <iframe src="${url || 'about:blank'}" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen"></iframe>`;
+        <iframe src="${url || 'about:blank'}" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen"></iframe>
+        <div class="resize-handle" title="Arraste para ajustar a altura"></div>`;
+      // Redimensionar altura do iframe arrastando o handle
+      (function bindResize(){
+        const handle = card.querySelector('.resize-handle');
+        const iframe = card.querySelector('iframe');
+        if(!handle || !iframe) return;
+        let startY=0, startH=0, dragging=false;
+        handle.addEventListener('pointerdown', (ev)=>{
+          dragging=true; startY = ev.clientY; startH = iframe.clientHeight;
+          handle.setPointerCapture(ev.pointerId);
+        });
+        handle.addEventListener('pointermove', (ev)=>{
+          if(!dragging) return;
+          const dy = ev.clientY - startY;
+          const h = Math.max(120, startH + dy);
+          iframe.style.height = h + 'px';
+        });
+        const stop=()=> dragging=false;
+        handle.addEventListener('pointerup', stop);
+        handle.addEventListener('pointercancel', stop);
+      })();
       // Prepend the session card dependendo do modo de abertura. Se "abrir dentro" estiver marcado,
       // insira a sessão no topo da página (sessionsAnchor); caso contrário, use o stackWrap padrão.
       const anchor = document.getElementById('sessionsAnchor');
