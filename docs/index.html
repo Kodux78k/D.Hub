@@ -34,6 +34,16 @@
       --tabsH: 74px;
       --hdrH: 64px;
       --blur: 24px;
+  /* Deslocamento opcional para o cabeçalho.  Ajuste este valor para
+     empurrar o cabeçalho (header.mast) alguns pixels para baixo.  O
+     padding superior do main será ajustado automaticamente. */
+  --hdrOffset: 0px;
+
+  /* Cor de overlay por arquétipo (gradiente sólido).  Esta variável
+     será atualizada dinamicamente via script conforme o arquétipo
+     ativo.  O valor padrão é transparente para não interferir na
+     estética quando nenhum arquétipo estiver selecionado. */
+  --arch-overlay: rgba(0,0,0,0);
       --ease: cubic-bezier(.22, .61, .36, 1);
     }
 
@@ -66,7 +76,21 @@
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
       overflow: hidden;
+  /* Permite que o pseudo-elemento ::after fique posicionado em relação ao corpo */
+  position: relative;
     }
+
+/* Overlay de cor do arquétipo ativo.  Usa a variável --arch-overlay definida no
+   :root e atualizada via script.  O overlay cobre toda a tela, tem pointer-events
+   desativado e fica atrás dos demais elementos (z-index: 0). */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: var(--arch-overlay);
+  pointer-events: none;
+  z-index: 0;
+}
 
     /* ===== Micro-interações base ===== */
     .fx-trans { transition: transform .16s var(--ease), background .25s var(--ease), box-shadow .25s var(--ease), border-color .25s var(--ease), color .25s var(--ease), opacity .25s var(--ease) }
@@ -90,7 +114,7 @@
     @keyframes ripple { from { opacity: .55; width: 0; height: 0 } to { opacity: 0; width: 260px; height: 260px } }
 
     /* ===== Header ===== */
-    header.mast { position: relative; inset: 0 0 auto 0; height: var(--hdrH); z-index: 100; display: flex; align-items: center; gap: 10px; padding: 0 12px; backdrop-filter: blur(var(--blur)) saturate(130%); background: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,0)) }
+    header.mast { position: relative; inset: 0 0 auto 0; height: var(--hdrH); z-index: 100; display: flex; align-items: center; gap: 10px; padding: 0 12px; backdrop-filter: blur(var(--blur)) saturate(130%); background: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,0)); margin-top: var(--hdrOffset); }
     .ib { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; box-shadow: var(--shadow) }
     .ib.fx-trans:hover { box-shadow: 0 10px 28px rgba(0,0,0,.5), 0 0 0 2px rgba(255,255,255,.10) inset }
     .title { flex: 1; text-align: center; line-height: 1 }
@@ -98,7 +122,7 @@
     .title small { display: block; color: var(--mut); letter-spacing: .1em }
 
     /* ===== Layout ===== */
-    main { position: relative; height: 100%; padding-top: calc(var(--hdrH) + env(safe-area-inset-top)); padding-bottom: calc(var(--tabsH) + env(safe-area-inset-bottom)); overflow: hidden }
+    main { position: relative; height: 100%; padding-top: calc(var(--hdrH) + env(safe-area-inset-top) + var(--hdrOffset)); padding-bottom: calc(var(--tabsH) + env(safe-area-inset-bottom)); overflow: hidden }
     .view { position: absolute; inset: 0; padding: 12px 14px; overflow: auto; display: none }
     .view.active { display: block; animation: fade .18s var(--ease) }
     @keyframes fade { from { opacity: 0; transform: translateY(6px) } }
@@ -2338,6 +2362,34 @@
       const select = document.getElementById('arch-select');
       const frame = document.getElementById('arch-frame');
       const fade = document.getElementById('arch-fadeCover');
+
+      // Mapeamento de cores/gradientes por arquétipo.  Cada chave
+      // corresponde ao nome do arquivo sem a extensão .html e define
+      // um valor CSS (cor sólida ou gradiente) com opacidade baixa
+      // para aplicar como overlay.  Ajuste as cores conforme o
+      // significado simbólico de cada arquétipo.
+      const ARCH_OVERLAYS = {
+        luxara: 'rgba(181, 96, 255, 0.22)',  // roxo suave
+        rhea:   'rgba(0, 209, 178, 0.22)',  // verde-água
+        aion:   'rgba(255, 159, 67, 0.22)',  // laranja dourado
+        atlas:  'rgba(64, 158, 255, 0.22)',  // azul celeste
+        nova:   'rgba(255, 82, 177, 0.22)',  // rosa fúcsia
+        genus:  'rgba(87, 207, 112, 0.22)',  // verde esmeralda
+        lumine:'rgba(255, 213, 79, 0.22)',  // amarelo suave
+        kaion:  'rgba(0, 191, 255, 0.22)',  // azul turquesa
+        kaos:   'rgba(255, 77, 109, 0.22)', // vermelho vibrante
+        horus:  'rgba(255, 195, 0, 0.22)',  // dourado
+        elysha:'rgba(186, 130, 219, 0.22)', // lilás
+        // valores padrão para quaisquer outros arquétipos
+        default:'rgba(255, 255, 255, 0.0)'
+      };
+
+      // Aplica a cor/gradiente de overlay correspondente ao arquétipo
+      function applyArchOverlay(name) {
+        const key = (name || '').toLowerCase();
+        const color = ARCH_OVERLAYS[key] || ARCH_OVERLAYS.default;
+        document.documentElement.style.setProperty('--arch-overlay', color);
+      }
       function populate() {
         select.innerHTML = '';
         archList.forEach(name => {
@@ -2361,6 +2413,12 @@
         // Atualiza as informações da Home (cartões) quando o arquétipo muda
         try {
           updateHomeStatus();
+        } catch (e) {}
+
+        // Ajusta o overlay de cor para o arquétipo selecionado
+        try {
+          const base = file.replace(/\.html$/i, '');
+          applyArchOverlay(base);
         } catch (e) {}
       }
       let current = 0;
