@@ -60,6 +60,7 @@
 
     body {
       margin: 0;
+      padding: 6px;
       color: var(--fg);
       background: linear-gradient(42deg, var(--grad-a), var(--grad-b)) fixed;
       font: 14px/1.45 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
@@ -90,7 +91,7 @@
     @keyframes ripple { from { opacity: .55; width: 0; height: 0 } to { opacity: 0; width: 260px; height: 260px } }
 
     /* ===== Header ===== */
-    header.mast { position: relative; inset: 0 0 auto 0; height: var(--hdrH); z-index: 100; display: flex; align-items: center; gap: 10px; padding: 0 12px; backdrop-filter: blur(var(--blur)) saturate(130%); background: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,0)) }
+    header.mast { position: absolute; inset: 0 0 auto 0; height: var(--hdrH); z-index: 100; display: flex; align-items: center; gap: 10px; padding: 0 12px; backdrop-filter: blur(var(--blur)) saturate(130%); background: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,0)) }
     .ib { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; box-shadow: var(--shadow) }
     .ib.fx-trans:hover { box-shadow: 0 10px 28px rgba(0,0,0,.5), 0 0 0 2px rgba(255,255,255,.10) inset }
     .title { flex: 1; text-align: center; line-height: 1 }
