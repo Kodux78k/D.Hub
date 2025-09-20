@@ -71,6 +71,10 @@
     body {
       margin: 0;
       color: var(--fg);
+      /* O fundo gradiente padrão só deve aparecer quando não estivermos
+         usando tema personalizado.  Em temas personalizados (data-theme="custom")
+         o plano de fundo será definido separadamente pelo contêiner
+         #custom-bg, de modo que o vídeo ou imagem não fiquem ocultos. */
       background: linear-gradient(42deg, var(--grad-a), var(--grad-b)) fixed;
       font: 14px/1.45 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       -webkit-font-smoothing: antialiased;
@@ -78,6 +82,14 @@
       overflow: hidden;
   /* Permite que o pseudo-elemento ::after fique posicionado em relação ao corpo */
   position: relative;
+    }
+
+    /* Quando o usuário seleciona o tema personalizado, remova o fundo
+       gradiente do body para que a imagem ou vídeo carregado em
+       #custom-bg fique visível.  O overlay de arquétipo (body::after)
+       continuará funcionando normalmente. */
+    body[data-theme="custom"] {
+      background: none;
     }
 
 /* Overlay de cor do arquétipo ativo.  Usa a variável --arch-overlay definida no
@@ -529,8 +541,12 @@ body::after {
     #chatFeed {
       /* Mantenha um tamanho mínimo para que mensagens apareçam mesmo sem altura flex */
       min-height: 120px;
+      /* Permita que o feed ocupe o espaço disponível da seção de chat.  A
+         propriedade flex:1 garante que o feed se expanda verticalmente
+         até o limite do contêiner pai (v-chat) sem impor um
+         max-height que corte o conteúdo. */
+      flex: 1 1 auto;
       overflow-y: auto;
-      max-height: 46svh;
       background: var(--surface);
       border: var(--bd);
       border-radius: var(--r2);
@@ -674,6 +690,21 @@ body::after {
     .home-btn img {
       width: 20px;
       height: 20px;
+    }
+
+    /* Miniatura do arquétipo dentro do botão de voz.  O iframe ocupa
+       toda a área do botão, herda a borda arredondada e não possui
+       borda própria. */
+    .home-btn iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: inherit;
+      overflow: hidden;
+      background: transparent;
+      /* Desativa interações dentro do iframe para que o clique seja
+         capturado pelo botão externo (homeVoiceBtn). */
+      pointer-events: none;
     }
     .home-btn.active {
       background: var(--ok);
@@ -1056,11 +1087,16 @@ body::after {
 
   <!-- Controles de texto e voz empilhados acima da barra de navegação -->
   <div id="homeButtons" class="home-btns">
+    <!-- Botão superior: voz/arquetipo.  Utilizamos um iframe miniatura para
+         renderizar o círculo do arquétipo ativo.  Ao clicar este botão,
+         iniciamos a captura de voz (startSpeechConversation). -->
+    <button id="homeVoiceBtn" class="home-btn">
+      <iframe id="miniArchFrame" title="Arquétipo ativo" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe>
+    </button>
+    <!-- Botão inferior: envio de texto.  Usa o ícone fornecido (PNG) como
+         indicador de digitação. -->
     <button id="homeTextBtn" class="home-btn">
       <img src="HubAdlineChat.png" alt="Texto" width="20" height="20" onerror="this.onerror=null;this.src='icons/pen-to-square.svg'">
-    </button>
-    <button id="homeVoiceBtn" class="home-btn">
-      <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone.svg" alt="Voz" width="20" height="20" onerror="this.onerror=null;this.src='icons/microphone.svg'">
     </button>
   </div>
   <!-- Overlay de input para envio rápido de mensagens na Home -->
@@ -1373,9 +1409,16 @@ body::after {
           el.style.color = '';
         }
         el.classList.add('show');
+        // Garanta que a mensagem desapareça após alguns segundos.  Após
+        // remover a classe .show também limpamos o texto para que
+        // mensagens antigas não permaneçam visíveis.  O timeout
+        // existente é cancelado sempre que uma nova mensagem é exibida.
         clearTimeout(el._tm);
         el._tm = setTimeout(() => {
           el.classList.remove('show');
+          // Pequeno atraso para permitir a transição de opacidade antes de
+          // limpar o conteúdo.
+          setTimeout(() => { el.textContent = ''; }, 300);
         }, 4000);
       } catch (e) {}
     }
@@ -2404,7 +2447,13 @@ body::after {
         const n = (idx + archList.length) % archList.length;
         select.selectedIndex = n;
         const file = archList[n];
-        frame.src = './archetypes/' + file;
+        const srcPath = './archetypes/' + file;
+        frame.src = srcPath;
+        // Atualize o iframe miniatura do botão de voz com o mesmo arquétipo
+        try {
+          const mini = document.getElementById('miniArchFrame');
+          if (mini) mini.src = srcPath;
+        } catch (e) {}
         // Pronuncia o nome do arquétipo sempre que for selecionado
         try {
           const base = file.replace(/\.html$/i, '');
