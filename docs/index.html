@@ -2909,6 +2909,29 @@ ${training}` : '';
   });
 })();
 </script>
+    <script>
+(function(){
+  const $ = (q,r=document)=>r.querySelector(q);
+  function keepOpen(ev){
+    ev?.preventDefault?.();
+    ev?.stopPropagation?.();
+    const p = $('#lsx-panel') || $('#ls-panel');
+    if(p) p.style.display = 'block';
+  }
+  function bindSafe(sel){
+    const el = $(sel);
+    if(!el) return;
+    // Usa capture:true pra segurar antes de qualquer outro handler
+    el.addEventListener('click', keepOpen, true);
+  }
+  // LSX (novo painel)
+  ['#lsx-refresh','#lsx-export','#lsx-import-btn','#lsx-clear-all','#lsx-clear-idb','#lsx-hide']
+    .forEach(bindSafe);
+  // LS (legado), se existir no seu HTML
+  ['#ls-refresh','#ls-export','#ls-import-btn','#ls-clear-all','#ls-clear-idb','#ls-hide']
+    .forEach(bindSafe);
+})();
+</script>
 <script>
 // === TTS Navegação: toggle no Brain (sem editar código existente) ======================
 (function(){
