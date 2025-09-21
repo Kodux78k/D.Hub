@@ -747,6 +747,41 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
   #ls-stats .stat{padding:6px 8px}
 }
 </style>
+
+<!-- == LS & TTS Upgrade • Styles (lean) == -->
+<style>
+/* Scope upgrades only to LS panels */
+#ls-panel, #lsx-panel{ display:flex; flex-direction:column; max-height:90vh; font-size:12.5px; }
+#ls-actions, #lsx-actions, #ls-header, #lsx-header{
+  position: sticky; top: 0; z-index: 2;
+  background: var(--glass, rgba(0,0,0,.35));
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  padding: .25rem 0;
+}
+#ls-actions button, #lsx-actions button{ margin:2px; padding:.4rem .55rem; border-radius:.6rem; font-size:inherit; line-height:1.15; }
+#ls-panel input, #lsx-panel input, #ls-panel select, #lsx-panel select, #ls-panel textarea, #lsx-panel textarea{
+  padding:6px 8px; border-radius:8px; font-size:inherit;
+}
+#ls-panel svg, #lsx-panel svg{ width:14px; height:14px; }
+#ls-panel .ls-row, #lsx-panel .ls-row, #ls-panel .ls-item, #lsx-panel .ls-item{ padding:6px 8px; border-radius:8px; margin:2px 0; }
+#ls-panel code, #lsx-panel code, #ls-panel pre, #lsx-panel pre{ font-size:11.5px; white-space:pre-wrap; word-break:break-word; }
+#ls-list, #lsx-list, #ls-keys, .ls-list, .ls-keys, .ls-data{ max-height:70vh; overflow:auto; }
+/* Compact mode hides advanced controls, keeps refresh/clear/hide */
+#ls-panel.ls-compact #ls-add, #ls-panel.ls-compact #ls-export, #ls-panel.ls-compact #ls-import-btn, #ls-panel.ls-compact #ls-search, #ls-panel.ls-compact #ls-stats, #ls-panel.ls-compact #ls-clear-idb,
+#lsx-panel.ls-compact #lsx-add, #lsx-panel.ls-compact #lsx-export, #lsx-panel.ls-compact #lsx-import-btn, #lsx-panel.ls-compact #lsx-search, #lsx-panel.ls-compact #lsx-stats, #lsx-panel.ls-compact #lsx-clear-idb{
+  display:none!important;
+}
+#ls-panel.ls-compact #ls-refresh, #ls-panel.ls-compact #ls-clear-all, #ls-panel.ls-compact #ls-hide,
+#lsx-panel.ls-compact #lsx-refresh, #lsx-panel.ls-compact #lsx-clear-all, #lsx-panel.ls-compact #lsx-hide{ display:inline-flex!important; }
+/* Compact toggle */
+.ls-compact-toggle{ margin-left:.25rem; padding:.35rem .55rem; font-size:12px; border-radius:.6rem; opacity:.95; }
+/* Masking */
+.ls-masked{ filter: blur(4px); transition: filter .2s ease; }
+.ls-masked.revealed{ filter:none; }
+.ls-reveal{ margin-left:6px; padding:.15rem .45rem; font-size:11px; border-radius:.5rem; }
+</style>
+<!-- == /LS & TTS Upgrade • Styles == -->
+
 </head>
 <body>
   <!-- ===== Header ===== -->
@@ -2937,7 +2972,18 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
 </svg>
 
 <!-- Panel -->
-
+<div id="ls-panel" role="dialog" aria-label="LocalStorage Viewer">
+  <header>
+    <strong id="ls-title">LocalStorage • Brain</strong>
+    <input id="ls-search" placeholder="buscar chave/valor…"><span id="ls-count" class="mut" style="font-size:11px;margin-left:6px"></span>
+    <div id="ls-actions">
+      <button id="ls-export"><svg><use href="#ic-download"/></svg>Exportar</button>
+      <button id="ls-import-btn"><svg><use href="#ic-upload"/></svg>Importar</button>
+      <input id="ls-import" type="file" accept="application/json" style="display:none">
+      <button id="ls-clear-all"><svg><use href="#ic-broom"/></svg>Limpar LS</button>
+      <button id="ls-clear-idb"><svg><use href="#ic-trash"/></svg>Limpar IDB</button>
+      <button id="ls-hide"><svg><use href="#ic-close"/></svg>Fechar</button>
+    </div>
   </header>
   <div id="ls-body">
     <div id="ls-stats">
@@ -2952,7 +2998,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       <textarea id="ls-new-v" placeholder="valor (texto ou JSON)"></textarea>
       <button id="ls-add"><svg><use href="#ic-save"/></svg>Salvar novo</button>
     </div>
-    
+    <div id="ls-grid"></div>
   </div>
 </div>
 
@@ -3096,157 +3142,353 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
   })();
 })();</script>
 
-<style id="dual-rescue-ls-css">
-/* Scoped rescue fixes for LS panel (non-invasive) */
-#ls-panel{max-width:min(96vw,1080px);}
-#ls-panel .ls-head,
-#ls-panel .ls-row{display:grid;gap:.5rem;align-items:start;}
-#ls-grid .ls-row{grid-template-columns:minmax(180px,280px) minmax(0,1fr) 170px;}
-#ls-panel .ls-preview{overflow:auto;max-height:40vh;overflow-wrap:anywhere;}
-@media (max-width:540px){
-  #ls-panel .ls-head,#ls-panel .ls-row{grid-template-columns:1fr;}
+
+<style id="dual-patch-ls">
+/* ==== Dual Patch • LS panel + nav-right fit ==== */
+@media (max-width: 540px){
+  #ls-panel .ls-head,
+  #ls-panel .ls-row{ grid-template-columns: 1fr; }
+  #ls-panel .ls-a{ justify-content: flex-start; }
 }
-/* If the app runs nav-right, leave a breathing space */
-body.nav-right #ls-panel{right:calc(78px + 16px);}
+body.nav-right #ls-panel{
+  right: calc(78px + 16px);
+}
+#ls-panel{ 
+  max-width: min(96vw, 1080px);
+}
+#ls-grid .ls-row{ 
+  grid-template-columns: minmax(180px, 280px) minmax(0,1fr) 170px;
+}
+#ls-grid .ls-preview{ 
+  overflow-wrap:anywhere;
+}
+
 </style>
-
-
-<script id="dual-rescue-ls-js">
+<script id="dual-patch-voice">
+/* ==== Dual Patch • Archetype Voice Hooks v1 ==== */
 (function(){
-  // Run late and defensively
-  function onReady(fn){
-    if(document.readyState === 'complete' || document.readyState === 'interactive'){
-      setTimeout(fn, 0);
-    }else{
-      document.addEventListener('DOMContentLoaded', fn, {once:true});
-    }
-  }
-  function safe(fn){ try{ fn(); }catch(e){} }
-  function speak(t){
-    try{ if(typeof speakWithActiveArch === 'function') speakWithActiveArch(String(t)); }catch(e){}
+  const $ = (q,r=document)=>r.querySelector(q);
+  const $$ = (q,r=document)=>Array.from(r.querySelectorAll(q));
+  function say(text){
+    try{
+      if(typeof speakWithActiveArch === 'function'){ speakWithActiveArch(String(text)); }
+    }catch(e){}
   }
   function bubble(text, type){
-    try{ if(typeof showArchMessage === 'function') showArchMessage(String(text), type||'ok'); }catch(e){}
+    try{
+      if(typeof showArchMessage === 'function'){ showArchMessage(String(text), type||'ok'); }
+    }catch(e){}
   }
 
-  onReady(function(){
-    // Lightweight guards for common elements
-    var $ = function(q, r){ return (r||document).querySelector(q); };
+  // 1) Upload de HTML (btnImport)
+  const btnImport = document.getElementById('btnImport');
+  if(btnImport){
+    btnImport.addEventListener('click', ()=>{
+      // O handler original fará o trabalho; depois de um pequeno atraso, falamos
+      setTimeout(()=>{
+        try{
+          const fs = (document.getElementById('fileLocal')?.files||[]);
+          if(fs.length){ say(`Adicionei ${fs.length} arquivo${fs.length>1?'s':''} local${fs.length>1?'s':''}.`); bubble('Locais adicionados.', 'ok'); }
+        }catch(e){}
+      }, 800);
+    });
+  }
 
-    // A) Upload de HTML
-    safe(function(){
-      var btnImport = $('#btnImport');
-      if(btnImport){
-        btnImport.addEventListener('click', function(){
-          setTimeout(function(){
-            try{
-              var fs = ($('#fileLocal') && $('#fileLocal').files) || [];
-              if(fs.length){ speak('Adicionei ' + fs.length + ' arquivo' + (fs.length>1?'s':'') + ' local' + (fs.length>1?'s':'' ) + '.'); bubble('Locais adicionados.', 'ok'); }
-            }catch(e){}
-          }, 800);
-        });
+  // 2) Preferências do usuário (nome, modelo, SK, tema, fundo, CSS, performance, voz)
+  const saveName = document.getElementById('saveName');
+  if(saveName){
+    saveName.addEventListener('click', ()=>{
+      const name = (document.getElementById('userName')?.value || '').trim();
+      if(name){
+        try{ localStorage.setItem('dual.name', name); }catch(e){}
+        say(`Salvo. Bem-vindo, ${name}.`);
+        bubble('Nome salvo.', 'ok');
       }
     });
-
-    // B) Preferências do usuário: salvar nome também em dual.name (sem alterar sua lógica)
-    safe(function(){
-      var saveName = $('#saveName');
-      var userInput = $('#userName');
-      if(saveName && userInput){
-        saveName.addEventListener('click', function(){
-          var name = (userInput.value||'').trim();
-          if(name){
-            try{ localStorage.setItem('dual.name', name); }catch(e){}
-            speak('Salvo. Bem-vindo, ' + name + '.');
-            bubble('Nome salvo.', 'ok');
-          }
-        });
-      }
+  }
+  const saveSK = document.getElementById('saveSK');
+  if(saveSK){
+    saveSK.addEventListener('click', ()=>{
+      say('Chave e modelo salvos.');
+      bubble('Configurações do OpenRouter salvas.', 'ok');
     });
-
-    // C) OpenRouter (chave/modelo)
-    safe(function(){
-      var saveSK = $('#saveSK');
-      if(saveSK){
-        saveSK.addEventListener('click', function(){
-          speak('Chave e modelo salvos.');
-          bubble('Configurações do OpenRouter salvas.', 'ok');
-        });
-      }
+  }
+  const themeSelect = document.getElementById('themeSelect');
+  if(themeSelect){
+    themeSelect.addEventListener('change', ()=>{
+      const map = {default:'padrão', medium:'cinza', custom:'personalizado'};
+      say('Tema ' + (map[themeSelect.value]||themeSelect.value) + ' aplicado.');
     });
-
-    // D) Tema / BG / CSS
-    safe(function(){
-      var themeSelect = $('#themeSelect');
-      if(themeSelect){
-        themeSelect.addEventListener('change', function(){
-          var map = {default:'padrão', medium:'cinza', custom:'personalizado'};
-          speak('Tema ' + (map[themeSelect.value]||themeSelect.value) + ' aplicado.');
-        });
-      }
-      var bgUpload = $('#bgUpload');
-      if(bgUpload){
-        bgUpload.addEventListener('change', function(e){
-          var f = e && e.target && e.target.files && e.target.files[0];
-          if(f){ speak('Fundo personalizado salvo.'); bubble('Fundo salvo.', 'ok'); }
-        });
-      }
-      var btnApplyCSS = $('#applyCSS');
-      if(btnApplyCSS){
-        btnApplyCSS.addEventListener('click', function(){ speak('CSS personalizado aplicado.'); });
-      }
-      var btnClearCSS = $('#clearCSS');
-      if(btnClearCSS){
-        btnClearCSS.addEventListener('click', function(){ speak('CSS personalizado removido.'); });
-      }
+  }
+  const bgUpload = document.getElementById('bgUpload');
+  if(bgUpload){
+    bgUpload.addEventListener('change', (e)=>{
+      const f = e.target.files && e.target.files[0];
+      if(f){ say('Fundo personalizado salvo.'); bubble('Fundo salvo.', 'ok'); }
     });
+  }
+  const btnApplyCSS = document.getElementById('applyCSS');
+  if(btnApplyCSS){
+    btnApplyCSS.addEventListener('click', ()=>{ say('CSS personalizado aplicado.'); });
+  }
+  const btnClearCSS = document.getElementById('clearCSS');
+  if(btnClearCSS){
+    btnClearCSS.addEventListener('click', ()=>{ say('CSS personalizado removido.'); });
+  }
+  const btnPerf = document.getElementById('btnPerf');
+  if(btnPerf){
+    btnPerf.addEventListener('click', ()=>{ say('Performance atualizada.'); });
+  }
+  const btnVoice = document.getElementById('btnVoice');
+  if(btnVoice){
+    btnVoice.addEventListener('click', ()=>{ say('Voz preferida salva.'); });
+  }
 
-    // E) Performance / Voz
-    safe(function(){
-      var btnPerf = $('#btnPerf');
-      if(btnPerf){ btnPerf.addEventListener('click', function(){ speak('Performance atualizada.'); }); }
-      var btnVoice = $('#btnVoice');
-      if(btnVoice){ btnVoice.addEventListener('click', function(){ speak('Voz preferida salva.'); }); }
+  // 3) Painel de LocalStorage — falar em ações principais
+  function hookLSPanel(){
+    const p = document.getElementById('ls-panel');
+    if(!p) return;
+    const exp = document.getElementById('ls-export');
+    const impBtn = document.getElementById('ls-import-btn');
+    const add = document.getElementById('ls-add');
+    const clearAll = document.getElementById('ls-clear-all');
+    const clearIDB = document.getElementById('ls-clear-idb');
+    if(exp) exp.addEventListener('click', ()=> say('Backup do LocalStorage exportado.'));
+    if(impBtn) impBtn.addEventListener('click', ()=> say('Importar backup do LocalStorage.'));
+    if(add) add.addEventListener('click', ()=> setTimeout(()=> say('Chave salva no LocalStorage.'), 300));
+    if(clearAll) clearAll.addEventListener('click', ()=> setTimeout(()=> say('LocalStorage limpo.'), 600));
+    if(clearIDB) clearIDB.addEventListener('click', ()=> setTimeout(()=> say('IndexedDB limpo.'), 600));
+  }
+  hookLSPanel();
+
+  // 4) Quando abrir o painel via botão LS no header, garantir que fala uma frase curta
+  const btnLS = document.getElementById('btnLS');
+  if(btnLS){
+    btnLS.addEventListener('click', ()=>{
+      setTimeout(()=>{
+        bubble('Painel de LocalStorage aberto.', 'ok');
+        say('Abrindo painel do LocalStorage.');
+      }, 120);
     });
+  }
 
-    // F) LS Panel actions
-    safe(function(){
-      var exp     = $('#ls-export');
-      var impBtn  = $('#ls-import-btn');
-      var add     = $('#ls-add');
-      var clearAll= $('#ls-clear-all');
-      var clearIDB= $('#ls-clear-idb');
+  // 5) Garantir que respostas da IA no feed também atualizam um preview falado curto (já rotea via chatPush)
+  // (Sem alteração: já existe integração com speakWithActiveArch(reply) na handleUserMessage.)
 
-      if(exp)     exp.addEventListener('click', function(){ speak('Backup do LocalStorage exportado.'); });
-      if(impBtn)  impBtn.addEventListener('click', function(){ speak('Importar backup do LocalStorage.'); });
-      if(add)     add.addEventListener('click', function(){ setTimeout(function(){ speak('Chave salva no LocalStorage.'); }, 300); });
-      if(clearAll)clearAll.addEventListener('click', function(){ setTimeout(function(){ speak('LocalStorage limpo.'); }, 600); });
-      if(clearIDB)clearIDB.addEventListener('click', function(){ setTimeout(function(){ speak('IndexedDB limpo.'); }, 600); });
-    });
-
-    // G) Abrir painel via botão LS
-    safe(function(){
-      var btnLS = $('#btnLS');
-      if(btnLS){
-        btnLS.addEventListener('click', function(){
-          setTimeout(function(){
-            bubble('Painel de LocalStorage aberto.', 'ok');
-            speak('Abrindo painel do LocalStorage.');
-          }, 120);
-        });
-      }
-    });
-
-    // H) Sincronizar dual.name com infodose:userName se existir
-    safe(function(){
-      var nm = (localStorage.getItem('infodose:userName')||'').trim();
+  // 6) Pequeno ajuste: se CODUX estiver setado como nome, sincronizar com dual.name ao carregar
+  document.addEventListener('DOMContentLoaded', ()=>{
+    try{
+      const nm = (localStorage.getItem('infodose:userName')||'').trim();
       if(nm && localStorage.getItem('dual.name')!==nm){
         localStorage.setItem('dual.name', nm);
       }
+    }catch(e){}
+  });
+})();
+
+</script>
+
+<!-- == LS & TTS Upgrade • Script (lean) == -->
+<script>
+(function(){
+  const $ = (q,r=document)=>r.querySelector(q);
+  const $$ = (q,r=document)=>Array.from(r.querySelectorAll(q));
+
+  // Speak helper (use active archetype voice if available; else Web Speech)
+  function sayLS(text){
+    try{
+      if(typeof speakWithActiveArch === 'function'){ speakWithActiveArch(String(text)); return; }
+      if(!('speechSynthesis' in window)) return;
+      const u = new SpeechSynthesisUtterance(String(text));
+      const vs = speechSynthesis.getVoices();
+      const v = vs.find(v=>v.lang && (v.lang.startsWith('pt')||v.lang.startsWith('en'))) || vs[0];
+      if(v) u.voice = v;
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  // Add "Compactar/Expandir" to actions (default expanded)
+  function ensureCompactButton(panelId, actionsId, toggleId){
+    const panel = $(panelId), actions = $(actionsId);
+    if(!panel || !actions) return;
+    let btn = actions.querySelector('.ls-compact-toggle');
+    if(!btn){
+      btn = document.createElement('button');
+      btn.className = 'ls-compact-toggle'; btn.id = toggleId; btn.type='button';
+      btn.title = 'Alternar modo compacto'; btn.textContent = 'Compactar';
+      actions.appendChild(btn);
+    }
+    btn.addEventListener('click', ()=>{
+      const compact = panel.classList.toggle('ls-compact');
+      btn.textContent = compact ? 'Expandir' : 'Compactar';
+      sayLS(compact ? 'Modo compacto ativado' : 'Modo compacto desativado');
+      setTimeout(resizeListArea, 10);
+    }, {passive:true});
+  }
+
+  // Resize list area height to fill viewport
+  function pickListCandidate(root){
+    const sels = ['#lsx-list','#ls-list','#ls-keys','.ls-list','.ls-keys','.ls-data'];
+    for(const s of sels){ const el = root.querySelector(s); if(el) return el; }
+    return null;
+  }
+  function resizeListArea(){
+    ['#lsx-panel','#ls-panel'].forEach(pid=>{
+      const p = $(pid); if(!p) return;
+      const actions = p.querySelector('#lsx-actions, #ls-actions, #ls-header, #lsx-header');
+      const list = pickListCandidate(p); if(!list) return;
+      const rect = p.getBoundingClientRect();
+      const topY = actions ? actions.getBoundingClientRect().bottom : rect.top;
+      const available = Math.max(160, window.innerHeight - topY - 24);
+      list.style.maxHeight = available + 'px'; list.style.overflow = 'auto';
     });
+  }
+
+  // Extra interactivity: search, selection, copy/delete/save speak, groups, count after refresh
+  function wireExtraInteractivity(){
+    const search = $('#lsx-search') || $('#ls-search');
+    if(search){
+      let t=null;
+      search.addEventListener('input', ()=>{
+        clearTimeout(t);
+        t = setTimeout(()=>{
+          const q = (search.value||'').trim();
+          sayLS(q ? `Buscando por ${q}` : 'Busca limpa');
+        }, 420);
+      }, {passive:true});
+    }
+    const list = $('#lsx-list') || $('#ls-list') || $('.ls-list') || $('.ls-keys') || $('.ls-data');
+    if(list){
+      list.addEventListener('click', (ev)=>{
+        const el = ev.target.closest('[data-action], .ls-row, .ls-item, button, summary, details');
+        if(!el) return;
+        if(el.matches('summary')){ const open = el.parentElement?.open; sayLS(open ? 'Grupo aberto' : 'Grupo fechado'); return; }
+        if(el.matches('[data-action="copy"]')){ sayLS('Valor copiado para a área de transferência'); return; }
+        if(el.matches('[data-action="delete"]')){ sayLS('Item removido'); return; }
+        if(el.matches('[data-action="save"]')){ sayLS('Item atualizado'); return; }
+        if(el.classList.contains('ls-row') || el.classList.contains('ls-item')){
+          const keyEl = el.querySelector('[data-key], .key, .ls-key, [data-ls-key]');
+          const key = (keyEl?.textContent || '').trim();
+          sayLS(key ? `Selecionado ${key}` : 'Item selecionado'); return;
+        }
+      });
+    }
+    const refresh = $('#lsx-refresh') || $('#ls-refresh');
+    if(refresh && list){
+      refresh.addEventListener('click', ()=>{
+        setTimeout(()=>{
+          const rows = list.querySelectorAll('.ls-row,.ls-item,tr');
+          const n = rows.length; sayLS(n ? `${n} registros listados` : 'Nenhum registro encontrado');
+        }, 250);
+      }, {passive:true});
+    }
+  }
+
+  // Cleanup stray LS nodes outside panels (avoids leaked fragments)
+  function cleanupStrayLS(){
+    const panels = ['#ls-panel','#lsx-panel'].map(s=>$(s)).filter(Boolean);
+    const isInside = (node)=> panels.some(p => p.contains(node));
+    const stray = $$('[id^="ls-"], [id^="lsx-"]').filter(el => !isInside(el) && !el.closest('template,[hidden]'));
+    stray.forEach(el => { (el.tagName==='DIV'||el.tagName==='SECTION'||el.tagName==='ASIDE') ? el.remove() : (el.hidden=true, el.style.display='none'); });
+    if(stray.length) sayLS('Elementos soltos do Local Storage foram removidos do layout');
+  }
+
+  // Sensitive masking + reveal
+  const SENSITIVE_RX = /(secret|token|apikey|api[-_ ]?key|openrouter|sk|bearer|auth|senha|password)/i;
+  function maskSensitiveIn(root){
+    const rows = root ? Array.from(root.querySelectorAll('.ls-row,.ls-item,tr')) : [];
+    rows.forEach(row=>{
+      const keyEl = row.querySelector('[data-key], .key, .ls-key, [data-ls-key]');
+      const valEl = row.querySelector('[data-value], .value, .ls-value, td:last-child, pre, code, .val, .ls-preview');
+      if(!valEl) return;
+      const key = (keyEl?.textContent || '').trim();
+      const raw = (valEl.textContent || '').trim();
+      if(!raw) return;
+      const looksSensitive = SENSITIVE_RX.test(key) || SENSITIVE_RX.test(raw.slice(0,40));
+      if(!looksSensitive) return;
+      if(valEl.classList.contains('ls-masked')) return;
+      valEl.classList.add('ls-masked');
+      const btn = document.createElement('button');
+      btn.className = 'ls-reveal'; btn.type='button'; btn.textContent = 'Mostrar';
+      btn.addEventListener('click', ()=>{
+        const rev = valEl.classList.toggle('revealed');
+        btn.textContent = rev ? 'Ocultar' : 'Mostrar';
+        sayLS(rev ? 'Valor revelado' : 'Valor ocultado');
+      }, {passive:true});
+      valEl.insertAdjacentElement('afterend', btn);
+    });
+  }
+  function observeListChanges(){
+    const targets = ['#lsx-list','#ls-list','.ls-list','.ls-keys','.ls-data','#ls-grid'].map(s=>$(s)).filter(Boolean);
+    if(!targets.length) return;
+    const obs = new MutationObserver(()=>{
+      targets.forEach(t=>{ if(t) maskSensitiveIn(t); });
+      resizeListArea();
+    });
+    targets.forEach(t=>{ if(t) obs.observe(t, {childList:true, subtree:true, characterData:true}); });
+    targets.forEach(t=>{ if(t) maskSensitiveIn(t); });
+  }
+
+  // Basic TTS hooks for LS + Brain
+  function wireBasicHooks(){
+    const map = [
+      ['#lsx-add',        ()=> sayLS('Chave salva no Local Storage')],
+      ['#lsx-export',     ()=> sayLS('Backup exportado')],
+      ['#lsx-import-btn', ()=> sayLS('Importar backup. Selecione o arquivo')],
+      ['#lsx-clear-all',  ()=> sayLS('Limpar Local Storage. Confirme sua escolha')],
+      ['#lsx-clear-idb',  ()=> sayLS('Limpar IndexedDB. Confirme sua escolha')],
+      ['#lsx-refresh',    ()=> sayLS('Atualizando visão do Local Storage')],
+      ['#lsx-hide',       ()=> sayLS('Fechando painel do Local Storage')],
+      ['#ls-add',         ()=> sayLS('Chave salva no Local Storage')],
+      ['#ls-export',      ()=> sayLS('Backup exportado')],
+      ['#ls-import-btn',  ()=> sayLS('Importar backup. Selecione o arquivo')],
+      ['#ls-clear-all',   ()=> sayLS('Limpar Local Storage. Confirme sua escolha')],
+      ['#ls-clear-idb',   ()=> sayLS('Limpar IndexedDB. Confirme sua escolha')],
+      ['#ls-refresh',     ()=> sayLS('Atualizando visão do Local Storage')],
+      ['#ls-hide',        ()=> sayLS('Fechando painel do Local Storage')],
+      ['#btnLS',          ()=> sayLS('Abrindo painel do Local Storage')],
+      ['#saveName',       ()=> sayLS('Nome salvo')],
+      ['#saveSK',         ()=> sayLS('Configurações de modelo salvas')],
+      ['#btnPerf',        ()=> sayLS('Preferência de performance atualizada')],
+      ['#btnVoice',       ()=> sayLS('Preferência de voz atualizada')],
+      ['#applyCSS',       ()=> sayLS('CSS aplicado')],
+      ['#clearCSS',       ()=> sayLS('CSS removido')],
+      ['#downloadCSS',    ()=> sayLS('Baixando CSS')],
+      ['#themeSelect',    ()=> sayLS('Tema aplicado')],
+      ['#bgUpload',       ()=> sayLS('Fundo personalizado salvo')],
+    ];
+    map.forEach(([sel,fn])=>{ const el = $(sel); if(el){ const evt = (sel==='#themeSelect'||sel==='#bgUpload')?'change':'click'; el.addEventListener(evt, fn, {passive:true}); }});
+  }
+
+  // Wire LS open button so it always renders first
+  function wireOpen(){
+    const btn = $('#btnLS');
+    const panel = $('#ls-panel') || $('#lsx-panel');
+    const render = (window.renderLS || window.render || function(){});
+    const refresh = (window.refresh || function(){});
+    if(btn && panel){
+      btn.addEventListener('click', ()=>{
+        panel.style.display='block';
+        try{ render(''); refresh(); }catch(e){}
+      }, {passive:true});
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    // UI enrich
+    ensureCompactButton('#lsx-panel','#lsx-actions','lsx-compact-toggle');
+    ensureCompactButton('#ls-panel', '#ls-actions', 'ls-compact-toggle');
+    resizeListArea(); window.addEventListener('resize', resizeListArea);
+
+    // Behavior
+    wireBasicHooks(); wireExtraInteractivity(); wireOpen();
+    cleanupStrayLS(); observeListChanges();
+    // Initial mask pass
+    maskSensitiveIn(document);
   });
 })();
 </script>
+<!-- == /LS & TTS Upgrade == -->
 
 </body>
 </html>
