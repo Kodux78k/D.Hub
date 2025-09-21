@@ -710,16 +710,47 @@ body::after {
   </style>
 
 <style>
-  /* ===== Archetype-driven BG effects ===== */
-  #custom-bg[data-arch*="Atlas"] * { filter: saturate(1.15) hue-rotate(12deg); }
-  #custom-bg[data-arch*="Nova"] * { filter: contrast(1.1) brightness(1.03); }
-  #custom-bg[data-arch*="Kaion"] * { filter: saturate(1.25) contrast(1.05); }
-  #custom-bg[data-arch*="Elysha"] * { filter: hue-rotate(-18deg) saturate(1.1); }
-  #custom-bg[data-arch*="Ignyra"] * { filter: contrast(1.12) brightness(1.06); }
-  #custom-bg[data-arch*="Genus"] * { filter: saturate(1.08) blur(0px); }
-  /* Long-fade cue (no visual change itself; JS controls timing) */
-  #ls-panel header .toggle { display:flex; align-items:center; gap:6px; margin-left:8px; font:12px/1.2 system-ui; color:#bfe3ff }
+  .ls-trigger {
+    --bg: rgba(12,16,22,.55);
+    --bd: rgba(255,255,255,.18);
+    --glow: rgba(80,160,255,.32);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    margin-left: 8px;
+    border-radius: 14px;
+    background: var(--bg);
+    backdrop-filter: blur(10px) saturate(120%);
+    border: 1px solid var(--bd);
+    color: #dff1ff;
+    font: 600 13px/1.1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,.25),
+                0 0 0 1px rgba(255,255,255,.04) inset,
+                0 0 14px var(--glow);
+    transition: transform .12s ease, box-shadow .2s ease, background .2s ease;
+    user-select: none;
+    animation: lsPulse 2.8s ease-in-out infinite;
+  }
+  .ls-trigger:active { transform: translateY(1px); }
+  .ls-trigger .dot {
+    width: 10px; height: 10px; border-radius: 999px;
+    background: radial-gradient(circle at 30% 30%, #7cf3ff, #39a7ff 60%, #2962ff 100%);
+    box-shadow: 0 0 12px rgba(57,167,255,.7);
+  }
+  .ls-trigger .label { letter-spacing: .02em; }
+  .ls-trigger .hint {
+    font-weight: 700; font-size: 10px; opacity: .85; padding: 4px 8px;
+    border-radius: 999px; border: 1px solid rgba(255,255,255,.18);
+    background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+  }
+  @keyframes lsPulse {
+    0%,100% { box-shadow: 0 4px 12px rgba(0,0,0,.25), 0 0 12px rgba(80,160,255,.22); }
+    50%     { box-shadow: 0 4px 12px rgba(0,0,0,.25), 0 0 22px rgba(80,160,255,.42); }
+  }
 </style>
+
 </head>
 <body>
   <!-- ===== Header ===== -->
@@ -736,15 +767,16 @@ body::after {
 <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/download.svg" alt="Download" width="20" height="20" onerror="this.onerror=null;this.src='icons/download.svg'">
       <span class="ripple"></span>
     </button>
-    <button class="ib fx-trans fx-press ring" id="btnHelp" title="Ajuda / Atalhos">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/question-circle.svg" alt="Ajuda" width="20" height="20" onerror="this.onerror=null;this.src='icons/question-circle.svg'">
-      <span class="ripple"></span>
+   
+   
+  
+    <button class="ls-trigger" id="ls-trigger" title="">
+      <span class="dot"></span>
+      <span class="label">Local&nbsp;Storage</span>
+      <span class="hint">Brain</span>
     </button>
-    <button class="ib fx-trans fx-press ring" id="btnBrain" title="Brain">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="20" height="20" onerror="this.onerror=null;this.src='icons/brain.svg'">
-      <span class="ripple"></span>
-    </button>
-  </header>
+
+</header>
 
   <!-- Âncora para sessões abertas quando o usuário optar por abrir dentro da página -->
   <section id="sessionsAnchor"></section>
@@ -2824,122 +2856,16 @@ body::after {
 
 <script>
 (function(){
-  const $ = (q,r=document)=>r.querySelector(q);
-  const $$ = (q,r=document)=>Array.from(r.querySelectorAll(q));
-  const LS = {
-    get:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
-    set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},
-    raw:(k)=>localStorage.getItem(k)||'',
-  };
-
-  // 1) Mount LS button inside Helper panel (and remove floating LS button if exists)
-  function mountLSInHelper(){
-    const helper = $('#helper') || $('#helper-panel') || $('#help-panel') || $('#help') || $('#brain-help') || $('#menu-help') || document.querySelector('[data-help]') || document.querySelector('[data-role="helper"]');
-    const panel = $('#ls-panel');
-    if(!panel) return;
-    // remove floating button if present
-    const floatBtn = $('#ls-panel-btn'); if(floatBtn) floatBtn.remove();
-
-    if(helper){
-      // create or reuse a commands bar
-      let bar = helper.querySelector('.helper-commands, nav, .actions, .toolbar');
-      if(!bar){
-        bar = document.createElement('div');
-        bar.className = 'helper-commands';
-        helper.prepend(bar);
-      }
-      const btn = document.createElement('button');
-      btn.id = 'ls-open-from-helper';
-      btn.textContent = 'LocalStorage';
-      btn.style.cssText = 'background:#0d1b2a;border:1px solid #254b70;color:#cfe6ff;border-radius:10px;padding:6px 10px;cursor:pointer';
-      btn.addEventListener('click', ()=>{ panel.style.display='block'; window.dispatchEvent(new Event('dual:ls:open'));});
-      bar.appendChild(btn);
+  const btn = document.getElementById('ls-trigger');
+  btn?.addEventListener('click', function(){
+    if(window.__LS_BRAIN_OPEN__) {
+      window.__LS_BRAIN_OPEN__();
+    } else {
+      alert('Painel LS não carregado ainda.');
     }
-  }
-
-  // 2) Expose long-fade toggle in LS panel header; wire into BG transition logic
-  function addLongFadeToggle(){
-    const hdr = document.querySelector('#ls-panel header');
-    if(!hdr) return;
-    const wrap = document.createElement('label');
-    wrap.className = 'toggle';
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.checked = !!LS.get('uno:bg:longfade', false);
-    const span = document.createElement('span');
-    span.textContent = 'fade longo (9s)';
-    wrap.appendChild(cb); wrap.appendChild(span);
-    hdr.appendChild(wrap);
-    cb.addEventListener('change', ()=>{
-      LS.set('uno:bg:longfade', cb.checked);
-      // optional nudge: re-apply bg to feel the change on next swap
-    });
-  }
-
-  // 3) Patch applyTheme_NoFlicker to honor longfade + set data-arch for CSS effects
-  function patchApply(){
-    const fn = window.applyTheme_NoFlicker;
-    if(typeof fn!=='function') return;
-    window.applyTheme_NoFlicker = function(forceSrc){
-      const long = !!LS.get('uno:bg:longfade', false);
-      const activeArch = localStorage.getItem('archetype:active')||'';
-      const bgContainer = document.getElementById('custom-bg');
-      if(bgContainer){ bgContainer.dataset.arch = activeArch; }
-      // run original once to ensure elements exist
-      const res = fn.apply(this, arguments);
-      try{
-        // adjust last appended element transition if any crossfade happens now
-        const cont = document.getElementById('custom-bg');
-        if(!cont) return res;
-        const kids = cont.children;
-        if(kids && kids.length){
-          const last = kids[kids.length-1];
-          // find the previous sibling (for crossfade removal); original code removes after 360ms; we'll extend if needed
-          const prev = last.previousElementSibling;
-          if(last && last.style){
-            const dur = long ? 9000 : 360;
-            last.style.transition = 'opacity '+(dur/1000)+'s ease-in-out';
-            last.style.opacity = '1';
-            if(prev){
-              // schedule previous removal after same duration to let concatenation happen
-              setTimeout(()=>{ try{ prev.remove(); }catch(e){} }, dur);
-            }
-          }
-        }
-      }catch(e){}
-      return res;
-    };
-  }
-
-  // 4) Also apply longfade when we detect a swap via our own code path (fallback)
-  window.addEventListener('dual:bg:swap', (ev)=>{
-    const cont = document.getElementById('custom-bg'); if(!cont) return;
-    const kids = cont.children;
-    if(!kids || !kids.length) return;
-    const last = kids[kids.length-1];
-    const prev = last.previousElementSibling;
-    const long = !!LS.get('uno:bg:longfade', false);
-    const dur = long ? 9000 : 360;
-    if(last && last.style){
-      last.style.transition = 'opacity '+(dur/1000)+'s ease-in-out';
-      last.style.opacity = '1';
-      if(prev){ setTimeout(()=>{ try{ prev.remove(); }catch(e){} }, dur); }
-    }
-  });
-
-  // 5) Update data-arch on ROM enter (ensures effect follows active archetype)
-  window.addEventListener('dual:rom:entered', (ev)=>{
-    const arch = (ev && ev.detail && ev.detail.archetype) ? ev.detail.archetype : (localStorage.getItem('archetype:active')||'');
-    const bgContainer = document.getElementById('custom-bg');
-    if(bgContainer){ bgContainer.dataset.arch = arch||''; }
-  });
-
-  document.addEventListener('DOMContentLoaded', ()=>{
-    mountLSInHelper();
-    addLongFadeToggle();
-    patchApply();
   });
 })();
 </script>
+
 </body>
 </html>
