@@ -37,7 +37,7 @@
   /* Deslocamento opcional para o cabeçalho.  Ajuste este valor para
      empurrar o cabeçalho (header.mast) alguns pixels para baixo.  O
      padding superior do main será ajustado automaticamente. */
-  --hdrOffset: 8px;
+  --hdrOffset: 0px;
 
   /* Cor de overlay por arquétipo (gradiente sólido).  Esta variável
      será atualizada dinamicamente via script conforme o arquétipo
@@ -89,7 +89,7 @@ body::after {
   inset: 0;
   background: var(--arch-overlay);
   pointer-events: none;
-  z-index: -3;
+  z-index: 0;
  
 }
 
@@ -488,7 +488,7 @@ body::after {
       background: var(--bg, #0b0f14);
       opacity: 0;
       pointer-events: none;
-      transition: opacity .3s ease;
+
     }
     #arch-fadeCover.show { opacity: 1; }
 
