@@ -1,7 +1,7 @@
-const CACHE_NAME = 'dualhub-v1';
+const CACHE_NAME = 'dualhub-v10';
 const CORE = [
   './',
-  './Hub_Dual_perfect.html'
+  './index.html'
 ];
 
 self.addEventListener('install', (e) => {
