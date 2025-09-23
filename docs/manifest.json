@@ -1,7 +1,7 @@
 {
   "name": "Hub Dual — Nebula Pro",
   "short_name": "Hub Dual",
-  "start_url": "./Hub_Dual_perfect.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0a0d1f",
   "theme_color": "#7c5cff",
