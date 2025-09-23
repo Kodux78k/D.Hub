@@ -23,7 +23,7 @@
   /* Deslocamento opcional para o cabeçalho.  Ajuste este valor para
      empurrar o cabeçalho (header.mast) alguns pixels para baixo.  O
      padding superior do main será ajustado automaticamente. */
-  --hdrOffset: 43px;
+  --hdrOffset: 0px;
 
   /* Cor de overlay por arquétipo (gradiente sólido).  Esta variável
      será atualizada dinamicamente via script conforme o arquétipo
@@ -978,24 +978,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       const wrap = document.getElementById('voicesWrap');
       if(!wrap) return;
       wrap.innerHTML = '';
-      // Lista de arquétipos suportados. Foi atualizada para refletir os
-      // arquétipos oficiais KOBLLUX (Nova, Atlas, Vitalis, Pulse, Artemis,
-      // Serena, Kaos, Genus, Lumine, Rhea, Solus, Aion). Se precisar adicionar
-      // novos arquétipos, inclua o nome aqui e também na tabela RAW.apps.
-      const archList = [
-        'Nova',
-        'Atlas',
-        'Vitalis',
-        'Pulse',
-        'Artemis',
-        'Serena',
-        'Kaos',
-        'Genus',
-        'Lumine',
-        'Rhea',
-        'Solus',
-        'Aion'
-      ];
+      const archList = [ 'Luxara','Rhea','Aion','Atlas','Nova','Genus','Lumine','Kaion','Kaos','Horus','Elysha','Serena' ];
       function populateVoices() {
         let voices = speechSynthesis.getVoices();
         // Filtrar apenas vozes que falam Português ou Espanhol
@@ -1834,26 +1817,7 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
     }
 
     /* ===================== Apps (embutido + locais) ===================== */
-    // Lista de apps embutidos (arquetípicos) com suas chaves, títulos, descrições
-    // e seeds. Essas entradas servem como base para a IA entender o contexto
-    // dos arquétipos e para exibir informações no UI. Se adicionar novos
-    // arquétipos em archList, inclua também aqui sua definição.
-    const RAW = {
-      apps: [
-        { key: 'nova',    title: 'NOVA',    desc: 'ignição e nascimento do ciclo', seeds: 'explosion birth spark toroid' },
-        { key: 'atlas',   title: 'ATLAS',   desc: 'estrutura, grade e ordem do mundo', seeds: 'structure atlas grid atlasian' },
-        { key: 'vitalis', title: 'VITALIS', desc: 'organismo vivo e pulsante', seeds: 'life organics pulse' },
-        { key: 'pulse',   title: 'PULSE',   desc: 'ritmo, batida e frequência', seeds: 'rhythm beat frequency' },
-        { key: 'artemis', title: 'ARTEMIS', desc: 'caça, mira e precisão lunar', seeds: 'hunt moon precision' },
-        { key: 'serena',  title: 'SERENA',  desc: 'calma d\'água e serenidade', seeds: 'calm water serene' },
-        { key: 'kaos',    title: 'KAOS',    desc: 'ruído, fractalidade e desordem fértil', seeds: 'chaos fractal noise' },
-        { key: 'genus',   title: 'GENUS',   desc: 'semente, gene e origem', seeds: 'seed gene origin' },
-        { key: 'lumine',  title: 'LUMINE',  desc: 'luz, lumen e brilho', seeds: 'light lumen glow' },
-        { key: 'rhea',    title: 'RHEA',    desc: 'fluxo-rio e matriz geradora', seeds: 'flow river mother' },
-        { key: 'solus',   title: 'SOLUS',   desc: 'foco singular e solidão produtiva', seeds: 'alone focus singularity' },
-        { key: 'aion',    title: 'AION',    desc: 'tempo cíclico e eternidade', seeds: 'eternal cycle time' }
-      ]
-    };
+    const RAW = { apps: [] };
 
     // Controle para exibir apenas apps locais ou todos
     let showOnlyLocal = false;
