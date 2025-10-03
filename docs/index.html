@@ -1,42 +1,302 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dual • Bundle Patched</title>
-<style>
-  :root{--c:#39ffb6;--b:#0b0f14;--fg:#e6f2ff}
-  body{background:radial-gradient(1200px 800px at 60% -10%, #0a1220 0%, #070b12 55%, #05080f 100%);color:var(--fg);font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Arial;margin:0;padding:22px}
-  .card{border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px;margin:0 0 12px;background:rgba(255,255,255,.06)}
-  a{color:#8fd3ff;text-decoration:none;font-weight:700}
-  small{opacity:.75}
-  code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:6px}
-</style>
-<h1>Dual • Bundle (Patched)</h1>
-<div class="card">
-  <h3>Arquivos principais</h3>
-  <ul>
-    <li><a href="./UNO_patched.html">UNO_patched.html</a> — Hub UNO com patches.</li>
-    <li><a href="./UNO_SHOWCASE.html">UNO_SHOWCASE.html</a> — Showcase / Arte ASC.</li>
-    <li><a href="./DualTube_patched.html">DualTube_patched.html</a> — Home + Playlists + Chat.</li>
-    <li><a href="./presets_embutidos_completos.json">presets_embutidos_completos.json</a> — presets.</li>
-  </ul>
-</div>
-<div class="card">
-  <h3>Dados de treinamento</h3>
-  <ul>
-    <li><a href="./data/Super_Treinamento_Universal_Dual_Infodose_v1-29.txt">data/Super_Treinamento_Universal_Dual_Infodose_v1-29.txt</a></li>
-    <li><a href="./data/codex-azura.txt">data/codex-azura.txt</a></li>
-    <li><a href="./data/manifesto_dual_ascii.txt">data/manifesto_dual_ascii.txt</a></li>
-  </ul>
-  <p><small>Os caminhos acima foram escolhidos para bater com o que o DualTube espera por padrão.</small></p>
-</div>
-<div class="card">
-  <h3>Como usar</h3>
-  <ol>
-    <li>Abra <a href="./UNO_patched.html">UNO_patched.html</a> diretamente no navegador (duplo clique) ou sirva com um HTTP server local.</li>
-    <li>Abra <a href="./DualTube_patched.html">DualTube_patched.html</a> para testar playlists e o chat integrado.</li>
-    <li>Se for usar os recursos de Chat IA, configure sua chave do OpenRouter e modelo pelo UI.</li>
-  </ol>
-  <p><small>OBS: Alguns recursos (voz/microfone, permissões e Picture-in-Picture) podem pedir autorização do navegador.</small></p>
-</div>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Dual Infodose — Dashboard</title>
+  <meta name="theme-color" content="#0b0f14" />
+  <style>
+    :root{
+      --bg-a:#0a0f1a; --bg-b:#0d1f3a;
+      --fg:#e8f0ff; --mut:#9eb3d1;
+      --ok:#39ffb6; --warn:#ffb86b; --err:#ff6b6b;
+      --brandA:#6db4ff; --brandB:#a66fff;
+      --glass:rgba(18,26,44,.55); --glass-2:rgba(18,26,44,.35);
+      --ring:1px solid rgba(142,198,255,.18);
+      --shadow:0 16px 46px rgba(0,0,0,.46);
+      --r:16px; --r2:22px; --ease:cubic-bezier(.22,.61,.36,1);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--fg);
+      background: radial-gradient(1200px 800px at 70% -10%, #0a1220 0%, #070b12 55%, #05080f 100%) fixed;
+      font:14px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      -webkit-font-smoothing:antialiased;
+    }
+    .wrap{max-width:1080px;margin:0 auto;padding:18px 14px 72px}
+    header{
+      display:flex;align-items:center;gap:12px;justify-content:space-between;
+      position:sticky;top:0;z-index:10;padding:10px 8px;margin:-18px -14px 12px;
+      backdrop-filter: blur(10px) saturate(130%);
+      background: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,0));
+    }
+    .brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.08em}
+    .brand .dot{width:30px;height:30px;border-radius:50%;
+      background:conic-gradient(from 120deg, var(--brandA), var(--brandB));
+      box-shadow:0 0 0 3px rgba(255,255,255,.06) inset, 0 0 18px rgba(109,180,255,.35);
+    }
+    .statbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .chip{display:inline-flex;gap:6px;align-items:center;padding:.44rem .66rem;
+      background:var(--glass);border:var(--ring);border-radius:999px;font-weight:800}
+    .chip i{width:16px;height:16px;border-radius:50%;background:linear-gradient(90deg,var(--brandA),var(--brandB))}
+    .grid{display:grid;gap:12px}
+    .grid.cards{grid-template-columns:repeat(auto-fill, minmax(220px, 1fr))}
+    .tile{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+      border:var(--ring);border-radius:var(--r);box-shadow:var(--shadow);
+      padding:14px;display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden}
+    .tile .row{display:flex;gap:10px;align-items:center}
+    .ico{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
+      background:rgba(255,255,255,.06);border:var(--ring);flex:none}
+    .ico svg{filter:invert(1) brightness(1.2)}
+    .tile h3{margin:0;font-size:15px;letter-spacing:.02em}
+    .mut{color:var(--mut);font-size:12px}
+    .tile button{align-self:flex-start;background:linear-gradient(90deg,#a66fff,#6db4ff);
+      border:0;color:#0b0f14;border-radius:12px;padding:.55rem .9rem;font-weight:900;cursor:pointer}
+    .tile.locked{opacity:.85}
+    .tile.locked::after{
+      content:'BLOQUEADO';position:absolute;top:12px;right:-36px;transform:rotate(12deg);
+      background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.32);
+      color:#ffb4b4;padding:2px 10px;border-radius:8px;font-size:11px;font-weight:900;letter-spacing:.08em}
+    .hero{
+      display:grid;grid-template-columns:1.2fr .8fr;gap:12px;margin-bottom:4px
+    }
+    @media(max-width:900px){.hero{grid-template-columns:1fr}}
+    .notice{margin:10px 0 4px;color:var(--mut);font-size:12px}
+    footer{margin-top:28px;color:var(--mut);font-size:12px;text-align:center}
+    a.btnlink{display:inline-flex;gap:8px;align-items:center;padding:.52rem .9rem;border-radius:12px;
+      border:var(--ring);background:var(--glass);color:var(--fg);text-decoration:none;font-weight:800}
+    .progress{display:flex;gap:8px;align-items:center}
+    .bar{flex:1;height:8px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;border:var(--ring)}
+    .bar>i{display:block;height:100%;background:linear-gradient(90deg,#6db4ff,#a66fff)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand"><span class="dot"></span><div>DUAL · INFODOSE</div></div>
+      <div class="statbar">
+        <div class="chip"><i></i> <span id="coins">0</span> contos</div>
+        <div class="chip"><i></i> <span id="seals">0</span> selos</div>
+        <a class="btnlink" href="./HUB-UNO-Revo_patched_SHOWCASE_ArteASC.html" title="Abrir HUB UNO">Abrir HUB UNO</a>
+      </div>
+    </header>
+
+    <!-- Destaques -->
+    <section class="hero">
+      <article class="tile" id="card-dualtube">
+        <div class="row">
+          <div class="ico" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          </div>
+          <div>
+            <h3>DualTube — assista & desbloqueie</h3>
+            <div class="mut">Conteúdo da Infodose. Ganhe 1 <strong>conto</strong> por minuto assistido.</div>
+          </div>
+        </div>
+        <div class="progress" style="margin-top:6px">
+          <div class="bar"><i id="progDual" style="width:0%"></i></div>
+          <div class="mut" id="mins">0 min</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button id="openTube">Abrir DualTube</button>
+          <button id="simMinute" title="Dev: simular 1 min">+1 min (teste)</button>
+        </div>
+      </article>
+
+      <article class="tile locked" data-cost="20" id="card-mind">
+        <div class="row">
+          <div class="ico" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 20v-6a4 4 0 0 0-4-4 4 4 0 0 1 8 0v10"/><circle cx="12" cy="5" r="2"/></svg>
+          </div>
+          <div>
+            <h3>Espaço da Mente</h3>
+            <div class="mut">Ambiente de foco guiado. Custa 20 contos para liberar.</div>
+          </div>
+        </div>
+        <button data-unlock="#card-mind">Desbloquear</button>
+      </article>
+    </section>
+
+    <!-- Seção desbloqueáveis -->
+    <h4 class="notice">Desbloqueáveis (assista para ganhar contos)</h4>
+    <section class="grid cards">
+      <article class="tile locked" data-cost="40" id="card-dopa">
+        <div class="row">
+          <div class="ico"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2v20"/><path d="M19 5l-7 7-7-7"/></svg></div>
+          <div><h3>Fórmula da Dopamina Sexy</h3><div class="mut">Recompensas pequenas, iterativas e crescentes.</div></div>
+        </div>
+        <button data-unlock="#card-dopa">Desbloquear</button>
+      </article>
+
+      <article class="tile locked" data-cost="150" id="card-secreto">
+        <div class="row">
+          <div class="ico"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M2 12a10 10 0 0 1 20 0 10 10 0 0 1-20 0z"/></svg></div>
+          <div><h3>Segredos do Kodux (playlist)</h3><div class="mut">Gravações de tela & códigos — acesso especial.</div></div>
+        </div>
+        <button data-unlock="#card-secreto">Desbloquear</button>
+      </article>
+    </section>
+
+    <!-- Arquétipos (atalhos simbólicos) -->
+    <h4 class="notice">Arquétipos · atalhos de uso</h4>
+    <section class="grid cards">
+      <article class="tile">
+        <div class="row">
+          <div class="ico"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 12h18M12 3v18"/></svg></div>
+          <div><h3>Atlas · jornada</h3><div class="mut">Passos claros no tabuleiro do tempo.</div></div>
+        </div>
+        <a class="btnlink" href="./HUB-UNO-Revo_patched_SHOWCASE_ArteASC.html">Abrir no HUB</a>
+      </article>
+
+      <article class="tile">
+        <div class="row">
+          <div class="ico"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M5 12a7 7 0 0 1 14 0"/></svg></div>
+          <div><h3>Nova · ideias</h3><div class="mut">Ideias vêm em ondas — pegue a próxima.</div></div>
+        </div>
+        <a class="btnlink" href="./HUB-UNO-Revo_patched_SHOWCASE_ArteASC.html">Abrir no HUB</a>
+      </article>
+
+      <article class="tile">
+        <div class="row">
+          <div class="ico"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 4l7 7-7 7M20 4l-7 7 7 7"/></svg></div>
+          <div><h3>Kaos · quebrar padrão</h3><div class="mut">Rompa para recomeçar.</div></div>
+        </div>
+        <a class="btnlink" href="./HUB-UNO-Revo_patched_SHOWCASE_ArteASC.html">Abrir no HUB</a>
+      </article>
+
+      <article class="tile">
+        <div class="row">
+          <div class="ico"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 20v-8"/><circle cx="12" cy="7" r="3"/></svg></div>
+          <div><h3>Solus · arcana</h3><div class="mut">O segredo está no retorno.</div></div>
+        </div>
+        <a class="btnlink" href="./HUB-UNO-Revo_patched_SHOWCASE_ArteASC.html">Abrir no HUB</a>
+      </article>
+
+      <article class="tile">
+        <div class="row">
+          <div class="ico"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M2 12h3l2-4 3 8 2-4h8"/></svg></div>
+          <div><h3>Pulse · som</h3><div class="mut">A batida que você sente é você pedindo mais.</div></div>
+        </div>
+        <a class="btnlink" href="./HUB-UNO-Revo_patched_SHOWCASE_ArteASC.html">Abrir no HUB</a>
+      </article>
+
+      <article class="tile">
+        <div class="row">
+          <div class="ico"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></div>
+          <div><h3>Lumine · brilho</h3><div class="mut">Espalhe, mas nunca toda a luz.</div></div>
+        </div>
+        <a class="btnlink" href="./HUB-UNO-Revo_patched_SHOWCASE_ArteASC.html">Abrir no HUB</a>
+      </article>
+
+      <article class="tile">
+        <div class="row">
+          <div class="ico"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 12h4M17 12h4"/><path d="M7 12c0-2.2 1.8-4 4-4 1.2 0 2.3.5 3 1.3M17 12c0 2.2-1.8 4-4 4-1.2 0-2.3-.5-3-1.3"/></svg></div>
+          <div><h3>Aion · evolução</h3><div class="mut">Microações constroem revoluções.</div></div>
+        </div>
+        <a class="btnlink" href="./HUB-UNO-Revo_patched_SHOWCASE_ArteASC.html">Abrir no HUB</a>
+      </article>
+
+      <article class="tile">
+        <div class="row">
+          <div class="ico"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 21s-6-3.5-6-8a4 4 0 0 1 6-3 4 4 0 0 1 6 3c0 4.5-6 8-6 8z"/></svg></div>
+          <div><h3>Serena · ampara</h3><div class="mut">Acolher é alicerçar.</div></div>
+        </div>
+        <a class="btnlink" href="./HUB-UNO-Revo_patched_SHOWCASE_ArteASC.html">Abrir no HUB</a>
+      </article>
+    </section>
+
+    <footer>
+      Feito para demonstrar a mecânica de recompensas por vídeo (1 conto/min). Integre com o DualTube para enviar eventos de tempo assistido.
+    </footer>
+  </div>
+
+  <script>
+    // ======= Estado / Carteira =======
+    const LSkey = k => 'infodose:' + k;
+    const $ = (q, r=document) => r.querySelector(q);
+    const coinsEl = $('#coins'), sealsEl = $('#seals'), minsEl = $('#mins'), prog = $('#progDual');
+    let coins = +(localStorage.getItem(LSkey('coins')) || 0);
+    let seals = +(localStorage.getItem(LSkey('seals')) || 0);
+    let minutes = +(localStorage.getItem(LSkey('minutes')) || 0);
+    function refreshStats(){
+      coinsEl.textContent = coins;
+      sealsEl.textContent = seals;
+      minsEl.textContent = minutes + ' min';
+      // Progresso “próxima liberação” — média dos custos dos cards bloqueados
+      const locked = [...document.querySelectorAll('.tile.locked')];
+      const costs = locked.map(el => +el.dataset.cost || 0);
+      const target = costs.length? Math.min(...costs) : 0;
+      const pct = target ? Math.min(100, Math.round((coins/target)*100)) : 100;
+      prog.style.width = pct + '%';
+    }
+    refreshStats();
+
+    // ======= Abertura DualTube =======
+    $('#openTube').addEventListener('click', () => {
+      // Preferir abrir no mesmo contexto; se estiver dentro do HUB, abrir em nova sessão
+      window.location.href = './dual-tube-25-0.html';
+    });
+
+    // ======= Simulação de 1 minuto (teste) =======
+    $('#simMinute').addEventListener('click', () => rewardMinutes(1));
+
+    function rewardMinutes(m){
+      minutes += m;
+      coins += m * 1; // 1 conto por minuto
+      localStorage.setItem(LSkey('minutes'), minutes);
+      localStorage.setItem(LSkey('coins'), coins);
+      refreshStats();
+      // selo simples a cada 30 min
+      if (minutes % 30 === 0){
+        seals += 1;
+        localStorage.setItem(LSkey('seals'), seals);
+        refreshStats();
+      }
+    }
+
+    // ======= Handshake com DualTube: receber recompensa do player =======
+    window.addEventListener('message', (ev) => {
+      const d = ev.data || {};
+      if (d && (d.type === 'dualtube:reward' || d.type === 'dualtube:minutes')){
+        const add = d.minutes || Math.floor((d.seconds||0)/60) || 0;
+        if (add > 0) rewardMinutes(add);
+      }
+    });
+
+    // ======= Desbloqueáveis =======
+    document.querySelectorAll('[data-unlock]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const card = document.querySelector(btn.dataset.unlock);
+        const cost = +(card?.dataset.cost || 0);
+        if (!card) return;
+        if (!card.classList.contains('locked')){
+          alert('Já está liberado!');
+          return;
+        }
+        if (coins < cost){
+          alert('Faltam contos. Assista mais vídeos no DualTube.');
+          return;
+        }
+        coins -= cost;
+        localStorage.setItem(LSkey('coins'), coins);
+        card.classList.remove('locked');
+        refreshStats();
+        alert('Liberado!');
+      });
+    });
+
+    // ======= Dicas: limpar carteira com SHIFT+click no logo =======
+    document.querySelector('.brand').addEventListener('click', (e) => {
+      if (e.shiftKey){
+        if (confirm('Zerar carteira e progresso?')){
+          ['coins','seals','minutes'].forEach(k => localStorage.removeItem(LSkey(k)));
+          coins=seals=minutes=0;
+          refreshStats();
+        }
+      }
+    });
+  </script>
+</body>
 </html>
