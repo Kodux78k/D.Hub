@@ -1,7 +1,17 @@
 <!doctype html>
 <html lang="pt-BR" style="--arch-overlay: rgba(64, 158, 255, 0.22);"><head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=yes">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0b0f14" />
+
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.webmanifest" />
+
+  <!-- CSS do círculo (se usar): -->
+  <link rel="stylesheet" href="css/Arch-circle-patch.css">
+
+
   <title>HUB UNO — PROD (safe)</title>
   <meta name="theme-color" content="#0b0f14">
   <style>
@@ -4238,10 +4248,6 @@ window.addEventListener('load', () => {
 
 })(); // end ChatPlus
 </script>
-  <script src="dual_multiagent_v1.js"></script>
-  <script src="dual_multiagent_v12_locked.js"></script>
-  <script src="openrouter_hardlock_model_v1.js" defer=""></script>
-
 
 <style>
 /* --------------------------------------------
@@ -5026,4 +5032,29 @@ main .row > * + * { margin-top: .5rem; }
   if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', bind); } else { bind(); }
 })();
 </script>
+  <!-- 1) CÍRCULO 3D • Bloom via loader (ESM) -->
+<!-- Esse arquivo IMPORTA o three.loader.js internamente e usa top-level await -->
+<script type="module" src="./lib/UNO_patch_arch3d_bloom_loader.js"></script>
+
+<!-- 2) CÍRCULO 3D • Partículas (JS clássico) -->
+<!-- Depende de window.THREE – o loader garante window.THREE -->
+<script src="./lib/UNO_patch_arch3d_particles.js"></script>
+
+<!-- 3) MULTI-AGENT • @kobllux opt-in (JS clássico) -->
+<script src="./lib/dual_multiagent_v12_kobllux_locked.js"></script>
+
+<!-- 4) Stub do modelo (evita 404; opcional) -->
+<script src="./lib/openrouter_hardlock_model_v1.js"></script>
+
+<!-- 5) Ícones (exemplo local-first + fallback CDN) -->
+<!-- Onde usar nos seus <img>: -->
+<!-- <img src="icons/chevron-left.svg" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@tabler/icons@2.47.0/icons/chevron-left.svg'"> -->
+
+<!-- 6) SW (PWA) -->
+<script>
+if ('serviceWorker' in navigator) {
+  addEventListener('load', ()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+</script>
+
 </body></html>
