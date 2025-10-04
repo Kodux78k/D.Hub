@@ -1,0 +1,11 @@
+:root{
+  /* ajuste rápido sem tocar HTML */
+  --arc-bg: rgba(15,17,32,.35);     /* ~0.35 */
+  --arc-bg-dim: rgba(15,17,32,.30); /* ~0.30 */
+}
+/* aplica só à área da bolinha, não escurece overlay 3D */
+.arch-circle{ background: var(--arc-bg) !important; }
+/* opcional: modo ainda mais translúcido (toggle via class no body) */
+body.arc-dim .arch-circle{ background: var(--arc-bg-dim) !important; }
+/* se quiser remover totalmente qualquer tinta */
+body.arc-clear .arch-circle{ background: transparent !important; border-color: rgba(255,255,255,.10) !important; }

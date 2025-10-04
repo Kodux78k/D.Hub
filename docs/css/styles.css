@@ -1,0 +1,363 @@
+/*
+ * Folha de estilos principal para o Hub Uno Integrado.  Mantém a estética
+ * minimalista de fundo escuro do protótipo original e adiciona
+ * componentes modulares como upload de arquivos, círculos de arquétipos
+ * e área de chat.  Há suporte para tema claro alternável.
+ */
+
+/* Reset básico e tipografia */
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Segoe UI', sans-serif;
+  color: #fff;
+  background: radial-gradient(ellipse at center, #0a0a0a, #000000);
+  transition: background 0.6s ease-in-out, color 0.6s ease-in-out;
+}
+
+body.light-mode {
+  background: radial-gradient(ellipse at center, #ffffff, #e0e0e0);
+  color: #000;
+}
+
+/* Halo animado no fundo */
+.halo {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 600px;
+  height: 600px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: glow 4s ease-in-out infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+
+@keyframes glow {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+  50% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+}
+
+/* Símbolo central */
+.symbol {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 260px;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  z-index: 2;
+  animation: breath 5.5s infinite ease-in-out;
+  transition: transform 0.3s ease-in-out, filter 0.3s ease-in-out;
+}
+
+@keyframes breath {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  50% { transform: translate(-50%, -50%) scale(1.06); opacity: 0.95; }
+}
+
+.symbol.pulse-light {
+  animation: pulseGlow 1.2s ease-out;
+}
+
+@keyframes pulseGlow {
+  0% { filter: drop-shadow(0 0 0px rgba(255,255,255,0)); }
+  50% { filter: drop-shadow(0 0 35px rgba(255,255,255,0.5)); }
+  100% { filter: drop-shadow(0 0 0px rgba(255,255,255,0)); }
+}
+
+.symbol svg line.risco {
+  stroke-dasharray: 180;
+  stroke-dashoffset: -180;
+  animation: drawLine 1.2s ease-out forwards;
+  animation-delay: 0.3s;
+}
+
+@keyframes drawLine {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Barra de navegação de ícones */
+.symbol-bar {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  display: flex;
+  gap: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  z-index: 10;
+}
+
+.symbol-bar.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: all;
+}
+
+.symbol-button {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  background: rgba(255,255,255,0.08);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  transition: transform 0.3s ease, background 0.3s ease;
+  color: inherit;
+}
+
+.symbol-button:hover {
+  background: rgba(255,255,255,0.2);
+  transform: scale(1.15);
+}
+
+.symbol-button img {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+  filter: invert(1);
+}
+
+.symbol-button:hover img {
+  transform: scale(1.1);
+}
+
+.symbol-button::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform-origin: bottom center;
+}
+
+.symbol-button:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+body.light-mode .symbol-button::after {
+  background: rgba(255,255,255,0.9);
+  color: #000;
+}
+
+body.light-mode .symbol-button img {
+  filter: invert(0);
+}
+
+/* Menu bridge para mostrar/ocultar a barra e alternar tema */
+.menu-bridge {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  z-index: 40;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+
+.menu-bridge:hover {
+  background: rgba(255, 255, 255, 0.6);
+  transform: translateX(-50%) scaleX(1.2);
+}
+
+/* Efeito de fade ao navegar */
+.fade-out {
+  animation: fadeOut 1s ease-in forwards;
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; transform: scale(1); filter: blur(0); }
+  100% { opacity: 0; transform: scale(0.9); filter: blur(8px); }
+}
+
+/* Componente de upload de arquivo */
+.file-upload-container {
+  position: fixed;
+  top: 70%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+}
+
+#uploadBtn {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  border-radius: 12px;
+  padding: 10px 24px;
+  font-size: 16px;
+  color: inherit;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.3s ease;
+}
+
+#uploadBtn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+body.light-mode #uploadBtn {
+  background: rgba(0,0,0,0.1);
+  color: #000;
+}
+
+body.light-mode #uploadBtn:hover {
+  background: rgba(0,0,0,0.2);
+}
+
+/* Contêiner de arquétipos gerado dinamicamente */
+.archetype-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 260px;
+  height: 260px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.arch {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  font-weight: 600;
+  font-size: 16px;
+  user-select: none;
+}
+
+body.light-mode .arch {
+  background: rgba(0,0,0,0.1);
+  border-color: rgba(0,0,0,0.3);
+}
+
+/* Área de chat */
+.chat-container {
+  position: fixed;
+  bottom: 140px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 600px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  color: inherit;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 20;
+}
+
+.chat-container .messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+}
+
+.msg {
+  padding: 6px 10px;
+  border-radius: 12px;
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+.msg.user {
+  align-self: flex-end;
+  background: rgba(255,255,255,0.15);
+}
+
+.msg.bot {
+  align-self: flex-start;
+  background: rgba(57,255,182,0.12);
+}
+
+.chat-input-wrapper {
+  display: flex;
+  gap: 8px;
+}
+
+.chat-input-wrapper input {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: none;
+  outline: none;
+  background: rgba(255,255,255,0.1);
+  color: inherit;
+  font-size: 14px;
+}
+
+.chat-input-wrapper button {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.2);
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.chat-input-wrapper button:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+body.light-mode .chat-container {
+  background: rgba(255,255,255,0.85);
+  color: #000;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+body.light-mode .msg.user {
+  background: rgba(0,0,0,0.1);
+}
+
+body.light-mode .msg.bot {
+  background: rgba(0,0,0,0.05);
+}
+
+body.light-mode .chat-input-wrapper input {
+  background: rgba(0,0,0,0.1);
+}
+
+body.light-mode .chat-input-wrapper button {
+  background: rgba(0,0,0,0.2);
+}
+
+body.light-mode .chat-input-wrapper button:hover {
+  background: rgba(0,0,0,0.3);
+}

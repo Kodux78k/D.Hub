@@ -1,0 +1,157 @@
+/* hub-uno.css — esqueleto de tema (variáveis + tokens) */
+
+/* ===============================
+   1) Paletas & Tokens
+   =============================== */
+:root{
+  /* Gradiente base (padrão) */
+  --a:#ff52e5;
+  --b:#00c5e5;
+
+  /* Tema Nebula Pro (sua assinatura) */
+  --nebula-a:#f0f;            /* magenta */
+  --nebula-b:#0ff;            /* ciano  */
+  --nebula-deg:42deg;
+
+  /* Cores de texto/superfícies */
+  --fg:#eaf0ff;
+  --mut:#b8c0d9;
+  --ink:#0b0f14;
+
+  /* Vidro / borda */
+  --glass:#0b1122cc;
+  --bd:#ffffff22;
+
+  /* Raio padrão e dimensões */
+  --r:14px;
+  --tabs:64px;
+  --hdr:56px;
+
+  /* Sombra suave */
+  --shadow:0 12px 32px rgba(0,0,0,.45);
+}
+
+/* Tema alternativo (medium) — cinza tecnológico/glass */
+body[data-theme="medium"]{
+  --a:#2c313c; --b:#1f242d;
+  --fg:#f1f2f5; --mut:#c8cbd4;
+  --glass:#2b3144cc; --bd:#ffffff12;
+}
+
+/* Tema Nebula Pro (ativo via classe .theme-nebula no <body>) */
+body.theme-nebula{
+  --a: var(--nebula-a);
+  --b: var(--nebula-b);
+}
+
+/* ===============================
+   2) Resets de base & helpers
+   =============================== */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;color:var(--fg);
+  background:linear-gradient(var(--nebula-deg),var(--a),var(--b)) fixed;
+  font:14px/1.45 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  overflow:hidden;
+}
+.mut{color:var(--mut);font-size:12px}
+.hide{display:none!important}
+
+/* ===============================
+   3) Layouts principais
+   =============================== */
+header.hub{
+  position:fixed;inset:0 0 auto;
+  display:flex;align-items:center;gap:8px;
+  height:var(--hdr);padding:0 10px;
+  background:linear-gradient(180deg,#0009,#0000);
+  backdrop-filter:blur(10px);
+  z-index:10;
+}
+.hub-title{flex:1;text-align:center}
+.hub-title h1{margin:0;font:900 16px/1 Inter;letter-spacing:.06em}
+main{
+  position:relative;height:100%;
+  padding:calc(var(--hdr) + env(safe-area-inset-top)) 10px calc(var(--tabs) + env(safe-area-inset-bottom));
+  overflow:auto;
+}
+.view{display:none;max-width:900px;margin:0 auto}
+.view.active{display:block;animation:fade .15s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}}
+.grid{display:grid;gap:10px}
+.card{
+  background:var(--glass); border:1px solid var(--bd);
+  border-radius:16px;padding:12px; box-shadow:var(--shadow);
+}
+
+/* ===============================
+   4) Controles & componentes
+   =============================== */
+.ib,.btn{
+  border:1px solid var(--bd); border-radius:12px;
+  background:#0b1122; color:var(--fg); cursor:pointer;
+}
+.ib{min-width:38px;height:38px;display:grid;place-items:center}
+.btn{padding:.55rem .8rem}
+
+/* Inputs */
+.input,select,textarea{
+  width:100%; background:#0b1122; border:1px solid var(--bd);
+  color:var(--fg); border-radius:12px; padding:8px;
+}
+
+/* Tabbar */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:env(safe-area-inset-bottom,0);
+  height:var(--tabs);display:flex;justify-content:center;padding:8px;z-index:10
+}
+.tabbar .in{
+  width:100%;max-width:900px;display:flex;justify-content:space-around;gap:8px;
+  background:var(--glass);border:1px solid var(--bd);border-radius:18px;padding:8px
+}
+.tab{flex:1;border-radius:12px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--mut);cursor:pointer}
+.tab.active{background:#ffffff14;color:var(--fg)}
+
+/* Dock e badges */
+#dock{position:fixed;left:10px;right:10px;bottom:calc(var(--tabs)+10px + env(safe-area-inset-bottom));display:flex;gap:8px;flex-wrap:wrap;z-index:9}
+.badge{border:1px solid var(--bd);border-radius:999px;background:#0b1122;padding:.35rem .6rem;font-weight:800}
+
+/* Archetype Circle */
+.arch{margin-top:6vh;display:grid;place-items:center;gap:10px}
+.circle{
+  position:relative;width:min(80vw,480px);aspect-ratio:1/1;border-radius:50%;
+  overflow:hidden;border:1px solid var(--bd);
+  background:radial-gradient(60% 60% at 50% 50%,#0ff2,#fff0)
+}
+.circle iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent}
+.msg{position:relative;margin-top:6px;background:#0b1122;border:1px solid var(--bd);border-radius:12px;padding:8px 10px;max-width:92%;text-align:center;opacity:.96}
+
+/* Chat */
+#chatFeed{min-height:140px;max-height:50vh;overflow:auto;background:var(--glass);border:1px solid var(--bd);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:6px}
+#chatFeed .m{max-width:75%;padding:7px 10px;border-radius:14px}
+#chatFeed .u{align-self:flex-end;background:#ffffff14;border-radius:14px 14px 0 14px}
+#chatFeed .a{align-self:flex-start;background:#00ffaa22;border-radius:14px 14px 14px 0}
+
+/* Home quick buttons */
+.homeBtns{position:fixed;right:12px;bottom:calc(var(--tabs)+20px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;z-index:9}
+.hb{width:44px;height:44px;border-radius:22px;border:1px solid var(--bd);background:#0b1122;display:grid;place-items:center}
+
+/* Apps grid */
+.apps{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.app{display:flex;gap:10px;align-items:center;background:#ffffff0e;border:1px solid var(--bd);border-radius:12px;padding:12px}
+.app .ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:#0b1122;border:1px solid var(--bd)}
+.app .t{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Sessions (Stack) */
+.session{background:#ffffff06;border:1px solid var(--bd);border-radius:14px;overflow:hidden}
+.session .h{display:flex;gap:8px;align-items:center;padding:8px 10px;background:#ffffff08;border-bottom:1px solid #ffffff16}
+.session iframe{display:block;width:100%;height:58vh;border:0;background:#000}
+
+/* Preview e Toast */
+#preview{position:fixed;left:12px;right:12px;bottom:calc(var(--tabs)+20px + env(safe-area-inset-bottom));background:#ffb86b;color:#0b0f14;border-radius:14px;padding:8px 12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:9;display:none}
+.toast{position:fixed;right:12px;bottom:calc(var(--tabs)+14px);display:grid;gap:8px;z-index:20}
+.toast .t{background:#0f2a1e;border:1px solid #2f7a56;color:#c9ffe7;padding:.55rem .7rem;border-radius:10px}
+
+/* BG container para tema custom */
+.theme-custom-bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}

@@ -1,0 +1,48 @@
+
+/* === ARC • Dim Preset + BG fixes ===============================
+   Toggle at runtime with: document.body.classList.toggle('arc-dim')
+   Optional overlay-off:  document.body.classList.add('overlay-off')
+   =============================================================== */
+
+/* Preset tokens (feel free to tweak) */
+:root{
+  --arc-dim-opacity: .68;     /* iframe (sólido) */
+  --arc-dim-saturate: .92;
+  --arc-dim-bright: .95;
+  --arc-dim-audio: .65;       /* camada de ripple de áudio */
+}
+
+/* Modo “leve” para a bola central (ARC) */
+body.arc-dim .arch-circle iframe{
+  opacity: var(--arc-dim-opacity);
+  filter: saturate(var(--arc-dim-saturate)) brightness(var(--arc-dim-bright));
+  transition: opacity .25s ease, filter .25s ease;
+}
+body.arc-dim .arch-circle{ box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset, var(--shadow); }
+body.arc-dim .audio-ripple{ opacity: var(--arc-dim-audio); }
+body.arc-dim .arch-msg{ opacity:.85; }
+
+/* Desliga qualquer overlay de cor que dispute com o BG (opcional) */
+body.overlay-off::after{ background: none !important; }
+body.overlay-off{ --arch-overlay: rgba(0,0,0,0); }
+
+/* Camada de BG única, sem conflitos (vídeo ou imagem) */
+#custom-bg,
+#custom-bg video,
+#custom-bg img{
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+  pointer-events: none;
+}
+#custom-bg video{ background:#000; }
+
+/* Garante exclusividade por modo */
+body[data-bg-mode="video"] #custom-bg img{ display:none; }
+body[data-bg-mode="image"] #custom-bg video{ display:none; }
+
+/* Pequena proteção de stacking para iOS/Safari */
+html, body{ transform: translateZ(0); }
