@@ -1,31 +1,29 @@
 {
-  "name": "DUAL • Nebula Hub",
+  "name": "DualHub KOBLLUX",
   "short_name": "DualHub",
   "id": "/",
   "start_url": "index.html",
   "display": "standalone",
-  "scope": "/",
-  "background_color": "#0a0b13",
-  "theme_color": "#0a0b13",
-  "description": "Hub principal Nebula Pro — Apps, Chat e Brain em um só lugar.",
+  "background_color": "#0b0f14",
+  "theme_color": "#0b0f14",
+  "lang": "pt-BR",
+  "description": "UNO • DualHub PWA — Nebula Pro • Mobile-first vertical hard-lock.",
   "icons": [
     {
-      "src": "icons/ppplayer/png/icon-192-pp6.png",
+      "src": "icons/pwa-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "icons/ppplayer/png/icon-512-pp6.png",
+      "src": "icons/pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/ppplayer/svg/icon-pp6.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "purpose": "maskable any"
     }
   ]
 }
