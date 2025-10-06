@@ -1227,17 +1227,23 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
 
 
 <style id="show-app-title-css">.app-title{display:inline-flex;align-items:center;gap:6px}</style>
-<!-- Manifestado 00 · orbs simples (inline) -->
-<style id="manifest00-inline">
-:root{ --grad-a:#9d7bff; --grad-b:#00c5e5; }
-.manifest-orbs{ display:flex; gap:14px; align-items:center; justify-content:center; padding:16px 0; }
-.manifest-orbs .orb{ width:120px; height:120px; border-radius:50%;
-  background: radial-gradient(circle at 35% 35%, var(--grad-a), var(--grad-b));
-  box-shadow: 0 0 40px rgba(0,197,229,.18), inset 0 0 40px rgba(255,82,229,.18);
-  animation: m00-pulse 2s ease-in-out infinite; cursor:pointer; position:relative; }
-@keyframes m00-pulse { 0%,100%{ transform:scale(1)} 50%{ transform:scale(1.05)} }
-.manifest-orbs .label{ position:absolute; bottom:-26px; left:50%; transform:translateX(-50%); font-weight:800; font-size:12px; opacity:.8 }
-@media (min-width:700px){ .manifest-orbs .orb{ width:160px; height:160px; } }
+
+<!-- PATCH: overlay-css-unify -->
+<style id="overlay-css-unify">
+/* Ensure overlay rendering is unified across variants */
+body::after{
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: var(--arch-overlay, transparent) !important;
+  pointer-events: none;
+  z-index: 0;
+}
+</style>
+<!-- PATCH: overlay-guardian-css -->
+<style id="overlay-guardian-css">
+html[data-overlay="off"] body::after{ background: transparent !important; }
+html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
 </style>
 </head>
 <body>
@@ -1249,7 +1255,7 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
   <!-- ===== Header ===== -->
   <header class="mast">
     <button class="ib fx-trans fx-press ring" id="btnBack" title="Voltar" aria-label="Voltar">
-    <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/arrow-left.svg" alt="Voltar" width="20" height="20" onerror="this.onerror=null;this.src='icons/arrow-left.svg'">
+    <img src="icons/arrow-left.svg" alt="Voltar" width="20" height="20" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/arrow-left.svg'">
       <span class="ripple"></span>
     </button>
     <div class="title">
@@ -1257,7 +1263,7 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
       <small>Dual · Trinity</small>
     </div>
     <button class="ib fx-trans fx-press ring" id="btnDownload" title="Baixar HTML">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/download.svg" alt="Download" width="20" height="20" onerror="this.onerror=null;this.src='icons/download.svg'">
+<img src="icons/download.svg" alt="Download" width="20" height="20" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/download.svg'">
       <span class="ripple"></span>
     </button>
     <button class="ib fx-trans fx-press ring" id="btnHelp" title="Ajuda / Atalhos">
@@ -1265,7 +1271,7 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
       <span class="ripple"></span>
     </button>
     <button class="ib fx-trans fx-press ring" id="btnBrain" title="Brain">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="20" height="20" onerror="this.onerror=null;this.src='icons/brain.svg'">
+<img src="icons/brain.svg" alt="Brain" width="20" height="20" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg'">
       <span class="ripple"></span>
     </button>
   <button class="ib fx-trans fx-press ring" id="btnLS" title="Local Storage" aria-label="Local Storage">
@@ -1288,7 +1294,7 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
   <!-- ===== Views ===== -->
   <main>
     <!-- HOME -->
-    <section id="v-home" class="view active">
+    <section id="v-home" class="view">
       <div class="grid">
           <!-- Saudação / chamada para cadastro. Visível quando o usuário precisa ativar a Dual Infodose ou quando já houver nome salvo -->
           <div id="greetingCard" class="card fx-trans fx-lift" style="display:none">
@@ -1301,7 +1307,7 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
               <div class="mut">Monólito: Apps embutidos + Viewer + Dock + Atalhos</div>
             </div>
             <div class="ico">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/bolt.svg" alt="Energia" width="24" height="24" onerror="this.onerror=null;this.src='icons/bolt.svg'">
+<img src="icons/bolt.svg" alt="Energia" width="24" height="24" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/bolt.svg'">
             </div>
           </div>
         </div>
@@ -1311,11 +1317,11 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
                da bolinha e seguirá o layout vertical da arch-container. -->
           <div class="arch-switcher">
             <button class="btn fx-trans fx-press ring" id="arch-prev" title="Anterior">
-              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-left.svg" alt="Anterior" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-left.svg'">
+              <img src="icons/chevron-left.svg" alt="Anterior" width="16" height="16" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-left.svg'">
             <span class="ripple"></span></button>
             <select id="arch-select" title="Escolher arquétipo"><option value="atlas.html">atlas.html</option><option value="nova.html">nova.html</option><option value="vitalis.html">vitalis.html</option><option value="pulse.html">pulse.html</option><option value="artemis.html">artemis.html</option><option value="serena.html">serena.html</option><option value="kaos.html">kaos.html</option><option value="genus.html">genus.html</option><option value="lumine.html">lumine.html</option><option value="rhea.html">rhea.html</option><option value="solus.html">solus.html</option><option value="aion.html">aion.html</option></select>
             <button class="btn fx-trans fx-press ring" id="arch-next" title="Próximo">
-              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-right.svg" alt="Próximo" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-right.svg'">
+              <img src="icons/chevron-right.svg" alt="Próximo" width="16" height="16" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-right.svg'">
             <span class="ripple"></span></button>
           </div>
           <div class="arch-circle">
@@ -1329,34 +1335,34 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
           <!-- Menu de arquétipos: permite acessar Apps, Stack, Usuário, Revo e Home -->
           <div id="archMenu" class="arch-menu">
             <button data-nav="apps">
-              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="20" height="20" onerror="this.onerror=null;this.src='icons/folder-open.svg'">
+              <img src="icons/folder-open.svg" alt="Apps" width="20" height="20" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg'">
               <span>Apps</span>
             <span class="ripple"></span></button>
             <button data-nav="stack">
-              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="20" height="20" onerror="this.onerror=null;this.src='icons/layer-group.svg'">
+              <img src="icons/layer-group.svg" alt="Stack" width="20" height="20" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg'">
               <span>Stack</span>
             <span class="ripple"></span></button>
             <button data-nav="brain">
-              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/user.svg" alt="Usuário" width="20" height="20" onerror="this.onerror=null;this.src='icons/user.svg'">
+              <img src="icons/user.svg" alt="Usuário" width="20" height="20" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/user.svg'">
               <span>Usuário</span>
             <span class="ripple"></span></button>
             <button data-nav="home">
-              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="20" height="20" onerror="this.onerror=null;this.src='icons/yin-yang.svg'">
+              <img src="icons/yin-yang.svg" alt="Arquétipo" width="20" height="20" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg'">
               <span>Arquétipo</span>
             <span class="ripple"></span></button>
             <button data-nav="chat">
-              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/comments.svg" alt="Chat" width="20" height="20" onerror="this.onerror=null;this.src='icons/comments.svg'">
+              <img src="icons/comments.svg" alt="Chat" width="20" height="20" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/comments.svg'">
               <span>Chat</span>
             <span class="ripple"></span></button>
           <button data-audio="true" id="archAudioBtn">
-            <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone-lines.svg" alt="Áudio" width="20" height="20" onerror="this.onerror=null;this.src='icons/microphone-lines.svg'">
+            <img src="icons/microphone-lines.svg" alt="Áudio" width="20" height="20" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone-lines.svg'">
             <span>Áudio</span>
           <span class="ripple"></span></button>
           </div>
         </div><div class="cards">
           <button class="card fx-trans fx-press ring" data-nav="apps">
             <div class="ico">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="24" height="24" onerror="this.onerror=null;this.src='icons/folder-open.svg'">
+<img src="icons/folder-open.svg" alt="Apps" width="24" height="24" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg'">
             </div>
             <div>
               <div style="font-weight:800">Apps</div>
@@ -1366,7 +1372,7 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
           </button>
           <button class="card fx-trans fx-press ring" data-nav="stack">
             <div class="ico">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="24" height="24" onerror="this.onerror=null;this.src='icons/layer-group.svg'">
+<img src="icons/layer-group.svg" alt="Stack" width="24" height="24" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg'">
             </div>
             <div>
               <div style="font-weight:800">Stack</div>
@@ -1376,7 +1382,7 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
           </button>
           <button class="card fx-trans fx-press ring" data-nav="brain">
             <div class="ico">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/user.svg" alt="Usuário" width="24" height="24" onerror="this.onerror=null;this.src='icons/user.svg'">
+<img src="icons/user.svg" alt="Usuário" width="24" height="24" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/user.svg'">
             </div>
             <div>
               <div style="font-weight:800">Usuário</div>
@@ -1386,7 +1392,7 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
           </button>
           <button class="card fx-trans fx-press ring" data-nav="home">
             <div class="ico">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="24" height="24" onerror="this.onerror=null;this.src='icons/yin-yang.svg'">
+<img src="icons/yin-yang.svg" alt="Arquétipo" width="24" height="24" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg'">
             </div>
             <div>
               <div style="font-weight:800">Arquétipo</div>
@@ -1414,7 +1420,7 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
                 <input id="openInside" type="checkbox" checked=""> abrir dentro
               </label>
               <button id="btnToggleLocal" class="btn fx-trans fx-press ring">
-                <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Locais" width="16" height="16" onerror="this.onerror=null;this.src='icons/folder-open.svg'" style="margin-right:4px">
+                <img src="icons/folder-open.svg" alt="Locais" width="16" height="16" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg'" style="margin-right:4px">
                 Mostrar Locais<span class="ripple"></span>
               </button>
             </div>
@@ -1426,11 +1432,11 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
                 Adicionar Locais<span class="ripple"></span>
               </button>
               <button id="btnExport" class="btn fx-trans fx-press ring">
-                <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/file-export.svg" alt="Exportar" width="16" height="16" onerror="this.onerror=null;this.src='icons/file-export.svg'" style="margin-right:4px">
+                <img src="icons/file-export.svg" alt="Exportar" width="16" height="16" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/file-export.svg'" style="margin-right:4px">
                 Exportar Locais<span class="ripple"></span>
               </button>
               <button id="btnClear" class="btn fx-trans fx-press ring">
-                <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/trash.svg" alt="Limpar" width="16" height="16" onerror="this.onerror=null;this.src='icons/trash.svg'" style="margin-right:4px">
+                <img src="icons/trash.svg" alt="Limpar" width="16" height="16" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/trash.svg'" style="margin-right:4px">
                 Limpar Locais<span class="ripple"></span>
               </button>
             </div>
@@ -1448,12 +1454,12 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
           <div style="font-weight:800; display:flex; align-items:center; gap:8px">
             Sessões
             <button id="btnCloseAll" class="btn fx-trans fx-press ring" title="Fechar todas">
-              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/xmark.svg" alt="Fechar todas" width="16" height="16" onerror="this.onerror=null;this.src='icons/xmark.svg'" style="margin-right:4px">
+              <img src="icons/xmark.svg" alt="Fechar todas" width="16" height="16" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/xmark.svg'" style="margin-right:4px">
               Fechar todas<span class="ripple"></span>
             </button>
             <!-- Botão para criar grupos de sessões -->
             <button id="btnAddGroup" class="btn fx-trans fx-press ring" title="Novo grupo">
-              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-plus.svg" alt="Novo grupo" width="16" height="16" onerror="this.onerror=null;this.src='icons/folder-plus.svg'" style="margin-right:4px">
+              <img src="icons/folder-plus.svg" alt="Novo grupo" width="16" height="16" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-plus.svg'" style="margin-right:4px">
               Novo grupo<span class="ripple"></span>
             </button>
             <!-- Botão para enviar um HTML local e abrir como sessão -->
@@ -1471,7 +1477,7 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
     </section>
 
     <!-- BRAIN -->
-    <section id="v-brain" class="view">
+    <section id="v-brain" class="view active">
       <div class="grid">
         <div class="card fx-trans fx-lift" style="display:block">
           <div style="font-weight:800">Usuário</div>
@@ -1605,24 +1611,24 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
   <nav class="tabbar">
     <div class="inner">
       <button class="tab fx-trans fx-press ring" data-nav="home">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/house.svg" alt="Home" width="18" height="18" onerror="this.onerror=null;this.src='icons/house.svg'">
+<img src="icons/house.svg" alt="Home" width="18" height="18" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/house.svg'">
         <span style="display:none">Home</span><span class="ripple"></span>
       </button>
       <button class="tab fx-trans fx-press ring" data-nav="apps">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="18" height="18" onerror="this.onerror=null;this.src='icons/folder-open.svg'">
+<img src="icons/folder-open.svg" alt="Apps" width="18" height="18" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg'">
         <span style="display:none">Apps</span><span class="ripple"></span>
       </button>
       <button class="tab fx-trans fx-press ring" data-nav="stack">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="18" height="18" onerror="this.onerror=null;this.src='icons/layer-group.svg'">
+<img src="icons/layer-group.svg" alt="Stack" width="18" height="18" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg'">
         <span style="display:none">Stack</span><span class="ripple"></span>
       </button>
       <button class="tab fx-trans fx-press ring active" data-nav="brain">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="18" height="18" onerror="this.onerror=null;this.src='icons/brain.svg'">
+<img src="icons/brain.svg" alt="Brain" width="18" height="18" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg'">
         <span style="display:none">Brain</span><span class="ripple"></span>
       </button>
       <!-- Botão da nova aba Chat -->
       <button class="tab fx-trans fx-press ring" data-nav="chat">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/comments.svg" alt="Chat" width="18" height="18" onerror="this.onerror=null;this.src='icons/comments.svg'">
+<img src="icons/comments.svg" alt="Chat" width="18" height="18" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/comments.svg'">
         <span style="display:none">Chat</span><span class="ripple"></span>
       </button>
     </div>
@@ -1636,7 +1642,7 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
       <img src="icons/pen-to-square.svg" alt="Texto" width="20" height="20" onerror="this.onerror=null;this.src='icons/pen-to-square.svg'">
     <span class="ripple"></span></button>
     <button id="homeVoiceBtn" class="home-btn">
-      <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone.svg" alt="Voz" width="20" height="20" onerror="this.onerror=null;this.src='icons/microphone.svg'">
+      <img src="icons/microphone.svg" alt="Voz" width="20" height="20" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone.svg'">
     <span class="ripple"></span></button>
   </div>
   <!-- Overlay de input para envio rápido de mensagens na Home -->
@@ -1644,7 +1650,7 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
     <form id="homeInputForm" autocomplete="off">
       <input id="homeInput" type="text" placeholder="Escreva aqui…" autocomplete="off">
       <button type="submit">
-        <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/paper-plane.svg" alt="Enviar" width="18" height="18" onerror="this.onerror=null;this.src='icons/paper-plane.svg'">
+        <img src="icons/paper-plane.svg" alt="Enviar" width="18" height="18" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/paper-plane.svg'">
       <span class="ripple"></span></button>
     </form>
   </div>
@@ -4216,12 +4222,7 @@ window.addEventListener('load', () => {
 
 })(); // end ChatPlus
 </script>
-  <script src="dual_multiagent_v1.js"></script>
-  <script src="dual_multiagent_v12_locked.js"></script>
-  <script src="openrouter_hardlock_model_v1.js" defer=""></script>
-
-
-<style>
+  <style>
 /* --------------------------------------------
    KOBLLUX • Compact Mode — Mobile-first Vertical
    Colar após o CSS atual
@@ -4629,6 +4630,8 @@ main .row > * + * { margin-top: .5rem; }
 </script>
 
 
+  <link rel="stylesheet" href="uno_showcase_patch.css">
+  <script src="js/uno_showcase_patch.js" defer></script>
 
 <div id="lsModal" class="ls-modal" aria-hidden="true">
   <div class="ls-panel" id="lsPanel">
@@ -4636,6 +4639,7 @@ main .row > * + * { margin-top: .5rem; }
       <div class="ls-ttl">LocalStorage • Presets, Chaves & Carteira SK</div>
       <div class="ls-actions">
         <button id="lsRescan">Re-scan</button>
+        <button id="lsRefresh">Atualizar página</button>
         <button id="lsExport">Exportar</button>
         <label for="lsImportFile" style="display:inline-block"><button type="button">Importar</button></label>
         <input id="lsImportFile" type="file" accept="application/json" hidden>
@@ -4920,138 +4924,92 @@ main .row > * + * { margin-top: .5rem; }
 })();
 </script>
 
-<!-- UNO merge patch · Home simples com orbs + Stack → LS Panel (inline) -->
-<script id="manifest00-boot">
-(function(){
-  function injectOrbs(){
-    const home = document.getElementById('v-home');
-    if(!home || home.dataset.m00Injected) return;
-    const grid = home.querySelector('.grid') || home;
-    const wrap = document.createElement('div'); wrap.id='manifest00'; wrap.className='manifest-orbs fx-trans fx-lift';
-    const make = (i, lab, action)=>{ const o=document.createElement('div'); o.className='orb'; o.title=lab; const t=document.createElement('div'); t.className='label'; t.textContent=lab; o.appendChild(t); if(action) o.addEventListener('click', action, {passive:true}); return o; };
-    wrap.append(
-      make(1, 'Ativar', ()=>{ try{ toast('Campo ativado'); }catch{} }),
-      make(2, 'Apps', ()=>{ try{ document.querySelector('.tab[data-nav="apps"]').click(); } catch{}; }),
-      make(3, 'LS', ()=>{ try{ (window.DualLS||{}).open?.(); }catch{}; })
-    );
-    const anchor = home.querySelector('.arch-container'); 
-    if(anchor) anchor.style.display='none';
-    if(grid.firstElementChild) grid.insertBefore(wrap, grid.firstElementChild); else grid.appendChild(wrap);
-    home.dataset.m00Injected = '1';
+
+<!-- PATCH: overlay-hardlock -->
+<script id="overlay-hardlock">
+(function () {
+  const LSget = (k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d }catch(e){ return d } };
+
+  function setOverlayTransparent(){
+    try{
+      document.documentElement.style.setProperty('--arch-overlay','rgba(0,0,0,0)');
+      document.documentElement.style.setProperty('--arch-overlay-strength','0%');
+    }catch(e){}
   }
-  function makeHomeDefault(){
-    // Views
-    document.querySelectorAll('section.view').forEach(s => s.classList.remove('active'));
-    const vHome=document.getElementById('v-home'); if(vHome) vHome.classList.add('active');
-    // Tabbar
-    document.querySelectorAll('nav.tabbar .tab').forEach(b => b.classList.remove('active'));
-    const tHome=document.querySelector('nav.tabbar .tab[data-nav="home"]'); if(tHome) tHome.classList.add('active');
-    try{ localStorage.setItem('uno:lastTab','home'); }catch(e){}
+
+  function gateApply(){
+    // Re-define applyArchOverlay ALWAYS last so it cannot be overridden later
+    window.applyArchOverlay = function(name){
+      const on = !!LSget('arch:overlayOn', false);
+      if(!on){ setOverlayTransparent(); return; }
+      const key = (name||'').toLowerCase();
+      const MAP = (window.ARCH_OVERLAYS_PATCHED||window.ARCH_OVERLAYS||{default:'rgba(0,0,0,0)'});
+      const color = MAP[key] || MAP.default || 'rgba(0,0,0,0)';
+      try{
+        document.documentElement.style.setProperty('--arch-overlay', color);
+        // If some panels manage strength separately, leave current value as-is when ON
+      }catch(e){}
+    };
+
+    // On load, keep OFF if toggle is OFF
+    const sel = document.getElementById('arch-select');
+    const base = (sel?.value || '').replace(/\.html$/i,'');
+    if(!LSget('arch:overlayOn', false)) setOverlayTransparent(); else window.applyArchOverlay(base);
   }
-  function rerouteStackToLS(){
-    // Arch quick menu
-    document.querySelectorAll('#archMenu [data-nav="stack"]').forEach(el=>el.remove());
-    // Tabbar button -> LS
-    const tab = document.querySelector('nav.tabbar .tab[data-nav="stack"]');
-    if(tab){
-      tab.setAttribute('data-nav','ls');
-      const img = tab.querySelector('img'); 
-      if(img){ img.alt='LS'; img.setAttribute('src','icons/database.svg'); }
-      const span = tab.querySelector('span'); if(span) span.textContent='LS';
-      tab.addEventListener('click', function(ev){ ev.preventDefault(); try{ (window.DualLS||{}).open?.(); }catch(e){} }, {passive:false});
-    }
-    // Hide/remove Stack view if present
-    const vStack = document.getElementById('v-stack'); if(vStack) vStack.remove();
-  }
-  // LS panel — Stack manager
-  function ensureLsStackSection(){
-    const panel = document.getElementById('lsPanel'); if(!panel || panel.dataset.stackInit) return;
-    const sec = document.createElement('details'); sec.className='presets'; sec.open = true;
-    sec.innerHTML = '<summary><strong>Sessões (Stack) — Gerir pelo LS</strong></summary>' +
-      '<div id="lsStackCtr" class="row" style="margin:.5rem 0; gap:8px; align-items:center">' +
-      '<button id="lsStackRefresh">Recarregar</button>' +
-      '<button id="lsStackCloseAll">Fechar todas</button>' +
-      '<span class="meta" id="lsStackMeta"></span>' +
-      '</div>' +
-      '<div class="list" id="lsStackList"></div>';
-    panel.appendChild(sec);
-    panel.dataset.stackInit = '1';
-    document.getElementById('lsStackRefresh').addEventListener('click', renderStackList, {passive:true});
-    document.getElementById('lsStackCloseAll').addEventListener('click', closeAllSessionsLS, {passive:true});
-    renderStackList();
-  }
-  function listSessions(){
-    return Array.from(document.querySelectorAll('#stackWrap .session'));
-  }
-  function closeAllSessionsLS(){
-    const list = listSessions();
-    if(!list.length) return;
-    list.forEach(s => s.remove());
-    try{ window.saveStackState?.(); }catch(e){}
-    updateDockLocal();
-    renderStackList();
-    try{ toast('Todas as sessões foram fechadas','warn'); }catch(e){}
-  }
-  function updateDockLocal(){
-    const dock = document.getElementById('dock'); if(!dock) return;
-    dock.innerHTML = '';
-    document.querySelectorAll('.session').forEach(s=>{
-      const meta = JSON.parse(s.dataset.meta||'{}');
-      const b = document.createElement('button'); b.className='badge fx-trans fx-press ring';
-      b.textContent = meta.title || 'App';
-      const rp = document.createElement('span'); rp.className='ripple'; b.appendChild(rp);
-      b.onclick = ()=>{ s.scrollIntoView({behavior:'smooth',block:'center'}); s.classList.remove('min'); };
-      dock.appendChild(b);
-    });
-    try{ updateHomeStatus?.(); }catch(e){}
-  }
-  function renderStackList(){
-    const host = document.getElementById('lsStackList'); if(!host) return;
-    const meta = document.getElementById('lsStackMeta');
-    host.innerHTML='';
-    const sessions = listSessions();
-    if(meta) meta.textContent = sessions.length ? (sessions.length+' sessão(ões) abertas') : 'Nenhuma sessão aberta';
-    if(!sessions.length){ host.innerHTML = '<div class="mut">Abra apps para vê-los aqui.</div>'; return; }
-    sessions.forEach(s=>{
-      const info = JSON.parse(s.dataset.meta||'{}'); const title = info.title || 'App'; const url = info.url || '';
-      const row = document.createElement('div'); row.className='item';
-      row.innerHTML = '<div class="head"><div class="key">'+title+'</div>'+
-        '<div class="seg">'+
-        '<button data-act="go">Abrir</button>'+
-        '<button data-act="min">Min</button>'+
-        '<button data-act="pin">'+(s.classList.contains('pinned')?'Desfixar':'Fixar')+'</button>'+
-        '<button data-act="close">Fechar</button>'+
-        '</div></div>' +
-        '<div class="val">'+(url||'—')+'</div>';
-      row.querySelector('[data-act="go"]').onclick = ()=>{ s.scrollIntoView({behavior:'smooth', block:'center'}); s.classList.remove('min'); };
-      row.querySelector('[data-act="min"]').onclick = ()=>{ s.classList.toggle('min'); updateDockLocal(); try{ window.saveStackState?.(); }catch(e){}; renderStackList(); };
-      row.querySelector('[data-act="close"]').onclick = ()=>{ s.remove(); updateDockLocal(); try{ window.saveStackState?.(); }catch(e){}; renderStackList(); };
-      row.querySelector('[data-act="pin"]').onclick = ()=>{ const md = JSON.parse(s.dataset.meta||'{}'); if(s.classList.contains('pinned')){ s.classList.remove('pinned'); try{ window.removePinnedByMeta?.(md);}catch(e){} }else{ s.classList.add('pinned'); try{ window.addPinned?.(md);}catch(e){} } renderStackList(); };
-      host.appendChild(row);
-    });
-  }
-  // Rede & Ping minimal
-  function initRedePingLS(){
-    const panel = document.getElementById('lsPanel'); if(!panel) return;
-    if(panel.dataset.redeInit) return;
-    const sec = document.createElement('details'); sec.className='presets'; sec.open=false;
-    sec.innerHTML = '<summary><strong>Rede & Ping</strong></summary><div class="row" style="align-items:center;gap:8px"><div class="pill" id="lsNetStatus"><span class="dot" style="width:10px;height:10px;border-radius:50%;background:#8b93a6"></span><span style="margin-left:6px">—</span></div><button id="lsPing">Ping</button></div>';
-    panel.appendChild(sec);
-    panel.dataset.redeInit='1';
-    function update(){ const d = document.getElementById('lsNetStatus'); if(!d) return; const on = navigator.onLine; const dot = d.querySelector('.dot'); const txt = d.querySelector('span:last-child'); if(dot) dot.style.background = on ? '#33e08a' : '#ff6b6b'; if(txt) txt.textContent = on ? 'online' : 'offline'; }
-    update(); window.addEventListener('online', update); window.addEventListener('offline', update);
-    document.getElementById('lsPing').onclick = async ()=>{ const t0 = performance.now(); try{ await fetch(location.origin, {cache:'no-store', mode:'no-cors'}); }catch(e){} const dt = Math.round(performance.now()-t0); try{ toast('Ping ~ '+dt+' ms'); }catch(e){ alert('Ping ~ '+dt+' ms'); } };
-  }
-  function boot(){
-    makeHomeDefault();
-    injectOrbs();
-    rerouteStackToLS();
-    ensureLsStackSection();
-    initRedePingLS();
-    // Remover patches externos para manter tudo inline
-    document.querySelectorAll('link[href*="uno_showcase_patch.css"],script[src*="uno_showcase_patch.js"]').forEach(n=> n.remove());
-  }
-  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', boot); } else { boot(); }
+
+  if(document.readyState === 'complete') gateApply();
+  else window.addEventListener('load', gateApply);
 })();
+</script>
+<!-- PATCH: ls-refresh-binder -->
+<script>
+(function(){
+  function bind(){
+    var b = document.getElementById('lsRefresh');
+    if(b){ b.onclick = function(){ try{ location.reload(); }catch(e){} }; }
+  }
+  if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', bind); } else { bind(); }
+})();
+</script>
+<!-- PATCH: overlay-guardian-js -->
+<script id="overlay-guardian-js">
+(function(){
+  function readLSBool(key, d){ try{ var v = localStorage.getItem(key); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+  function enforce(){
+    var on = !!readLSBool('arch:overlayOn', false);
+    document.documentElement.setAttribute('data-overlay', on ? 'on' : 'off');
+    if(!on){
+      try{
+        document.documentElement.style.setProperty('--arch-overlay','rgba(0,0,0,0)');
+        document.documentElement.style.setProperty('--arch-overlay-strength','0%');
+        var fade = document.getElementById('arch-fadeCover');
+        if(fade) fade.style.background = 'transparent';
+      }catch(e){}
+    }
+  }
+  function bind(){
+    enforce();
+    // Poll lightly to defeat late writers
+    setInterval(enforce, 500);
+    // Also react to storage changes (other tabs)
+    window.addEventListener('storage', function(ev){ if(ev && ev.key==='arch:overlayOn'){ enforce(); } });
+    // If there is a Brain toggle, hook it
+    document.addEventListener('click', function(e){
+      var t = e.target;
+      if(!t) return;
+      if(t.id==='overlayToggle' || t.closest && t.closest('#overlayToggle')){
+        setTimeout(enforce, 60);
+      }
+    }, true);
+  }
+  if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', bind); } else { bind(); }
+})();
+</script>
+<script src="js/UNO_patch_arch3d.js" defer></script>
+<script src="js/dual_multiagent_v12_kobllux_locked.js" defer></script>
+<script>
+if ('serviceWorker' in navigator) {
+  addEventListener('load', ()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
 </script>
 </body></html>
