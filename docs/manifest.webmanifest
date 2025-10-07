@@ -1,29 +1,21 @@
 {
-  "name": "DualHub KOBLLUX",
-  "short_name": "DualHub",
-  "id": "/",
-  "start_url": "index.html",
+  "name": "HUB-UNO \u2014 Nebula Pack",
+  "short_name": "HUB-UNO",
+  "start_url": "./index.updated.html",
   "display": "standalone",
-  "background_color": "#0b0f14",
-  "theme_color": "#0b0f14",
-  "lang": "pt-BR",
-  "description": "UNO • DualHub PWA — Nebula Pro • Mobile-first vertical hard-lock.",
+  "background_color": "#070912",
+  "theme_color": "#7a3cff",
   "icons": [
     {
-      "src": "icons/pwa-192.png",
+      "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icons/pwa-512.png",
+      "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
-    },
-    {
-      "src": "icons/maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable any"
     }
-  ]
+  ],
+  "description": "Pacote PWA com 4 variantes do HUB UNO (v11, Brava, Atlas3D+Bloom, v14-Archetypes) e index atualizado."
 }
