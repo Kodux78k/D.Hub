@@ -22,7 +22,7 @@
       --r2: 22px;
       --shadow: 0 14px 40px rgba(0, 0, 0, .45);
       --tabsH: 74px;
-      --hdrH: 64px;
+      --hdrH: 52px;
       --blur: 24px;
   /* Deslocamento opcional para o cabeçalho.  Ajuste este valor para
      empurrar o cabeçalho (header.mast) alguns pixels para baixo.  O
@@ -98,7 +98,8 @@ body::after{content:'';position:fixed;inset:0;background:none !important;pointer
     @keyframes ripple { from { opacity: .55; width: 0; height: 0 } to { opacity: 0; width: 260px; height: 260px } }
 
     /* ===== Header ===== */
-    header.mast { position: relative; inset: 0 0 auto 0; height: var(--hdrH); z-index: 100; display: flex; align-items: center; gap: 10px; padding: 0 12px; backdrop-filter: blur(var(--blur)) saturate(130%); background: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,0)); margin-top: var(--hdrOffset); }
+    header.mast { position: relative; inset: 0 0 auto 0; height: var(--hdrH);
+  padding: 0 10px; z-index: 100; display: flex; align-items: center; gap: 10px; padding: 0 12px; backdrop-filter: blur(var(--blur)) saturate(130%); background: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,0)); margin-top: var(--hdrOffset); }
     .ib { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; box-shadow: var(--shadow) }
     .ib.fx-trans:hover { box-shadow: 0 10px 28px rgba(0,0,0,.5), 0 0 0 2px rgba(255,255,255,.10) inset }
     .title { flex: 1; text-align: center; line-height: 1 }
@@ -370,7 +371,7 @@ body::after{content:'';position:fixed;inset:0;background:none !important;pointer
       gap: 8px;
       justify-content: center;
       /* Dá mais espaço do topo, relativo à altura da viewport */
-      margin-top: 5vh;
+      margin-top: 3vh;
     }
     .arch-circle {
       position: relative;
@@ -1304,52 +1305,6 @@ body::after{
 html[data-overlay="off"] body::after{ background: transparent !important; }
 html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
 </style>
-
-<style>
-/* --- Edge Toggles (botões fantasmas na borda) --- */
-.edge-toggle {
-  position: fixed;
-  left: max(6px, env(safe-area-inset-left));
-  width: 14px; height: 56px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: rgba(255,255,255,.04);
-  box-shadow: 0 6px 24px rgba(0,0,0,.35), inset 0 0 20px rgba(255,255,255,.05);
-  opacity: .18; transition: opacity .2s ease, transform .12s ease;
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  z-index: 120; /* acima do orb e do panel */
-  display: grid; place-items: center;
-  -webkit-tap-highlight-color: rgba(255,255,255,.1);
-}
-.edge-toggle:active { transform: scale(.98); }
-.edge-toggle:hover { opacity: .35; }
-
-/* posições verticais */
-#etNav   { top: 55vh; transform: translateY(-50%); }
-#etHead  { top: 78vh; transform: translateY(-50%); }
-
-/* ícone minimal (barra dupla / barra única) */
-.edge-toggle i {
-  display:block; width: 2px; height: 32px; position:relative;
-  background: linear-gradient(180deg, rgba(255,255,255,.25), rgba(255,255,255,.08));
-  border-radius: 2px;
-}
-.edge-toggle i::after{
-  content:""; position:absolute; left:6px; top:0; width:2px; height:32px;
-  background: linear-gradient(180deg, rgba(255,255,255,.25), rgba(255,255,255,.08));
-  border-radius:2px;
-}
-
-/* estados “escondidos” aplicados no BODY */
-body.hide-nav .options,
-body.hide-nav .btn-ctrl { display: none !important; }
-
-body.hide-header .hud-bar { display: none !important; }
-
-/* quando header some, compensa o topo no container principal */
-body.hide-header .container { padding-top: max(8px, env(safe-area-inset-top)); }
-</style>
-
 </head>
 <body>
   <!-- Splash screen displayed on initial load -->
@@ -5227,256 +5182,183 @@ document.getElementById('orbWrap')?.addEventListener('click', function(){ try{ w
 </script>
 
 
-<script>
-/* ================================================================
-   Dual · Particles "Cell" Renderer with Archetype Colors (Blue-1 safe)
-   - Replaces the existing #particles canvas with a new instance.
-   - Colors follow the current archetype (persisted in localStorage).
-   - Public API: window.setArchetype(name)
-   ================================================================ */
+<script id="arch-persist-patch">
+// =============== Archetype Persist Patch ===============
+// - Boot with last active archetype saved in localStorage
+// - Save every change (select / prev / next)
+// Keys used: 'uno:arch' (primary), 'infodose:arch' (legacy, read-only)
 (function(){
-  const ARCH_KEY = 'dual.archetype';           // localStorage key
-  const DEFAULT_ARCH = 'Nova';                 // default if none stored
-  // Hue palettes (center hue and spread) — tweak to your taste
-  const ARCH_PALETTES = {
-    'Nova':   { hue: 200, spread: 24 }, // ciano celeste
-    'Elysha': { hue: 280, spread: 26 }, // violeta-nebula
-    'Kaion':  { hue: 160, spread: 20 }, // verde-tec
-    'Atlas':  { hue: 30,  spread: 16 }, // âmbar/solar
-    'Serena': { hue: 320, spread: 22 }, // magenta quente
-    'Artemis':{ hue: 210, spread: 18 }, // azul profundo
-    'Pulse':  { hue: 195, spread: 30 }, // aqua vivo
-    'Rhea':   { hue: 45,  spread: 18 }, // ouro suave
-    'Solus':  { hue: 12,  spread: 18 }, // coral
-    'Aion':   { hue: 260, spread: 20 }, // roxo frio
-    'Genus':  { hue: 140, spread: 18 }, // verde bio
-    'Lumine': { hue: 220, spread: 20 }  // azul-luz
+  const LS = {
+    get:(k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d }catch(_){ return d } },
+    raw:(k)=>localStorage.getItem(k)||'',
+    set:(k,v)=>{ try{ localStorage.setItem(k, typeof v==='string'? v : JSON.stringify(v)); }catch(_){ } }
   };
 
-  // Read current archetype from localStorage
-  function getArch(){
-    try { return localStorage.getItem(ARCH_KEY) || DEFAULT_ARCH; }
-    catch(_) { return DEFAULT_ARCH; }
-  }
-  function setArch(name){
-    const key = (name||'').trim();
-    if (!ARCH_PALETTES[key]) return;
-    try { localStorage.setItem(ARCH_KEY, key); } catch(_){}
-    // recolor immediately
-    CURRENT.arch = key;
-    recolor();
-  }
-  window.setArchetype = setArch;
-  window.getArchetype = getArch;
+  function baseName(file){ return String(file||'').replace(/\.html$/i,'').toLowerCase(); }
 
-  // Obtain / replace particles canvas safely
-  const oldCanvas = document.getElementById('particles');
-  if (!oldCanvas) return;
-  const parent = oldCanvas.parentNode;
-  const clone = oldCanvas.cloneNode(true);
-  oldCanvas.replaceWith(clone);
-
-  const c = clone;
-  const ctx = c.getContext('2d', { alpha:true });
-  const dpr = Math.min(2, (window.devicePixelRatio||1));
-  let RAF = 0;
-
-  function resize(){
-    const r = c.getBoundingClientRect();
-    c.width  = Math.floor(r.width * dpr);
-    c.height = Math.floor(r.height * dpr);
-  }
-  new ResizeObserver(()=>{ resize(); }).observe(c); resize();
-
-  // "Cell": concentric membrane, cytoplasm glow, drifting organelles
-  const CURRENT = {
-    arch: getArch(),
-    t0: performance.now(),
-    nodes: [],
-    nucleus: { wobbleA: Math.random()*6.28, wobbleB: Math.random()*6.28 }
-  };
-
-  const N = 96; // particles (organelles)
-  function palette(){
-    const p = ARCH_PALETTES[CURRENT.arch] || ARCH_PALETTES[DEFAULT_ARCH];
-    return p;
-  }
-  function rand(min, max){ return min + Math.random()*(max-min); }
-
-  function seed(){
-    CURRENT.nodes = Array.from({length:N}, ()=>{
-      const a  = Math.random()*Math.PI*2;
-      const rr = 0.30 + Math.random()*0.58; // keep inner space for nucleus
-      const s  = (0.15 + Math.random()*0.65) * (Math.random()<0.5?-1:1);
-      const z  = 0.45 + Math.random()*0.55;
-      return { a, r: rr, s, z, hueOffset: rand(-1,1), drift: rand(0.8,1.6) };
-    });
-  }
-  seed();
-
-  function recolor(){
-    // noop: colors are computed per-frame from CURRENT.arch
+  function currentSelectBase(){
+    const sel = document.getElementById('arch-select');
+    if(!sel) return '';
+    const opt = sel.options[sel.selectedIndex];
+    return baseName(opt && opt.value);
   }
 
-  function draw(now){
-    const t = now || performance.now();
-    const dt = t - CURRENT.t0;
+  function applyArch(base){
+    // set select if option exists
+    const sel = document.getElementById('arch-select');
+    const frame = document.getElementById('arch-frame');
+    const fade  = document.getElementById('arch-fadeCover');
+    if(!sel || !frame) return;
+    // find option index
+    let idx = -1;
+    for(let i=0;i<sel.options.length;i++){
+      if(baseName(sel.options[i].value) === base){ idx = i; break; }
+    }
+    if(idx >= 0){
+      sel.selectedIndex = idx;
+      // nice fade
+      if (fade) fade.classList.add('show');
+      // set iframe src
+      const file = sel.options[idx].value;
+      frame.src = './archetypes/' + file;
+      // apply overlay if helper exists
+      try {
+        if (typeof window.applyArchOverlay === 'function') window.applyArchOverlay(base);
+      } catch {}
+      // speak and update home status if helpers exist
+      try { if (typeof window.speakArchetype === 'function') window.speakArchetype(base); } catch {}
+      try { if (typeof window.updateHomeStatus === 'function') window.updateHomeStatus(); } catch {}
+      // remove fade a bit after
+      setTimeout(()=>{ if (fade) fade.classList.remove('show'); }, 240);
+    }
+  }
 
-    ctx.clearRect(0,0,c.width,c.height);
-    ctx.save();
-    ctx.translate(c.width/2, c.height/2);
-    ctx.globalCompositeOperation = 'lighter';
+  function saveCurrent(){
+    const base = currentSelectBase();
+    if(!base) return;
+    // primary key (string, no JSON)
+    try { localStorage.setItem('uno:arch', base); } catch(_){}
+  }
 
-    const scl = Math.min(c.width, c.height)/2;
-
-    // Cell membrane (rim)
-    (()=>{
-      const grd = ctx.createRadialGradient(0,0, scl*0.15, 0,0, scl*0.98);
-      const P = palette();
-      const h = P.hue;
-      grd.addColorStop(0.00, `hsla(${h}, 90%, 65%, .06)`);
-      grd.addColorStop(0.55, `hsla(${h}, 90%, 55%, .10)`);
-      grd.addColorStop(0.87, `hsla(${h}, 90%, 60%, .16)`);
-      grd.addColorStop(1.00, `hsla(${h}, 90%, 65%, 0)`);
-      ctx.fillStyle = grd;
-      ctx.beginPath(); ctx.arc(0,0, scl*0.98, 0, Math.PI*2); ctx.fill();
-    })();
-
-    // Cytoplasm faint noise swirl
-    (()=>{
-      const swirl = Math.sin(t*0.0013)*0.04;
-      ctx.rotate(swirl);
-      ctx.globalAlpha = 0.08;
-      const P = palette();
-      const h = P.hue + 12;
-      for (let i=0;i<6;i++){
-        const r = scl*(0.25 + i*0.12);
-        ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2);
-        ctx.strokeStyle = `hsla(${h},70%,60%,${0.08 - i*0.01})`;
-        ctx.lineWidth = 2 * (c.width/800);
-        ctx.stroke();
+  function boot(){
+    // prefer 'uno:arch' (string); fallback to legacy 'infodose:arch'
+    let saved = (localStorage.getItem('uno:arch') || localStorage.getItem('infodose:arch') || '').replace(/\.html$/i,'');
+    saved = baseName(saved);
+    if(saved){
+      // Only apply if different from current default
+      const cur = currentSelectBase();
+      if(cur !== saved){
+        applyArch(saved);
       }
-      ctx.globalAlpha = 1;
-      ctx.rotate(-swirl);
-    })();
-
-    // Nucleus (soft pulsing)
-    (()=>{
-      const P = palette();
-      const h = P.hue - 10;
-      const wob = Math.sin(t*0.0016 + CURRENT.nucleus.wobbleA)*0.02 + Math.sin(t*0.0011 + CURRENT.nucleus.wobbleB)*0.015;
-      const r  = scl*(0.18 + wob);
-      const g  = ctx.createRadialGradient(0,0, 0, 0,0, r*1.55);
-      g.addColorStop(0.00, `hsla(${h}, 95%, 75%, .55)`);
-      g.addColorStop(0.45, `hsla(${h}, 90%, 60%, .18)`);
-      g.addColorStop(1.00, `hsla(${h}, 85%, 55%, 0)`);
-      ctx.fillStyle = g;
-      ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill();
-    })();
-
-    // Organelles (drifting particles)
-    const P = palette();
-    for(const n of CURRENT.nodes){
-      const ang = n.a + t*0.00025*n.s;
-      const rr  = n.r * (0.72 + 0.12*Math.sin(t*0.001 + n.a));
-      const x = Math.cos(ang)*rr*scl;
-      const y = Math.sin(ang)*rr*scl*0.98;
-      const rad = (1.0 + n.z*1.6) * (c.width/900);
-      const hue = P.hue + n.hueOffset * P.spread;
-
-      const g = ctx.createRadialGradient(x,y,0,x,y,rad*4.2);
-      g.addColorStop(0, `hsla(${hue}, 90%, 70%, .88)`);
-      g.addColorStop(1, `hsla(${hue}, 85%, 50%, 0)`);
-      ctx.fillStyle = g;
-      ctx.beginPath(); ctx.arc(x,y,rad,0,Math.PI*2); ctx.fill();
+    } else {
+      // If nothing saved yet, save the current default for next boot
+      saveCurrent();
     }
 
-    ctx.restore();
-    RAF = requestAnimationFrame(draw);
-  }
+    // Watch future changes to persist immediately
+    const sel = document.getElementById('arch-select');
+    const prev = document.getElementById('arch-prev');
+    const next = document.getElementById('arch-next');
+    if (sel) sel.addEventListener('change', saveCurrent, { passive:true });
+    if (prev) prev.addEventListener('click', ()=> setTimeout(saveCurrent, 0), { passive:true });
+    if (next) next.addEventListener('click', ()=> setTimeout(saveCurrent, 0), { passive:true });
 
-  function boot(){
-    cancelAnimationFrame(RAF);
-    RAF = requestAnimationFrame(draw);
-  }
-
-  // If a global archetype selector exists elsewhere, hook it:
-  document.addEventListener('archetype:change', (ev)=>{
-    const name = ev && ev.detail && ev.detail.name;
-    if (name && ARCH_PALETTES[name]) setArch(name);
-  });
-
-  // expose lightweight API
-  window.DUAL_ARCH = {
-    set: setArch,
-    get: getArch,
-    palettes: ARCH_PALETTES
-  };
-
-  // Start with last used or default
-  recolor();
-  boot();
-})();
-</script>
-
-
-<!-- Edge toggles: navegação (nave) e header -->
-<button id="etNav"  class="edge-toggle" aria-label="Alternar navegação" title="Mostrar/ocultar navegação">
-  <i></i>
-</button>
-<button id="etHead" class="edge-toggle" aria-label="Alternar header" title="Mostrar/ocultar header">
-  <i></i>
-</button>
-
-
-<script>
-(function(){
-  const KEY_NAV  = 'dual.ui.hideNav';
-  const KEY_HEAD = 'dual.ui.hideHeader';
-
-  const $ = (s)=> document.querySelector(s);
-  let etNav, etHead;
-
-  function vibrate(ms=12){ try{ navigator.vibrate && navigator.vibrate(ms); }catch(_){} }
-
-  function applyPersisted(){
-    try{
-      const hideNav  = localStorage.getItem(KEY_NAV)  === '1';
-      const hideHead = localStorage.getItem(KEY_HEAD) === '1';
-      document.body.classList.toggle('hide-nav', hideNav);
-      document.body.classList.toggle('hide-header', hideHead);
-    }catch(_){}
-  }
-
-  function toggleNav(){
-    document.body.classList.toggle('hide-nav');
-    const on = document.body.classList.contains('hide-nav');
-    try{ localStorage.setItem(KEY_NAV, on?'1':'0'); }catch(_){}
-    vibrate(8);
-  }
-
-  function toggleHeader(){
-    document.body.classList.toggle('hide-header');
-    const on = document.body.classList.contains('hide-header');
-    try{ localStorage.setItem(KEY_HEAD, on?'1':'0'); }catch(_){}
-    vibrate(8);
-  }
-
-  function boot(){
-    etNav  = $('#etNav');
-    etHead = $('#etHead');
-    if (etNav)  etNav.addEventListener('click', toggleNav,  {passive:true});
-    if (etHead) etHead.addEventListener('click', toggleHeader, {passive:true});
-    applyPersisted();
-    // atalhos desktop
-    document.addEventListener('keydown', (e)=>{
-      if (e.key === 'n' || e.key === 'N') toggleNav();
-      if (e.key === 'h' || e.key === 'H') toggleHeader();
+    // Also persist on iframe ready message if it announces the active archetype
+    window.addEventListener('message', (ev)=>{
+      const d = ev && ev.data || {};
+      if (d && typeof d === 'object' && d.type === 'archReady' && d.name){
+        // Normalize and save
+        try { localStorage.setItem('uno:arch', baseName(d.name)); } catch(_){}
+      }
     });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
+})();
+</script>
+
+
+<script id="arch-firestore-sync">
+/* =====================================================
+   Archetype ↔ Firestore Sync (defensive)
+   - Persists 'uno:arch' into Firestore when available.
+   - Reads current select and writes to
+     /artifacts/{appId}/users/{userId}/atom_state/orb_manifest { archetype }
+   - Also logs events to /events with origin.
+   ===================================================== */
+(function(){
+  async function logEvent(name, origin){
+    try{
+      if (!(window.db && window.userId && window.appId)) return;
+      const mod = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js');
+      const { collection, addDoc, serverTimestamp } = mod;
+      const path = `/artifacts/${window.appId}/users/${window.userId}/events`;
+      await addDoc(collection(window.db, path), {
+        type: 'archetype.change',
+        name: name, origin: origin || 'local',
+        at: serverTimestamp ? serverTimestamp() : new Date().toISOString()
+      });
+    }catch(e){ /* silent */ }
+  }
+  async function saveFirestoreArchetype(name, origin){
+    try{
+      // Prefer existing saveState(state) if provided
+      if (typeof window.saveState === 'function'){
+        try{
+          window.S = window.S || { state:{}, config:{} };
+          window.S.state = window.S.state || {};
+          window.S.state.archetype = name;
+          await window.saveState(window.S.state);
+          return;
+        }catch(e){ /* fallback to raw write */ }
+      }
+      if (!(window.db && window.userId && window.appId)) return;
+      const mod = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js');
+      const { doc, setDoc } = mod;
+      const path = `/artifacts/${window.appId}/users/${window.userId}/atom_state`;
+      const ref  = doc(window.db, path, 'orb_manifest');
+      await setDoc(ref, { archetype: name, lastUpdate: new Date().toISOString() }, { merge: true });
+    }catch(e){ /* silent */ }
+  }
+
+  function getCurrentBase(){
+    try{
+      const sel = document.getElementById('arch-select');
+      const opt = sel && sel.options[sel.selectedIndex];
+      return String(opt && opt.value || '').replace(/\.html$/i,'').toLowerCase();
+    }catch(_){ return ''; }
+  }
+
+  function persist(name, origin){
+    if (!name) name = getCurrentBase();
+    if (!name) return;
+    try{ localStorage.setItem('uno:arch', name); }catch(_){}
+    saveFirestoreArchetype(name, origin);
+    logEvent(name, origin);
+  }
+
+  // Persist on common actions
+  document.addEventListener('DOMContentLoaded', function(){
+    const sel  = document.getElementById('arch-select');
+    const prev = document.getElementById('arch-prev');
+    const next = document.getElementById('arch-next');
+    if (sel)  sel.addEventListener('change', ()=> persist(getCurrentBase(), 'local'), {passive:true});
+    if (prev) prev.addEventListener('click', ()=> setTimeout(()=>persist(getCurrentBase(), 'local'),0), {passive:true});
+    if (next) next.addEventListener('click', ()=> setTimeout(()=>persist(getCurrentBase(), 'local'),0), {passive:true});
+  });
+
+  // If child archetype frame reports readiness with name, treat as remote merge
+  window.addEventListener('message', (ev)=>{
+    const d = ev && ev.data || {};
+    if (d && d.type === 'archReady' && d.name){
+      const base = String(d.name||'').replace(/\.html$/i,'').toLowerCase();
+      persist(base, 'remote');
+    }
+  });
+
+  // Also persist once on boot for the current selection (ensures Firestore has a value)
+  window.addEventListener('load', ()=>{ setTimeout(()=>persist(getCurrentBase(), 'boot'), 250); });
 })();
 </script>
 
