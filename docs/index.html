@@ -5695,126 +5695,249 @@ document.getElementById('orbWrap')?.addEventListener('click', function(){ try{ w
 </script>
 
 
-<!-- PATCH v3.5.2 — Champion: per-arch presets + FPS miniHUD + Export LS (inline) -->
-<script id="champion-v352">
+<!-- PATCH v3.5.3 — ARK3D • 3D Chips ORB (WebGL, fallback Canvas) -->
+<script id="ark3d-chips-orb">
 (function(){
-  /* ---------- Helpers ---------- */
-  const $ = (q,r=document)=>r.querySelector(q);
-  const archOf = ()=> (($('#arch-select')?.value||'atlas').replace(/\.html$/i,'').toLowerCase());
-
-  function postFrame(msg){
-    try{ const fr=$('#arch-frame'); fr&&fr.contentWindow&&fr.contentWindow.postMessage(msg,'*'); }catch(_){}
-  }
-  function clamp(x,a,b){ return Math.max(a,Math.min(b,x)); }
-
-  /* ---------- 1) Presets por arquétipo (favoritos) ---------- */
-  const PRESETS = {
-    atlas:  { color:'#3b69ff', count:180, orbitRadius:.75, glow:.42 },
-    nova:   { color:'#ff52b1', count:220, orbitRadius:.76, glow:.48 },
-    vitalis:{ color:'#22d3ee', count:200, orbitRadius:.74, glow:.40 },
-    pulse:  { color:'#00bfff', count:240, orbitRadius:.76, glow:.44 },
-    artemis:{ color:'#ff7a00', count:160, orbitRadius:.72, glow:.38 },
-    serena: { color:'#b684ff', count:180, orbitRadius:.70, glow:.40 },
-    kaos:   { color:'#ff4d6d', count:200, orbitRadius:.75, glow:.46 },
-    genus:  { color:'#10b981', count:170, orbitRadius:.70, glow:.36 },
-    lumine: { color:'#ffd54f', count:210, orbitRadius:.77, glow:.50 },
-    rhea:   { color:'#00d1b2', count:160, orbitRadius:.68, glow:.34 },
-    solus:  { color:'#6495ed', count:190, orbitRadius:.73, glow:.42 },
-    aion:   { color:'#8b5cf6', count:200, orbitRadius:.75, glow:.46 }
-  };
-  function applyArchPreset(a){
-    const p = PRESETS[a]||PRESETS.atlas;
-    // refletir sliders se existirem
-    const c=$('#atom-count'), o=$('#atom-orbit'), g=$('#atom-glow');
-    const co=$('#atom-count-out'), oo=$('#atom-orbit-out'), go=$('#atom-glow-out');
-    if (c){ c.value=p.count; co&&(co.textContent=String(p.count)); }
-    if (o){ o.value=p.orbitRadius; oo&&(oo.textContent=p.orbitRadius.toFixed(2)); }
-    if (g){ g.value=p.glow; go&&(go.textContent=p.glow.toFixed(2)); }
-    // enviar para o iframe
-    postFrame({ type:'atomConfig', data:{ count:p.count, orbitRadius:p.orbitRadius, glow:p.glow } });
-    // overlay de cor, se a função existir
-    try{ typeof window.applyArchOverlay==='function' && window.applyArchOverlay(a); }catch(_){}
-  }
-  // Boot inicial e mudança de arquétipo
-  function bindArchPreset(){
-    const sel = $('#arch-select');
-    if (sel && !sel.dataset._v352){
-      sel.dataset._v352='1';
-      sel.addEventListener('change', ()=> setTimeout(()=> applyArchPreset(archOf()), 60), {passive:true});
+  const MOUNT_DELAY = 80;
+  function mount(){
+    const circle = document.querySelector('.arch-circle');
+    if(!circle) return;
+    let wrap = circle.querySelector('.orb-wrap');
+    if(!wrap){
+      wrap = document.createElement('div');
+      wrap.className='orb-wrap';
+      wrap.style.cssText='position:absolute;inset:6%;border-radius:50%;overflow:hidden;';
+      circle.appendChild(wrap);
     }
-    // aplica no primeiro load
-    setTimeout(()=> applyArchPreset(archOf()), 120);
-  }
+    // Remove any previous #orb3d
+    const old = wrap.querySelector('#orb3d'); if(old) old.remove();
 
-  /* ---------- 2) FPS mini‑HUD no Brain ---------- */
-  function fpsHUD(){
-    let last=performance.now(), frames=0, fps=0;
-    const hud = document.createElement('div');
-    hud.id='fpsMiniHUD';
-    hud.style.cssText='position:absolute;top:8px;right:8px;padding:6px 8px;border-radius:10px;font:12px/1.2 system-ui,-apple-system,Segoe UI,Roboto;color:#eaf2ff;background:rgba(0,0,0,.38);border:1px solid rgba(255,255,255,.16);z-index:5';
-    hud.textContent='FPS — …';
-    function ensureInBrain(){
-      const pop = $('#brain .popover');
-      if (pop && !$('#fpsMiniHUD')) pop.appendChild(hud);
+    const cv = document.createElement('canvas');
+    cv.id='orb3d'; cv.style.cssText='position:absolute;inset:0;width:100%;height:100%;display:block;border-radius:50%';
+    wrap.appendChild(cv);
+
+    const DPR = Math.min(devicePixelRatio||1, 2);
+    function fit(){
+      const r = cv.getBoundingClientRect();
+      cv.width = Math.max(2, Math.floor(r.width * DPR));
+      cv.height= Math.max(2, Math.floor(r.height* DPR));
     }
-    function tick(now){
-      frames++;
-      if (now-last>=1000){ fps=frames; frames=0; last=now; hud.textContent = `FPS — ${fps}`; }
-      requestAnimationFrame(tick);
+    new ResizeObserver(()=>{fit(); initOrUpdate();}).observe(cv);
+    fit();
+
+    // Try WebGL2 then WebGL
+    const gl = cv.getContext('webgl2', {alpha:true, antialias:true}) || cv.getContext('webgl', {alpha:true, antialias:true});
+    const hasGL = !!gl;
+
+    // Settings (reads LS presets if present)
+    function lsNum(key, def){ try{ const v=localStorage.getItem(key); return v==null? def : parseFloat(v); } catch(_){ return def; } }
+    function archKey(){ try{ const s=document.getElementById('arch-select'); return (s?.value||'atlas').replace(/\.html$/,'').toLowerCase(); }catch(_){ return 'atlas'; } }
+    function settings(){
+      const a = archKey();
+      const count = Math.round(lsNum(`dual.atom.${a}.count`, lsNum('dual.atom.count', 200)));
+      const orbit = lsNum(`dual.atom.${a}.orbit`, lsNum('dual.atom.orbit', .75));
+      const glow  = lsNum(`dual.atom.${a}.glow`,  lsNum('dual.atom.glow',  .46));
+      const bloomOn = (localStorage.getItem('dual.ui.bloom')==='1');
+      return {count: Math.max(32, Math.min(1200, count)), orbitRadius: Math.max(.5, Math.min(.9, orbit)), glow: Math.max(0, Math.min(1, glow)), bloomOn};
     }
-    requestAnimationFrame(tick);
-    // tenta inserir sempre que o brain abre
-    ensureInBrain();
-    const brainBtn = $('#btnBrain') || document.querySelector('[data-action="brain"]');
-    brainBtn && brainBtn.addEventListener('click', ()=> setTimeout(ensureInBrain, 80), {passive:true});
-    // fallback: tenta de novo depois
-    setInterval(ensureInBrain, 1200);
-  }
 
-  /* ---------- 3) Exportar LocalStorage (toggles/presets) ---------- */
-  function exportLSButton(){
-    const panel = $('#lsPanel') || document.querySelector('#lsModal .ls-panel');
-    if (!panel) return;
-    if ($('#btnExportLS')) return;
-    const btn = document.createElement('button');
-    btn.id='btnExportLS'; btn.className='pill-btn'; btn.textContent='Exportar LS (JSON)';
-    btn.style.marginTop='8px';
-    btn.onclick = ()=>{
-      try{
-        const keys = Object.keys(localStorage);
-        const pick = {};
-        const allow = [/^dual\.ui\./, /^dual\.atom\./];
-        keys.forEach(k=>{
-          if (allow.some(r=>r.test(k))) pick[k]=localStorage.getItem(k);
-        });
-        const blob = new Blob([JSON.stringify(pick,null,2)], {type:'application/json'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'dual_ls_export.json';
-        document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 400);
-      }catch(e){ console.warn('Export LS failed', e); }
-    };
-    // Coloca perto da seção de Partículas (se existir), senão no topo
-    const sec = $('#atomControlsV342') || panel;
-    sec.insertBefore(btn, sec.firstChild);
-  }
-  function bindExport(){
-    const btnLS = $('#btnLS');
-    if (btnLS && !btnLS.dataset._expLS){
-      btnLS.dataset._expLS='1';
-      btnLS.addEventListener('click', ()=> setTimeout(exportLSButton, 120), {passive:true});
-    } else setTimeout(exportLSButton, 200);
-  }
+    let animRAF=null, program=null, buf=null, u={}, pts=0, clock=0, _cfg=null;
 
-  /* ---------- Wire ---------- */
-  function boot(){
-    bindArchPreset();
-    fpsHUD();
-    bindExport();
+    // Build GL program
+    function makeGL(){
+      if(!gl) return false;
+      const vs = `#version 100
+      precision mediump float;
+      attribute float aIdx;
+      uniform float uCount, uTime, uOrbit, uSize;
+      uniform vec2 uRes;
+      varying float vL;
+      // golden angle for distribution
+      float ga = 2.39996323;
+      void main(){
+        float i = aIdx;
+        float n = max(1.0, uCount);
+        float t = uTime*0.9;
+        float a = i*ga + t*0.2;
+        float y = (i/n)*2.0 - 1.0;
+        float r = sqrt(1.0 - y*y);
+        // base sphere
+        vec3 p = vec3(r*cos(a), y, r*sin(a));
+
+        // orbit deformation
+        float wob = 0.06*sin(t + i*0.13);
+        p *= (uOrbit + wob);
+
+        // rotate slowly
+        float s = sin(t*0.25), c = cos(t*0.25);
+        mat2 rot = mat2(c,-s,s,c);
+        vec3 q = vec3(rot*vec2(p.x,p.z), p.y);
+
+        // perspective
+        float camZ = 1.9;
+        float z = q.z + camZ;
+        float invz = 1.0 / z;
+        vec2 ndc = q.xy * invz;
+        // fit to canvas
+        float aspect = uRes.x / uRes.y;
+        ndc.x *= aspect;
+        gl_Position = vec4(ndc, 0.0, 1.0);
+        float size = uSize * (1.5 + 1.2*sin(i*0.3 + t*1.1));
+        gl_PointSize = size * invz;
+        vL = clamp(0.45 + 0.55*(1.0 - invz), 0.0, 1.0);
+      }`;
+      const fs = `#ifdef GL_ES
+      precision mediump float;
+      #endif
+      varying float vL;
+      uniform float uGlow;
+      uniform vec3 uColA, uColB;
+      void main(){
+        // point sprite square chip
+        vec2 uv = gl_PointCoord*2.0 - 1.0;
+        float d = max(abs(uv.x), abs(uv.y));
+        float edge = smoothstep(1.0, 0.95, 1.0 - d);
+        vec3 col = mix(uColA, uColB, vL);
+        // inner specular
+        float spec = pow(max(0.0, 1.0 - dot(uv,uv)), 3.0);
+        vec3 rgb = col*(.55+.45*vL) + spec * (0.65 + 0.35*uGlow);
+        gl_FragColor = vec4(rgb, edge);
+      }`;
+      function compile(type,src){
+        const s = gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s);
+        if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)){ console.warn(gl.getShaderInfoLog(s)); return null; }
+        return s;
+      }
+      const v = compile(gl.VERTEX_SHADER, vs);
+      const f = compile(gl.FRAGMENT_SHADER, fs);
+      if(!v || !f) return false;
+      program = gl.createProgram(); gl.attachShader(program,v); gl.attachShader(program,f); gl.linkProgram(program);
+      if(!gl.getProgramParameter(program, gl.LINK_STATUS)){ console.warn(gl.getProgramInfoLog(program)); return false; }
+      gl.useProgram(program);
+      // setup buffer of indices [0..N)
+      buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      // attrib
+      const aIdx = gl.getAttribLocation(program, 'aIdx');
+      gl.enableVertexAttribArray(aIdx); gl.vertexAttribPointer(aIdx, 1, gl.FLOAT, false, 0, 0);
+      // uniforms
+      u.count = gl.getUniformLocation(program, 'uCount');
+      u.time  = gl.getUniformLocation(program, 'uTime');
+      u.orbit = gl.getUniformLocation(program, 'uOrbit');
+      u.size  = gl.getUniformLocation(program, 'uSize');
+      u.res   = gl.getUniformLocation(program, 'uRes');
+      u.glow  = gl.getUniformLocation(program, 'uGlow');
+      u.colA  = gl.getUniformLocation(program, 'uColA');
+      u.colB  = gl.getUniformLocation(program, 'uColB');
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+      return true;
+    }
+
+    function hexToRgb(hex){
+      hex = hex.replace('#','');
+      const r=parseInt(hex.substring(0,2),16)/255;
+      const g=parseInt(hex.substring(2,4),16)/255;
+      const b=parseInt(hex.substring(4,6),16)/255;
+      return [r,g,b];
+    }
+
+    function palette(){
+      // try to read CSS variable --arch-color if available
+      const cssCol = getComputedStyle(document.documentElement).getPropertyValue('--arch-color').trim() || '#5fa3ff';
+      const a = hexToRgb(cssCol);
+      const b = [Math.min(1,a[0]+.25), Math.min(1,a[1]+.25), Math.min(1,a[2]+.25)];
+      return {a:a, b:b};
+    }
+
+    function initOrUpdate(){
+      _cfg = settings();
+      if(hasGL && !program){
+        if(!makeGL()) return;
+      }
+      if(hasGL){
+        // update buffer if count changed
+        if(pts !== _cfg.count){
+          const arr = new Float32Array(_cfg.count);
+          for(let i=0;i<_cfg.count;i++) arr[i]=i;
+          gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+          gl.bufferData(gl.ARRAY_BUFFER, arr, gl.STATIC_DRAW);
+          pts = _cfg.count;
+        }
+      }
+    }
+
+    function render(t){
+      if(!cv.isConnected) return; // detached
+      if(!hasGL){ renderFallback2D(t); animRAF=requestAnimationFrame(render); return; }
+      const col = palette();
+      gl.viewport(0,0,cv.width,cv.height);
+      gl.clearColor(0,0,0,0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.useProgram(program);
+      gl.uniform1f(u.count, _cfg.count);
+      gl.uniform1f(u.time,  t*0.001);
+      gl.uniform1f(u.orbit, _cfg.orbitRadius);
+      const baseSize = Math.max(1.5, cv.width/450.0);
+      const sizeBoost = _cfg.bloomOn ? 1.35 : 1.0;
+      gl.uniform1f(u.size, baseSize* sizeBoost * window.devicePixelRatio);
+      gl.uniform2f(u.res, cv.width, cv.height);
+      gl.uniform1f(u.glow, _cfg.glow);
+      gl.uniform3fv(u.colA, col.a);
+      gl.uniform3fv(u.colB, col.b);
+      gl.drawArrays(gl.POINTS, 0, pts);
+      animRAF = requestAnimationFrame(render);
+    }
+
+    // Fallback Canvas 2D (simple rotating dots)
+    let ctx2d=null;
+    function renderFallback2D(ms){
+      if(!ctx2d){ ctx2d = cv.getContext('2d'); }
+      const t = ms*0.001;
+      const W=cv.width, H=cv.height, R=Math.min(W,H)*0.45*_cfg.orbitRadius;
+      ctx2d.clearRect(0,0,W,H);
+      ctx2d.save(); ctx2d.translate(W/2,H/2);
+      const n=_cfg.count, wob=0.06*Math.sin(t);
+      for(let i=0;i<n;i++){
+        const a = i*2.39996323 + t*0.2;
+        const y = (i/n)*2-1;
+        const r = Math.sqrt(1 - y*y);
+        const px = r*Math.cos(a), pz = r*Math.sin(a), py = y;
+        // rotate
+        const s=Math.sin(t*0.25), c=Math.cos(t*0.25);
+        const X = (c*px - s*pz), Z = (s*px + c*pz), Y = py;
+        const invz = 1/(Z+1.9);
+        const x = X*R*invz, y2= Y*R*invz;
+        const sz = (1.5 + 1.2*Math.sin(i*0.3 + t*1.1)) * invz * (cv.width/450);
+        const alpha = Math.min(1, Math.max(.15, invz));
+        ctx2d.fillStyle = `rgba(200,230,255,${alpha})`;
+        ctx2d.fillRect(x - sz, y2 - sz, sz*2, sz*2);
+      }
+      ctx2d.restore();
+    }
+
+    function start(){
+      cancelAnimationFrame(animRAF); animRAF=null;
+      initOrUpdate();
+      animRAF = requestAnimationFrame(render);
+    }
+
+    // React to LS changes we control (bloom/atom values) via simple polling
+    let lastSig='';
+    setInterval(()=>{
+      const s = JSON.stringify(settings());
+      if(s!==lastSig){ lastSig=s; initOrUpdate(); }
+    }, 400);
+
+    // External messages (from parent scripts)
+    window.addEventListener('storage', (ev)=>{
+      if(ev.key && (ev.key.startsWith('dual.atom.') || ev.key==='dual.ui.bloom')) initOrUpdate();
+    });
+
+    // Kickoff
+    start();
   }
-  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
-  // Reaplicar após carregamento do iframe do arquétipo
-  (function(){ const fr=$('#arch-frame'); fr&&fr.addEventListener('load', ()=> setTimeout(()=> applyArchPreset(archOf()), 60)); })();
+  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', ()=> setTimeout(mount, MOUNT_DELAY));
+  else setTimeout(mount, MOUNT_DELAY);
 })();
 </script>
 
