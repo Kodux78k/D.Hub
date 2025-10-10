@@ -1,10 +1,12 @@
 {
-  "name": "HUB-UNO \u2014 Nebula Pack",
-  "short_name": "HUB-UNO",
-  "start_url": "./index.updated.html",
+  "name": "HUB UNO",
+  "short_name": "UNO",
+  "id": "/",
+  "start_url": "index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#070912",
-  "theme_color": "#7a3cff",
+  "background_color": "#0b0f14",
+  "theme_color": "#0b0f14",
   "icons": [
     {
       "src": "icons/icon-192.png",
@@ -16,6 +18,5 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ],
-  "description": "Pacote PWA com 4 variantes do HUB UNO (v11, Brava, Atlas3D+Bloom, v14-Archetypes) e index atualizado."
+  ]
 }

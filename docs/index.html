@@ -1,5 +1,7 @@
 <!doctype html>
 <html lang="pt-BR" style="--arch-overlay: rgba(64, 158, 255, 0.22);"><head>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
   <title>HUB UNO — PROD (safe)</title>
@@ -1304,64 +1306,6 @@ body::after{
 html[data-overlay="off"] body::after{ background: transparent !important; }
 html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
 </style>
-
-<style id="orb-slot-css">
-/* === ORB Slot (iframe "dentro" do orbe) === */
-.arch-circle { position: relative; }
-#orbWrap { position: relative; }
-#orbWrap canvas#orb,
-#orbWrap .orb-glow,
-#orbWrap .ring,
-#orbWrap canvas#particles { position: absolute; inset: 0; }
-
-/* Z-order for sandwiching */
-#orbWrap canvas#orb { z-index: 1; }
-#orbWrap .orb-glow { z-index: 2; }
-#orbWrap .orb-slot   { z-index: 3; } /* iframe masked */
-#orbWrap canvas#particles { z-index: 4; }
-#orbWrap .ring { z-index: 5; }
-/* HUB overlays keep above */
-#arch-fadeCover, #audioRipple { z-index: 6; }
-
-/* Masked slot inside the orb */
-.orb-slot{
-  position:absolute;
-  inset: 8%;              /* adjust 6–10% to taste */
-  border-radius: 50%;
-  overflow: hidden;
-  -webkit-clip-path: circle(50% at 50% 50%);
-          clip-path: circle(50% at 50% 50%);
-  mix-blend-mode: screen;
-  opacity: .92;
-  filter: saturate(1.06) contrast(1.04);
-  will-change: transform, opacity, filter;
-  pointer-events: auto;   /* allow interaction inside the archetype app */
-}
-.orb-slot iframe#arch-frame{
-  position:absolute; inset:0;
-  width:100%; height:100%;
-  border:0; background:#0b0f14; /* avoid white flash */
-  transform: translateZ(0);
-}
-/* Tint with archetype overlay color */
-.orb-slot::after{
-  content:"";
-  position:absolute; inset:0;
-  background: var(--arch-overlay, transparent);
-  pointer-events:none;
-  mix-blend-mode: overlay;
-  opacity:.35;
-  transition: opacity .25s ease;
-}
-</style>
-
-
-<!-- VOICE-PATCH • UI tweaks + hide logs -->
-<style id="voice-patch-tweaks">
-  #logs{display:none !important}
-  #lsModal button{padding:6px 10px;font-size:13px}
-  .arch-switcher button{width:30px;height:30px;padding:0;border-radius:8px}
-</style>
 </head>
 <body>
   <!-- Splash screen displayed on initial load -->
@@ -1436,7 +1380,7 @@ html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
             <button class="btn fx-trans fx-press ring" id="arch-prev" title="Anterior">
               <img src="icons/chevron-left.svg" alt="Anterior" width="16" height="16" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-left.svg'">
             <span class="ripple"></span></button>
-            <select id="arch-select" title="Escolher arquétipo"><option value="./archetypes3d/value="./archetypes3d/atlas.html">atlas.html</option><option value="./archetypes3d/value="./archetypes3d/nova.html">nova.html</option><option value="./archetypes3d/value="./archetypes3d/vitalis.html">vitalis.html</option><option value="./archetypes3d/value="./archetypes3d/pulse.html">pulse.html</option><option value="./archetypes3d/value="./archetypes3d/artemis.html">artemis.html</option><option value="./archetypes3d/value="./archetypes3d/serena.html">serena.html</option><option value="./archetypes3d/value="./archetypes3d/kaos.html">kaos.html</option><option value="./archetypes3d/value="./archetypes3d/genus.html">genus.html</option><option value="./archetypes3d/value="./archetypes3d/lumine.html">lumine.html</option><option value="./archetypes3d/value="./archetypes3d/rhea.html">rhea.html</option><option value="./archetypes3d/value="./archetypes3d/solus.html">solus.html</option><option value="./archetypes3d/value="./archetypes3d/aion.html">aion.html</option></select>
+            <select id="arch-select" title="Escolher arquétipo"><option value="atlas.html">atlas.html</option><option value="nova.html">nova.html</option><option value="vitalis.html">vitalis.html</option><option value="pulse.html">pulse.html</option><option value="artemis.html">artemis.html</option><option value="serena.html">serena.html</option><option value="kaos.html">kaos.html</option><option value="genus.html">genus.html</option><option value="lumine.html">lumine.html</option><option value="rhea.html">rhea.html</option><option value="solus.html">solus.html</option><option value="aion.html">aion.html</option></select>
             <button class="btn fx-trans fx-press ring" id="arch-next" title="Próximo">
               <img src="icons/chevron-right.svg" alt="Próximo" width="16" height="16" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-right.svg'">
             <span class="ripple"></span></button>
@@ -5239,464 +5183,196 @@ document.getElementById('orbWrap')?.addEventListener('click', function(){ try{ w
 </script>
 
 
-<script id="orb-slot-and-archpersist-patch">
+<script>
+/* ================================================================
+   Dual · Particles "Cell" Renderer with Archetype Colors (Blue-1 safe)
+   - Replaces the existing #particles canvas with a new instance.
+   - Colors follow the current archetype (persisted in localStorage).
+   - Public API: window.setArchetype(name)
+   ================================================================ */
 (function(){
-  // ---- Helpers ----
-  function $(q, r=document){ return r.querySelector(q); }
-  function baseName(file){ return String(file||'').replace(/\.html$/i,'').toLowerCase(); }
+  const ARCH_KEY = 'dual.archetype';           // localStorage key
+  const DEFAULT_ARCH = 'Nova';                 // default if none stored
+  // Hue palettes (center hue and spread) — tweak to your taste
+  const ARCH_PALETTES = {
+    'Nova':   { hue: 200, spread: 24 }, // ciano celeste
+    'Elysha': { hue: 280, spread: 26 }, // violeta-nebula
+    'Kaion':  { hue: 160, spread: 20 }, // verde-tec
+    'Atlas':  { hue: 30,  spread: 16 }, // âmbar/solar
+    'Serena': { hue: 320, spread: 22 }, // magenta quente
+    'Artemis':{ hue: 210, spread: 18 }, // azul profundo
+    'Pulse':  { hue: 195, spread: 30 }, // aqua vivo
+    'Rhea':   { hue: 45,  spread: 18 }, // ouro suave
+    'Solus':  { hue: 12,  spread: 18 }, // coral
+    'Aion':   { hue: 260, spread: 20 }, // roxo frio
+    'Genus':  { hue: 140, spread: 18 }, // verde bio
+    'Lumine': { hue: 220, spread: 20 }  // azul-luz
+  };
 
-  // ---- Create orb-slot and move the iframe inside the orb ----
-  function fuseIframeIntoOrb(){
-    var wrap = $('#orbWrap');
-    var frame = $('#arch-frame');
-    if(!wrap || !frame) return;
-    // If already fused, skip
-    if (frame.parentElement && frame.parentElement.classList && frame.parentElement.classList.contains('orb-slot')) return;
-    var slot = document.createElement('div');
-    slot.className = 'orb-slot';
-    // Insert slot above particles but below ring (order controlled by CSS z-index)
-    wrap.appendChild(slot);
-    // Move iframe inside slot
-    slot.appendChild(frame);
+  // Read current archetype from localStorage
+  function getArch(){
+    try { return localStorage.getItem(ARCH_KEY) || DEFAULT_ARCH; }
+    catch(_) { return DEFAULT_ARCH; }
   }
+  function setArch(name){
+    const key = (name||'').trim();
+    if (!ARCH_PALETTES[key]) return;
+    try { localStorage.setItem(ARCH_KEY, key); } catch(_){}
+    // recolor immediately
+    CURRENT.arch = key;
+    recolor();
+  }
+  window.setArchetype = setArch;
+  window.getArchetype = getArch;
 
-  // ---- Archetype persistence (uno:arch) + overlay/apply + Firestore sync ----
-  function currentSelectBase(){
-    var sel = $('#arch-select'); if(!sel) return '';
-    var opt = sel.options[sel.selectedIndex];
-    return baseName(opt && opt.value);
+  // Obtain / replace particles canvas safely
+  const oldCanvas = document.getElementById('particles');
+  if (!oldCanvas) return;
+  const parent = oldCanvas.parentNode;
+  const clone = oldCanvas.cloneNode(true);
+  oldCanvas.replaceWith(clone);
+
+  const c = clone;
+  const ctx = c.getContext('2d', { alpha:true });
+  const dpr = Math.min(2, (window.devicePixelRatio||1));
+  let RAF = 0;
+
+  function resize(){
+    const r = c.getBoundingClientRect();
+    c.width  = Math.floor(r.width * dpr);
+    c.height = Math.floor(r.height * dpr);
   }
-  function applyArch(base){
-    var sel = $('#arch-select'), frame = $('#arch-frame'), fade = $('#arch-fadeCover');
-    if(!sel || !frame) return;
-    var idx = -1;
-    for (var i=0;i<sel.options.length;i++){
-      if (baseName(sel.options[i].value) === base){ idx = i; break; }
-    }
-    if (idx >= 0){
-      sel.selectedIndex = idx;
-      if (fade) fade.classList.add('show');
-      var file = sel.options[idx].value;
-      frame.src = './archetypes/' + file;
-      try { if (typeof window.applyArchOverlay === 'function') window.applyArchOverlay(base); } catch(_){}
-      try { if (typeof window.speakArchetype === 'function') window.speakArchetype(base); } catch(_){}
-      try { if (typeof window.updateHomeStatus === 'function') window.updateHomeStatus(); } catch(_){}
-      setTimeout(function(){ if (fade) fade.classList.remove('show'); }, 240);
-    }
+  new ResizeObserver(()=>{ resize(); }).observe(c); resize();
+
+  // "Cell": concentric membrane, cytoplasm glow, drifting organelles
+  const CURRENT = {
+    arch: getArch(),
+    t0: performance.now(),
+    nodes: [],
+    nucleus: { wobbleA: Math.random()*6.28, wobbleB: Math.random()*6.28 }
+  };
+
+  const N = 96; // particles (organelles)
+  function palette(){
+    const p = ARCH_PALETTES[CURRENT.arch] || ARCH_PALETTES[DEFAULT_ARCH];
+    return p;
   }
-  function saveArch(base){
-    if(!base) return;
-    try { localStorage.setItem('uno:arch', base); } catch(_){}
-    // If a shared app state exists, mirror and save remotely
-    try {
-      if (window.S && S.state){
-        S.state.archetype = base;
-        if (typeof window.saveState === 'function') saveState(S.state);
-      }
-    } catch(_){}
-  }
-  function bindArchPersistence(){
-    var sel = $('#arch-select'), prev = $('#arch-prev'), next = $('#arch-next');
-    function persist(){ var b=currentSelectBase(); if(b){ saveArch(b);} }
-    if (sel) sel.addEventListener('change', persist, {passive:true});
-    if (prev) prev.addEventListener('click', function(){ setTimeout(persist, 0); }, {passive:true});
-    if (next) next.addEventListener('click', function(){ setTimeout(persist, 0); }, {passive:true});
-    // Accept remote notifications
-    window.addEventListener('message', function(ev){
-      var d = ev && ev.data || {};
-      if (d && d.type==='archReady' && d.name){
-        var b = baseName(d.name);
-        saveArch(b);
-      }
+  function rand(min, max){ return min + Math.random()*(max-min); }
+
+  function seed(){
+    CURRENT.nodes = Array.from({length:N}, ()=>{
+      const a  = Math.random()*Math.PI*2;
+      const rr = 0.30 + Math.random()*0.58; // keep inner space for nucleus
+      const s  = (0.15 + Math.random()*0.65) * (Math.random()<0.5?-1:1);
+      const z  = 0.45 + Math.random()*0.55;
+      return { a, r: rr, s, z, hueOffset: rand(-1,1), drift: rand(0.8,1.6) };
     });
   }
-  function bootWithSavedArch(){
-    var saved = (localStorage.getItem('uno:arch') || localStorage.getItem('infodose:arch') || '').replace(/\.html$/i,'');
-    saved = baseName(saved);
-    if(saved){
-      var cur = currentSelectBase();
-      if (cur !== saved) applyArch(saved);
-    } else {
-      // Initialize with current
-      saveArch(currentSelectBase());
+  seed();
+
+  function recolor(){
+    // noop: colors are computed per-frame from CURRENT.arch
+  }
+
+  function draw(now){
+    const t = now || performance.now();
+    const dt = t - CURRENT.t0;
+
+    ctx.clearRect(0,0,c.width,c.height);
+    ctx.save();
+    ctx.translate(c.width/2, c.height/2);
+    ctx.globalCompositeOperation = 'lighter';
+
+    const scl = Math.min(c.width, c.height)/2;
+
+    // Cell membrane (rim)
+    (()=>{
+      const grd = ctx.createRadialGradient(0,0, scl*0.15, 0,0, scl*0.98);
+      const P = palette();
+      const h = P.hue;
+      grd.addColorStop(0.00, `hsla(${h}, 90%, 65%, .06)`);
+      grd.addColorStop(0.55, `hsla(${h}, 90%, 55%, .10)`);
+      grd.addColorStop(0.87, `hsla(${h}, 90%, 60%, .16)`);
+      grd.addColorStop(1.00, `hsla(${h}, 90%, 65%, 0)`);
+      ctx.fillStyle = grd;
+      ctx.beginPath(); ctx.arc(0,0, scl*0.98, 0, Math.PI*2); ctx.fill();
+    })();
+
+    // Cytoplasm faint noise swirl
+    (()=>{
+      const swirl = Math.sin(t*0.0013)*0.04;
+      ctx.rotate(swirl);
+      ctx.globalAlpha = 0.08;
+      const P = palette();
+      const h = P.hue + 12;
+      for (let i=0;i<6;i++){
+        const r = scl*(0.25 + i*0.12);
+        ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2);
+        ctx.strokeStyle = `hsla(${h},70%,60%,${0.08 - i*0.01})`;
+        ctx.lineWidth = 2 * (c.width/800);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.rotate(-swirl);
+    })();
+
+    // Nucleus (soft pulsing)
+    (()=>{
+      const P = palette();
+      const h = P.hue - 10;
+      const wob = Math.sin(t*0.0016 + CURRENT.nucleus.wobbleA)*0.02 + Math.sin(t*0.0011 + CURRENT.nucleus.wobbleB)*0.015;
+      const r  = scl*(0.18 + wob);
+      const g  = ctx.createRadialGradient(0,0, 0, 0,0, r*1.55);
+      g.addColorStop(0.00, `hsla(${h}, 95%, 75%, .55)`);
+      g.addColorStop(0.45, `hsla(${h}, 90%, 60%, .18)`);
+      g.addColorStop(1.00, `hsla(${h}, 85%, 55%, 0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill();
+    })();
+
+    // Organelles (drifting particles)
+    const P = palette();
+    for(const n of CURRENT.nodes){
+      const ang = n.a + t*0.00025*n.s;
+      const rr  = n.r * (0.72 + 0.12*Math.sin(t*0.001 + n.a));
+      const x = Math.cos(ang)*rr*scl;
+      const y = Math.sin(ang)*rr*scl*0.98;
+      const rad = (1.0 + n.z*1.6) * (c.width/900);
+      const hue = P.hue + n.hueOffset * P.spread;
+
+      const g = ctx.createRadialGradient(x,y,0,x,y,rad*4.2);
+      g.addColorStop(0, `hsla(${hue}, 90%, 70%, .88)`);
+      g.addColorStop(1, `hsla(${hue}, 85%, 50%, 0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(x,y,rad,0,Math.PI*2); ctx.fill();
     }
+
+    ctx.restore();
+    RAF = requestAnimationFrame(draw);
   }
 
-  function start(){
-    fuseIframeIntoOrb();
-    bindArchPersistence();
-    bootWithSavedArch();
+  function boot(){
+    cancelAnimationFrame(RAF);
+    RAF = requestAnimationFrame(draw);
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
-  else start();
-})();
-</script>
-
-
-<script id="arch-chips-3d-layers">
-(function(){
-  // Minimal palettes (sync with your overlay colors)
-  const COLORS = {
-    atlas:'#409EFF', nova:'#FF52B1', vitalis:'#34D399', pulse:'#00BFFF',
-    artemis:'#FFC300', serena:'#B684FF', kaos:'#FF4D6D', genus:'#22C55E',
-    lumine:'#FFD54F', rhea:'#00D1B2', solus:'#6495ED', aion:'#8B5CF6'
-  };
-  const PRESET = name => ({
-    name,
-    color: COLORS[name] || '#88a',
-    count: (name==='nova'||name==='pulse'||name==='lumine') ? 340 : 260,
-    orbitRadius: (name==='nova'||name==='serena'||name==='lumine') ? 0.76 : 0.68,
-    spin: (name==='nova'||name==='pulse') ? 0.7 : 0.56,
-    size: 0.010, // sphere size
-    glow: 0.42
+  // If a global archetype selector exists elsewhere, hook it:
+  document.addEventListener('archetype:change', (ev)=>{
+    const name = ev && ev.detail && ev.detail.name;
+    if (name && ARCH_PALETTES[name]) setArch(name);
   });
 
-  const ACTIVE = new Set();
-  function sendLayers(){
-    const fr = document.getElementById('arch-frame');
-    if (!fr || !fr.contentWindow) return;
-    const arr = Array.from(ACTIVE).map(n => PRESET(n));
-    fr.contentWindow.postMessage({ type:'atomConfigLayers', layers: arr }, '*');
-  }
-
-  function chipEl(name){
-    const b = document.createElement('button');
-    b.className = 'arch-chip';
-    b.textContent = name[0].toUpperCase()+name.slice(1);
-    b.style.borderColor = 'rgba(255,255,255,.18)';
-    b.style.background = 'rgba(255,255,255,.06)';
-    b.onclick = ()=>{
-      if (ACTIVE.has(name)) ACTIVE.delete(name); else ACTIVE.add(name);
-      b.classList.toggle('on', ACTIVE.has(name));
-      sendLayers();
-    };
-    return b;
-  }
-
-  function ensureStyles(){
-    if (document.getElementById('archChip3DStyles')) return;
-    const st = document.createElement('style'); st.id='archChip3DStyles';
-    st.textContent = `
-      .arch-chip-wrap{ display:grid; grid-template-columns: repeat(auto-fill,minmax(92px,1fr)); gap:8px; }
-      .arch-chip{ appearance:none; border:1px solid var(--ring, rgba(255,255,255,.18)); background: var(--glass, rgba(255,255,255,.06)); color: var(--txt, #eaf2ff);
-        padding:8px 10px; border-radius:999px; font-size:12px; letter-spacing:.2px; cursor:pointer; }
-      .arch-chip.on{ background: rgba(57,255,182,.18); border-color: rgba(57,255,182,.45); }
-      .arch-chip-title{ font-size:12px; color: var(--muted,#a6b0c0); margin: 6px 0 6px; font-weight:800; }
-    `;
-    document.head.appendChild(st);
-  }
-
-  function injectInLSPanel(){
-    ensureStyles();
-    const panel = document.getElementById('lsPanel') || document.querySelector('#lsModal .ls-panel');
-    if (!panel || document.getElementById('archChip3DSection')) return;
-    const sec = document.createElement('div');
-    sec.id = 'archChip3DSection';
-    sec.className = 'preset';
-    sec.style.marginTop = '10px';
-    sec.innerHTML = `<div class="arch-chip-title">Arquétipos (camadas no ORB · 3D)</div>`;
-    const wrap = document.createElement('div'); wrap.className = 'arch-chip-wrap';
-    ['atlas','nova','vitalis','pulse','artemis','serena','kaos','genus','lumine','rhea','solus','aion'].forEach(n=> wrap.appendChild(chipEl(n)));
-    sec.appendChild(wrap);
-    // Coloca no topo do LS Panel
-    const hdr = panel.querySelector('.ls-hdr');
-    if (hdr && hdr.parentNode) hdr.parentNode.insertBefore(sec, hdr.nextSibling);
-    // Ativa por padrão a camada do arquétipo atual
-    try{
-      const sel = document.getElementById('arch-select');
-      const cur = (sel && sel.value || 'atlas.html').replace(/.*\//,'').replace(/\.html$/i,'');
-      const btn = wrap.querySelector('button.arch-chip:nth-child(' + (['atlas','nova','vitalis','pulse','artemis','serena','kaos','genus','lumine','rhea','solus','aion'].indexOf(cur)+1) + ')');
-      if (cur && btn){ ACTIVE.add(cur); btn.classList.add('on'); sendLayers(); }
-    }catch(_){}
-  }
-
-  function bindLSButton(){
-    const btn = document.getElementById('btnLS');
-    if (btn && !btn.dataset._chipsHook){
-      btn.dataset._chipsHook = '1';
-      btn.addEventListener('click', ()=> setTimeout(injectInLSPanel, 80), {passive:true});
-    } else {
-      // if already open
-      setTimeout(injectInLSPanel, 120);
-    }
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindLSButton);
-  else bindLSButton();
-
-  // Also re-inject if LS modal gets rebuilt
-  document.addEventListener('ls:disabled-changed', ()=> setTimeout(injectInLSPanel, 60));
-})();
-</script>
-
-
-<!-- PATCH v3.5 — Presets por arquétipo + Salvar como padrão (inline) -->
-<script id="lspanel-atom-presets-v35">
-(function(){
-  const ARCH_KEYS = ['atlas','nova','vitalis','pulse','artemis','serena','kaos','genus','lumine','rhea','solus','aion'];
-  const K = (arch)=> ({
-    count: `dual.atom.${arch}.count`,
-    orbit: `dual.atom.${arch}.orbit`,
-    glow:  `dual.atom.${arch}.glow`
-  });
-  const GLOBAL = { bloom:'dual.ui.bloom', solid:'dual.ui.orbSolid' };
-
-  const PRESETS = {
-    leve:   { count: 96,  orbitRadius: .72, glow: .30 },
-    medio:  { count: 180, orbitRadius: .75, glow: .42 },
-    cinema: { count: 320, orbitRadius: .78, glow: .56 }
+  // expose lightweight API
+  window.DUAL_ARCH = {
+    set: setArch,
+    get: getArch,
+    palettes: ARCH_PALETTES
   };
 
-  function getArch(){
-    const sel = document.getElementById('arch-select');
-    if(!sel) return 'atlas';
-    const v = sel.value || 'atlas';
-    return v.replace(/\.html$/i,'').toLowerCase();
-  }
-  function getLS(key, def){
-    try{
-      const v = localStorage.getItem(key);
-      if (v === null || v === undefined) return def;
-      // try parse float/int
-      if (/count$/.test(key)) return parseInt(v, 10);
-      return parseFloat(v);
-    }catch(_){ return def; }
-  }
-  function setLS(key, val){ try{ localStorage.setItem(key, String(val)); }catch(_){ } }
-
-  function pushToFrame(data){
-    try{
-      const fr = document.getElementById('arch-frame');
-      fr && fr.contentWindow && fr.contentWindow.postMessage({ type:'atomConfig', data }, '*');
-    }catch(_){}
-  }
-
-  function currentFromLS(arch){
-    const keys = K(arch);
-    const out = {};
-    const c = getLS(keys.count, NaN);
-    const o = getLS(keys.orbit, NaN);
-    const g = getLS(keys.glow , NaN);
-    if(!isNaN(c)) out.count = clamp(c, 8, 720);
-    if(!isNaN(o)) out.orbitRadius = clamp(o, .40, .90);
-    if(!isNaN(g)) out.glow = clamp(g, 0, 1);
-    return out;
-  }
-
-  function clamp(x, a, b){ return Math.max(a, Math.min(b, x)); }
-
-  // Inject UI into existing v3.4.2 section, augmenting with preset buttons and "Salvar"
-  function injectPresetUI(){
-    const panel = document.getElementById('lsPanel') || document.querySelector('#lsModal .ls-panel');
-    if(!panel) return;
-    // base controls section (from v3.4.2) or create if missing
-    let sec = document.getElementById('atomControlsV342');
-    if(!sec){
-      sec = document.createElement('section'); sec.id='atomControlsV342';
-      const title = document.createElement('div'); title.className='section-title'; title.textContent='Partículas do Átomo';
-      sec.appendChild(title);
-      panel.prepend(sec);
-    }
-    if (document.getElementById('atomPresetBar')) return;
-    const bar = document.createElement('div'); bar.id='atomPresetBar';
-    bar.style.display='grid'; bar.style.gridTemplateColumns='repeat(auto-fill,minmax(120px,1fr))';
-    bar.style.gap='8px'; bar.style.margin='8px 0';
-    function pill(txt, cb){
-      const b=document.createElement('button'); b.className='pill-btn'; b.textContent=txt; b.onclick=cb; return b;
-    }
-    const btnLeve   = pill('Leve',   ()=> applyPreset('leve'));
-    const btnMedio  = pill('Médio',  ()=> applyPreset('medio'));
-    const btnCinema = pill('Cinema', ()=> applyPreset('cinema'));
-    const btnSalvar = pill('Salvar padrão do arquétipo', saveAsDefault);
-    bar.appendChild(btnLeve); bar.appendChild(btnMedio); bar.appendChild(btnCinema); bar.appendChild(btnSalvar);
-    // insert above sliders (first line in sec)
-    const first = sec.firstElementChild && sec.firstElementChild.classList.contains('section-title') ? sec.firstElementChild.nextSibling : sec.firstChild;
-    sec.insertBefore(bar, first);
-
-    // small hint showing current arch target
-    const hint = document.createElement('div'); hint.className='mut'; hint.style.fontSize='11px'; hint.style.opacity='.8';
-    hint.style.marginTop='-2px'; hint.id='atomPresetHint';
-    sec.insertBefore(hint, bar.nextSibling);
-    updateHint();
-
-    function updateHint(){
-      const arch = getArch();
-      hint.textContent = 'Arquétipo alvo: ' + arch;
-    }
-    const sel = document.getElementById('arch-select'); if (sel && !sel.dataset._v35Bind){ sel.dataset._v35Bind='1'; sel.addEventListener('change', ()=>{ setTimeout(updateHint, 20); loadDefaultsForArch(); }, {passive:true}); }
-  }
-
-  function applyPreset(name){
-    const arch = getArch();
-    const keys = K(arch);
-    const p = PRESETS[name]; if(!p) return;
-    setLS(keys.count, p.count);
-    setLS(keys.orbit, p.orbitRadius);
-    setLS(keys.glow , p.glow);
-    // reflect on sliders if they exist (v3.4.2)
-    const c=document.getElementById('atom-count'), o=document.getElementById('atom-orbit'), g=document.getElementById('atom-glow');
-    const co=document.getElementById('atom-count-out'), oo=document.getElementById('atom-orbit-out'), go=document.getElementById('atom-glow-out');
-    if(c){ c.value=p.count; co && (co.textContent=String(p.count)); }
-    if(o){ o.value=p.orbitRadius; oo && (oo.textContent=p.orbitRadius.toFixed(2)); }
-    if(g){ g.value=p.glow; go && (go.textContent=p.glow.toFixed(2)); }
-    pushToFrame({ count:p.count, orbitRadius:p.orbitRadius, glow:p.glow });
-  }
-
-  function saveAsDefault(){
-    const arch = getArch();
-    const keys = K(arch);
-    // read current sliders or LS
-    const c=document.getElementById('atom-count'), o=document.getElementById('atom-orbit'), g=document.getElementById('atom-glow');
-    const count = c? parseInt(c.value,10) : getLS(keys.count, 64);
-    const orbit = o? parseFloat(o.value)   : getLS(keys.orbit, .74);
-    const glow  = g? parseFloat(g.value)   : getLS(keys.glow , .40);
-    setLS(keys.count, clamp(count, 8, 720));
-    setLS(keys.orbit, clamp(orbit, .40, .90));
-    setLS(keys.glow , clamp(glow , 0, 1));
-    // soft notify
-    try{
-      const sec = document.getElementById('atomControlsV342');
-      if(sec){
-        let ok = sec.querySelector('#atomSavedOK'); if(!ok){ ok = document.createElement('div'); ok.id='atomSavedOK'; ok.className='mut'; ok.style.fontSize='11px'; ok.style.marginTop='4px'; sec.appendChild(ok); }
-        ok.textContent = 'Padrão salvo para "'+arch+'".';
-        setTimeout(()=>{ ok.textContent=''; }, 1600);
-      }
-    }catch(_){}
-  }
-
-  function loadDefaultsForArch(){
-    const arch = getArch();
-    const cfg = currentFromLS(arch);
-    if(Object.keys(cfg).length){
-      // reflect on sliders:
-      const c=document.getElementById('atom-count'), o=document.getElementById('atom-orbit'), g=document.getElementById('atom-glow');
-      const co=document.getElementById('atom-count-out'), oo=document.getElementById('atom-orbit-out'), go=document.getElementById('atom-glow-out');
-      if(cfg.count && c){ c.value=cfg.count; co && (co.textContent=String(cfg.count)); }
-      if(cfg.orbitRadius && o){ o.value=cfg.orbitRadius; oo && (oo.textContent=cfg.orbitRadius.toFixed(2)); }
-      if(cfg.glow!==undefined && g){ g.value=cfg.glow; go && (go.textContent=cfg.glow.toFixed(2)); }
-      pushToFrame(cfg);
-    }
-  }
-
-  // On first load, apply saved defaults for the current arch
-  function firstBoot(){
-    injectPresetUI();
-    loadDefaultsForArch();
-  }
-
-  // bind on LSPanel open or early boot
-  function bind(){
-    const btnLS = document.getElementById('btnLS');
-    if(btnLS && !btnLS.dataset._v35){
-      btnLS.dataset._v35='1';
-      btnLS.addEventListener('click', ()=> setTimeout(firstBoot, 120), {passive:true});
-    } else {
-      setTimeout(firstBoot, 200);
-    }
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', bind); else bind();
-  document.addEventListener('ls:disabled-changed', ()=> setTimeout(firstBoot, 100));
-  // also re-apply after iframe loads
-  (function(){
-    const fr = document.getElementById('arch-frame'); if(!fr) return;
-    fr.addEventListener('load', ()=> setTimeout(loadDefaultsForArch, 60));
-  })();
+  // Start with last used or default
+  recolor();
+  boot();
 })();
 </script>
 
-
-<!-- VOICE-PATCH • PT‑BR presets + memória do arquétipo -->
-<script id="voice-patch">
-(function(){
-  try{
-    const ARCH_META = {
-      atlas:'male', nova:'female', vitalis:'male', pulse:'male',
-      artemis:'female', serena:'female', kaos:'male', genus:'male',
-      lumine:'female', rhea:'female', solus:'male', aion:'male'
-    };
-    function pickVoiceFor(gender){
-      try {
-        const voices = window.speechSynthesis ? speechSynthesis.getVoices() : [];
-        function first(fn){ for(const v of voices){ try{ if(fn(v)) return v; }catch(e){} } return null; }
-        // Prefer Google neural PT-BR when present
-        const ptbrGoogle = first(v=>/pt[-_]br/i.test(v.lang||'') && /google/i.test(v.name||''));
-        const ptbrFemale = first(v=>/pt[-_]br/i.test(v.lang||'') && /(luciana|fernanda|let[ií]cia|v[ií]t[oó]ria|camila|maria|joana)/i.test(v.name||''));
-        const ptbrMale   = first(v=>/pt[-_]br/i.test(v.lang||'') && /(felipe|thiago|daniel|jo[aã]o|rafael)/i.test(v.name||''));
-        const ptbrAny    = first(v=>/pt[-_]br/i.test(v.lang||''));
-        const ptptAny    = first(v=>/^pt([-_]|$)/i.test(v.lang||''));
-        const enAny      = first(v=>/^en/i.test(v.lang||''));
-        if (gender === 'female') return ptbrGoogle || ptbrFemale || ptbrAny || ptptAny || enAny || (voices[0] || null);
-        return ptbrGoogle || ptbrMale || ptbrAny || ptptAny || enAny || (voices[0] || null);
-      } catch(e){ return null; }
-    }
-    function ensurePTPresets(){
-      try{
-        const saved = JSON.parse(localStorage.getItem('infodose:voices')||'{}')||{};
-        let changed=false;
-        Object.keys(ARCH_META).forEach(base=>{
-          const file = base+'.html';
-          if(!saved[file]){
-            const v = pickVoiceFor(ARCH_META[base]);
-            if(v){ saved[file]=v.name; changed=true; }
-          }
-        });
-        if(changed) localStorage.setItem('infodose:voices', JSON.stringify(saved));
-      }catch(e){}
-    }
-    function bindArchMemory(){
-      const sel   = document.getElementById('arch-select');
-      const frame = document.getElementById('arch-frame');
-      if(!sel || !frame) return;
-      const last = localStorage.getItem('uno:archFile');
-      if(last && Array.from(sel.options).some(o=>o.value===last)) sel.value = last;
-      applyArch(sel.value, true);
-      sel.addEventListener('change', ()=>{
-        localStorage.setItem('uno:archFile', sel.value);
-        applyArch(sel.value, false);
-      });
-      document.getElementById('arch-prev')?.addEventListener('click', ()=>step(-1));
-      document.getElementById('arch-next')?.addEventListener('click', ()=>step(1));
-      function step(dir){
-        const i = sel.selectedIndex;
-        const n = (i + dir + sel.options.length) % sel.options.length;
-        sel.selectedIndex = n;
-        sel.dispatchEvent(new Event('change'));
-      }
-      function applyArch(file, silent){
-        try{
-          // Keep support for both relative files and ./archetypes/*
-          if (frame.tagName.toLowerCase()==='iframe') {
-            if(!/^https?:|^data:|^about:/.test(file)){
-              const u = (file.startsWith('./')||file.startsWith('/')) ? file : ('./archetypes/'+file);
-              if (frame.src !== u) frame.src = u;
-            }
-          }
-        }catch(e){}
-        if(!silent && typeof window.showArchMessage === 'function'){
-          const nm = String(file||'').replace(/\.html$/i,'').toUpperCase();
-          showArchMessage('Arquétipo: ' + nm, 'ok');
-        }
-      }
-    }
-    function boot(){
-      ensurePTPresets();
-      bindArchMemory();
-    }
-    // Wait for voices if needed to pick best Google PT-BR neural
-    if (window.speechSynthesis){
-      const already = speechSynthesis.getVoices();
-      if (already && already.length){
-        boot();
-      } else {
-        // voiceschanged may not fire on some browsers; use a timeout fallback
-        speechSynthesis.addEventListener('voiceschanged', boot, { once: true });
-        setTimeout(boot, 800);
-      }
-    } else {
-      boot();
-    }
-  }catch(e){ console.warn('voice-patch error', e); }
-})();
-</script>
 </body></html>
