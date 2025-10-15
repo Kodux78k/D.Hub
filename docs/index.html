@@ -1,5 +1,7 @@
 <!doctype html>
 <html lang="pt-BR" style="--arch-overlay: rgba(64, 158, 255, 0.22);"><head>
+<!-- NOTE: bump your SW cache name to e.g. CACHE_V3 to avoid stale assets after refactor. -->
+
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
   <title>HUB UNO — PROD (safe)</title>
@@ -66,7 +68,7 @@
       font: 14px/1.45 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
-      overflow: hidden;
+      overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch;
   /* Permite que o pseudo-elemento ::after fique posicionado em relação ao corpo */
   position: relative;
     }
@@ -106,8 +108,9 @@ body::after{content:'';position:fixed;inset:0;background:none !important;pointer
     .title small { display: block; color: var(--mut); letter-spacing: .1em }
 
     /* ===== Layout ===== */
-    main { position: relative; height: 100%; padding-top: calc(var(--hdrH) + env(safe-area-inset-top) + var(--hdrOffset)); padding-bottom: calc(var(--tabsH) + env(safe-area-inset-bottom)); overflow: hidden }
-    .view { position: absolute; inset: 0; padding: 12px 14px; overflow: auto; display: none }
+    main { position: relative; height: 100%; padding-top: calc(var(--hdrH) + env(safe-area-inset-top) + var(--hdrOffset)); padding-bottom: calc(var(--tabsH) + env(safe-area-inset-bottom)); overflow: auto; -webkit-overflow-scrolling: touch;}
+    .view { position: absolute; inset: 0; padding: 12px 14px; overflow: auto; display: none; -webkit-overflow-scrolling: touch;
+}
     .view.active {
       display: block;
       /* Animação de transição mais simples: apenas fade com leve zoom. */
@@ -1532,55 +1535,93 @@ body{
 try{ document.documentElement.style.setProperty('--arch-overlay','rgba(64,158,255,.22)'); }catch{}
 </script>
 
-<style id="OVERLAY_CONSOLIDATION">
-/* === CONSOLIDATION: OVERLAY BACKGROUND-ONLY === */
-body::after{ content:none !important; }
-body{
-  background:
-    radial-gradient(120% 120% at 50% 40%,
-      var(--arch-overlay, rgba(0,0,0,0)) 0%,
-      rgba(0,0,0,0) 62%),
-    linear-gradient(42deg, var(--grad-a), var(--grad-b)) fixed !important;
-}
-:root{ --grad-a:#ff52e5; --grad-b:#00c5e5; }
-body[data-theme="blue1"]{ --grad-a:#0044ff; --grad-b:#00aaff; }
-.arch-circle{ box-shadow: 0 18px 50px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.06); }
-</style>
-<style id="TOP_SPACING_FIX">
-:root{
-  --hdrH: 56px;
-  --tabsH: 60px;
-}
-main{
-  padding-top: calc(var(--hdrH) + min(env(safe-area-inset-top, 0px), 10px)) !important;
-  padding-bottom: calc(var(--tabsH) + min(env(safe-area-inset-bottom, 0px), 8px)) !important;
-}
-.arch-container{
-  margin-top: clamp(6px, 1.2vh, 12px) !important;
-}
-.view{ padding-top: 8px !important; }
-</style>
-<style id="TOP_SPACING_TIGHT">
-/* Variante mais colada: ignora safe-area extra */
-main{ padding-top: var(--hdrH) !important; }
-</style>
+
 <style id="ULTRA_TIGHT_TOP">
+/* 1) Header fixo e var de altura menor como base */
 :root{ --hdrH: 52px; --tabsH: 58px; }
+
+/* 2) Header fica fixo; o conteúdo compensa só a altura do header */
 header.mast{
   position: fixed !important;
   top: 0; left: 0; right: 0;
   margin-top: 0 !important;
-  z-index: 100;
+  z-index: 100; /* reforço */
 }
+
+/* 3) Main sem safe-area extra: só a altura real do header */
 main{
   padding-top: var(--hdrH) !important;
   padding-bottom: calc(var(--tabsH) + min(env(safe-area-inset-bottom, 0), 8px)) !important;
 }
+
+/* 4) Orbe colado: remove o 5vh e usa um clamp curtinho */
 .arch-container{
   margin-top: clamp(0px, 0.6vh, 8px) !important;
 }
-.view{ padding-top: 0 !important; }
+
+/* 5) Remove qualquer “respiro” adicional no topo das views */
+.view{ padding-top: 0 !important;   -webkit-overflow-scrolling: touch;
+}
 </style>
+
+<script id="ULTRA_TIGHT_RUNTIME">
+/* Mede a altura real do header (considera fonte/zoom/safe-area) e fixa --hdrH */
+document.addEventListener('DOMContentLoaded', ()=>{
+  try{
+    const hdr = document.querySelector('header.mast');
+    if(!hdr) return;
+    const hh = Math.round(hdr.getBoundingClientRect().height);
+    document.documentElement.style.setProperty('--hdrH', hh + 'px');
+  }catch(e){}
+});
+</script>
+
+
+<style id="OVERSCROLL_GUARD">
+html, body { overscroll-behavior-y: contain; }
+</style>
+<script id="SCROLL_UNLOCK_GUARD">
+(function(){
+  function unlock(){ try{ document.documentElement.style.overflowY='auto'; document.body.style.overflowY='auto'; }catch(e){} }
+  document.addEventListener('DOMContentLoaded', unlock, {once:true});
+  window.addEventListener('load', unlock, {once:true});
+  window.addEventListener('WindexReady', unlock, {once:true});
+})();
+</script>
+
+
+<style id="ARC_ORB_SQUARE_FADE">
+/* Patch focado: remove apenas o quadrado do ARC ORB,
+   preservando o fundo do iframe do arquétipo e adicionando fade circular. */
+
+/* 1) Zera fundos apenas do contêiner do ORB e filhos diretos */
+#orbWrap, #orbWrap * {
+  background: transparent !important;
+}
+
+/* 2) Mantém o fundo do arquétipo (fetch) intacto */
+.arch-circle > #arch-frame,
+.arch-circle > iframe#arch-frame {
+  background: #0b0f14 !important;
+}
+
+/* 3) Recria a “tinta” como overlay circular com fade suave */
+.arch-circle::after{
+  content:"";
+  position:absolute; inset:0;
+  border-radius:50%;
+  background: var(--arch-overlay, transparent);
+  mix-blend-mode: overlay;
+  pointer-events:none;
+  z-index: 6;
+  /* feather nas bordas (fade) */
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 86%);
+          mask-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 86%);
+  opacity:.35;
+  transition: opacity .25s ease;
+}
+</style>
+
 </head>
 <body>
   <!-- Splash screen displayed on initial load -->
@@ -1713,20 +1754,7 @@ main{
   <polyline points="15 18 9 12 15 6" stroke="url(#g5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
             <span class="ripple"></span></button>
-            <select id="arch-select" title="Escolher arquétipo">
-  <option value="./archetypes/atlas.html">atlas</option>
-  <option value="./archetypes/nova.html">nova</option>
-  <option value="./archetypes/vitalis.html">vitalis</option>
-  <option value="./archetypes/pulse.html">pulse</option>
-  <option value="./archetypes/artemis.html">artemis</option>
-  <option value="./archetypes/serena.html">serena</option>
-  <option value="./archetypes/kaos.html">kaos</option>
-  <option value="./archetypes/genus.html">genus</option>
-  <option value="./archetypes/lumine.html">lumine</option>
-  <option value="./archetypes/rhea.html">rhea</option>
-  <option value="./archetypes/solus.html">solus</option>
-  <option value="./archetypes/aion.html">aion</option>
-</select>
+            <select id="arch-select" title="Escolher arquétipo"><option value="./archetypes/atlas.html">atlas.html</option><option value="./archetypes/nova.html">nova.html</option><option value="./archetypes/vitalis.html">vitalis.html</option><option value="./archetypes/pulse.html">pulse.html</option><option value="./archetypes/artemis.html">artemis.html</option><option value="./archetypes/serena.html">serena.html</option><option value="./archetypes/kaos.html">kaos.html</option><option value="./archetypes/genus.html">genus.html</option><option value="./archetypes/lumine.html">lumine.html</option><option value="./archetypes/rhea.html">rhea.html</option><option value="./archetypes/solus.html">solus.html</option><option value="./archetypes/aion.html">aion.html</option></select>
             <button class="btn fx-trans fx-press ring" id="arch-next" title="Próximo">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
 
@@ -6629,37 +6657,114 @@ header.mast .ib svg{ display:block }
 /* Pequeno ajuste do LS modal dentro do glass theme */
 #lsModal .panel{ backdrop-filter: blur(8px) }
 </style>
-<script id="BOOTSTRAP_CONSOLIDATION">
+
+  <script src="./arch_overlay_fix_scoped.js"></script>
+  <script src="./ls_pedal_anti_fps_patch.js"></script>
+
+<!-- RESET ALL • Safe Boot + LS/IDB/SW/Caches -->
+<script id="UNO_RESET_ALL">
 (function(){
-  try{
-    const theme = localStorage.getItem('uno:theme') || 'default';
-    document.body.dataset.theme = (theme === 'blue1') ? 'blue1' : '';
-    if (!localStorage.getItem('uno:overlayLevel')) localStorage.setItem('uno:overlayLevel','22');
-    function overlayAlpha(){ const v=parseInt(localStorage.getItem('uno:overlayLevel')||'22',10); return Math.min(30,Math.max(0,isNaN(v)?22:v))/100; }
-    function overlayColor(name,a){ const RGB={atlas:[64,158,255],nova:[255,82,177],vitalis:[72,218,168],pulse:[0,191,255],artemis:[186,130,219],serena:[140,190,255],kaos:[255,77,109],genus:[87,207,112],lumine:[255,213,79],rhea:[0,209,178],solus:[100,149,237],aion:[255,159,67]}; const rgb=RGB[name]||[64,158,255]; return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`; }
-    const saved=(localStorage.getItem('uno:arch')||'atlas').toLowerCase();
-    const a = overlayAlpha(); document.documentElement.style.setProperty('--arch-overlay', overlayColor(saved,a));
-  }catch(e){ console.warn('bootstrap consolidation:', e); }
+  // Expose a single entry point
+  async function resetAll({clearLS=true, clearIDB=true, clearCaches=true, unregisterSW=true}={}){
+    try{
+      if (clearLS) localStorage.clear();
+      if (clearIDB && 'indexedDB' in window){
+        if (indexedDB.databases){
+          const dbs = await indexedDB.databases();
+          for (const d of (dbs||[])){
+            if (d && d.name){
+              await new Promise(res=>{
+                const req = indexedDB.deleteDatabase(d.name);
+                req.onsuccess = req.onerror = req.onblocked = ()=>res();
+              });
+            }
+          }
+        } else {
+          // common names fallback
+          for (const name of ['dual','uno','app','db','files','store']) {
+            await new Promise(res=>{
+              const req = indexedDB.deleteDatabase(name);
+              req.onsuccess = req.onerror = req.onblocked = ()=>res();
+            });
+          }
+        }
+      }
+      if (clearCaches && window.caches?.keys){
+        const keys = await caches.keys();
+        for (const k of keys) await caches.delete(k);
+      }
+      if (unregisterSW && navigator.serviceWorker?.getRegistrations){
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for (const r of regs) await r.unregister();
+      }
+      // small grace
+      setTimeout(()=>location.reload(), 200);
+    }catch(e){
+      console.error('ResetAll error', e);
+      alert('Reset falhou: ver Console.');
+    }
+  }
+  window.UNO_ResetAll = resetAll;
+
+  // Safe boot via ?safe=1
+  (function safeBoot(){
+    try{
+      const p = new URLSearchParams(location.search);
+      if (p.has('safe')){
+        // minimal: clear LS keys that are ours (prefix uno:/infodose:/dual.)
+        for (let i=localStorage.length-1;i>=0;i--){
+          const k = localStorage.key(i);
+          if (/^(uno:|infodose:|dual\.)/i.test(k)) localStorage.removeItem(k);
+        }
+      }
+    }catch{}
+  })();
+
+  // Storage versioning (bump to force soft reset on incompatible schema)
+  (function versioning(){
+    const VER = '3.1.0';
+    const KEY = 'uno:version';
+    try{
+      const cur = localStorage.getItem(KEY);
+      if (cur !== VER){
+        // Soft migration: drop volatile keys known to corrupt state
+        const DROP = [
+          'unoStackGroups','unoStackSessions','unoPinnedApps',
+          'infodose:locals:v1','infodose:cssCustom','uno:bg'
+        ];
+        DROP.forEach(k=> localStorage.removeItem(k));
+        localStorage.setItem(KEY, VER);
+      }
+    }catch{}
+  })();
+
+  // Add hidden "Reset All" control into LS modal + keyboard shortcut (Ctrl+Alt+Backspace)
+  document.addEventListener('DOMContentLoaded', function(){
+    try{
+      const panel = document.querySelector('#lsModal .ls-panel') || document.getElementById('lsPanel');
+      if (panel && !document.getElementById('btnResetAll')){
+        const bar = panel.querySelector('.ls-actions') || panel;
+        const b = document.createElement('button');
+        b.id = 'btnResetAll';
+        b.textContent = 'Reset All (LS+IDB+Cache+SW)';
+        b.style.background = 'rgba(255,92,138,.22)';
+        b.style.borderColor = 'rgba(255,92,138,.38)';
+        b.addEventListener('click', async ()=>{
+          if (confirm('Zerar tudo? (LocalStorage + IndexedDB + Caches + SW)')){
+            await window.UNO_ResetAll({});
+          }
+        });
+        bar && bar.appendChild(b);
+      }
+    }catch(e){}
+  });
+  window.addEventListener('keydown', (e)=>{
+    if ((e.ctrlKey||e.metaKey) && e.altKey && e.key === 'Backspace'){
+      e.preventDefault();
+      if (confirm('Reset All agora?')) window.UNO_ResetAll({});
+    }
+  });
 })();
 </script>
-<script id="TOP_SPACING_RUNTIME_FIX">
-document.addEventListener('DOMContentLoaded', ()=>{
-  try{
-    const hdr = document.querySelector('header.mast');
-    if(!hdr) return;
-    const hh = Math.round(hdr.getBoundingClientRect().height);
-    document.documentElement.style.setProperty('--hdrH', hh + 'px');
-  }catch(e){}
-});
-</script>
-<script id="ULTRA_TIGHT_RUNTIME">
-document.addEventListener('DOMContentLoaded', ()=>{
-  try{
-    const hdr = document.querySelector('header.mast');
-    if(!hdr) return;
-    const hh = Math.round(hdr.getBoundingClientRect().height);
-    document.documentElement.style.setProperty('--hdrH', hh + 'px');
-  }catch(e){}
-});
-</script>
+
 </body></html>
