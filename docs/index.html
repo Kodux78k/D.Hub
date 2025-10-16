@@ -1589,38 +1589,6 @@ html, body { overscroll-behavior-y: contain; }
 })();
 </script>
 
-
-<style id="ARC_ORB_SQUARE_FADE">
-/* Patch focado: remove apenas o quadrado do ARC ORB,
-   preservando o fundo do iframe do arquétipo e adicionando fade circular. */
-
-/* 1) Zera fundos apenas do contêiner do ORB e filhos diretos */
-#orbWrap, #orbWrap * {
-  background: transparent !important;
-}
-
-/* 2) Mantém o fundo do arquétipo (fetch) intacto */
-.arch-circle > #arch-frame,
-.arch-circle > iframe#arch-frame {
-  background: #0b0f14 !important;
-}
-
-/* 3) Recria a “tinta” como overlay circular com fade suave */
-.arch-circle::after{
-  content:"";
-  position:absolute; inset:0;
-  border-radius:50%;
-  background: var(--arch-overlay, transparent);
-  mix-blend-mode: overlay;
-  pointer-events:none;
-  z-index: 6;
-  /* feather nas bordas (fade) */
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 86%);
-          mask-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 86%);
-  opacity:.35;
-  transition: opacity .25s ease;
-}
-</style>
 <style id="ARCH_FAB_ROUND_FIX">
 .arch-circle{
   border-radius:50% !important;
@@ -1640,11 +1608,11 @@ html, body { overscroll-behavior-y: contain; }
   background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
   box-shadow:0 6px 16px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.06) inset;
 }
-/* failsafe de recorte para camadas do orbe */
 .arch-circle > canvas, .arch-circle #orbWrap, .arch-circle .orb-slot, .arch-circle iframe#arch-frame{
   -webkit-clip-path: circle(50% at 50% 50%); clip-path: circle(50% at 50% 50%);
 }
 </style>
+
 </head>
 <body>
   <!-- Splash screen displayed on initial load -->
@@ -1801,7 +1769,7 @@ html, body { overscroll-behavior-y: contain; }
               <div class="orb-glow" id="orbGlow"></div>
               <canvas id="particles"></canvas>
               <div class="ring"></div>
-              <div class="call" id="orbCall"></div>
+              <div class="call" id="orbCall">Toque para pulsar · Nebula</div>
             </div>
 
             <iframe id="arch-frame" title="Archetype Core" sandbox="allow-scripts" referrerpolicy="no-referrer" src="./archetypes/atlas.html"></iframe>
@@ -6790,4 +6758,285 @@ header.mast .ib svg{ display:block }
 })();
 </script>
 
+
+
+<!-- Δ UNO_PATCH_DELTA (voices sync + scroll unlock + LSPanel accordion + dataURI→IDB + ranges + SW cache) -->
+<style id="UNO_PATCH_DELTA_styles">
+  html,body { overscroll-behavior: contain; }
+  main { overflow: auto; }
+  .view { overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; }
+  /* Garantir círculo 100% arredondado e sem vazamento de conteúdo */
+  .arch-circle{ border-radius:50%; overflow:hidden; }
+  /* FAB com recorte circular suave para não quadrar o fundo do círculo */
+  .arch-circle>.arch-fab{
+    background-clip: padding-box;
+    -webkit-mask-image: radial-gradient(circle at center, #000 69%, transparent 70%);
+            mask-image: radial-gradient(circle at center, #000 69%, transparent 70%);
+  }
+  /* Acordeão do LS Panel (injeção) */
+  .ls-acc .acc { margin-top:10px; border:1px solid rgba(255,255,255,.12); border-radius:14px; background:rgba(15,17,32,.6); }
+  .ls-acc .acc-hdr{ width:100%; text-align:left; background:transparent; border:0; padding:10px 12px; display:flex; gap:8px; align-items:center; cursor:pointer; }
+  .ls-acc .acc-body{ padding:10px 12px; display:block; }
+  .ls-acc .row{ display:grid; grid-template-columns: 120px 1fr auto; gap:10px; align-items:center; margin:6px 0; }
+  .ls-acc .actions{ display:flex; gap:8px; flex-wrap: wrap; }
+</style>
+<script id="UNO_PATCH_DELTA_voices_sync">
+(() => {
+  if (window.__UNO_VOICE_PATCH__) return; window.__UNO_VOICE_PATCH__ = true;
+  const log=(...a)=>console.debug('[UNO/patch]',...a);
+
+  const CANON_KEY='uno:voice:v1';
+  const CANON_CFG='uno:voice:cfg:v1';
+  const LEGACY_KEYS=['brain:voice','brain:voiceId','brain:voice:settings','arch:voice','arch:voiceId','tts:voice','tts:rate','tts:pitch','tts:volume','uno:voice','uno:voice:rate','uno:voice:pitch','uno:voice:gain','voices:active'];
+
+  const readLS = (k)=>{ try{ return localStorage.getItem(k); }catch(e){ return null; } };
+  const writeLS = (k,v)=>{ try{ localStorage.setItem(k,v); }catch(e){} };
+
+  function latestProfile(){
+    let cand=null, now=Date.now();
+    const c = readLS(CANON_CFG);
+    if (c) { try { const j=JSON.parse(c); if (j && j.id) cand=j; } catch{} }
+    if (!cand) {
+      const b = readLS('brain:voice:settings');
+      if (b) { try {
+        const j=JSON.parse(b);
+        if (j && j.id) cand={id:j.id,name:j.name||j.id,rate:j.rate??1,pitch:j.pitch??0,volume:j.volume??1,provider:j.provider||'brain',savedAt:j.savedAt||now};
+      } catch{} }
+    }
+    if (!cand) {
+      const id = readLS('brain:voiceId')||readLS('arch:voiceId')||readLS('tts:voice')||readLS('uno:voice')||'alloy';
+      const rate = +(readLS('tts:rate')||readLS('uno:voice:rate')||1);
+      const pitch = +(readLS('tts:pitch')||readLS('uno:voice:pitch')||0);
+      const volume = +(readLS('tts:volume')||readLS('uno:voice:gain')||1);
+      cand={id,name:id,rate,pitch,volume,provider:'auto',savedAt:now};
+    }
+    return cand;
+  }
+
+  function applyToModules(profile){
+    try{
+      const w = window;
+      if (w.arch?.setVoice) w.arch.setVoice(profile);
+      if (w.ATOM?.setVoice) w.ATOM.setVoice(profile);
+      const iframe = document.querySelector('.arch-circle iframe');
+      if (iframe?.contentWindow) {
+        try { iframe.contentWindow.postMessage({type:'uno:voice', profile}, '*'); } catch {}
+      }
+    }catch{}
+    try{
+      const w = window;
+      if (w.brain?.setVoice) w.brain.setVoice(profile);
+      if (w.BRAIN?.setVoice) w.BRAIN.setVoice(profile);
+      window.dispatchEvent(new CustomEvent('uno:voice-change', {detail:profile}));
+    }catch{}
+  }
+
+  function saveCanonical(profile){
+    profile = {...profile, savedAt: Date.now()};
+    writeLS(CANON_CFG, JSON.stringify(profile));
+    writeLS(CANON_KEY, profile.id);
+    writeLS('brain:voiceId', profile.id);
+    writeLS('arch:voiceId', profile.id);
+    writeLS('tts:voice', profile.id);
+    writeLS('tts:rate', String(profile.rate ?? 1));
+    writeLS('tts:pitch', String(profile.pitch ?? 0));
+    writeLS('tts:volume', String(profile.volume ?? 1));
+  }
+
+  const current = latestProfile(); saveCanonical(current); applyToModules(current);
+
+  window.addEventListener('storage', (e) => {
+    if (!e.key) return;
+    if (e.key===CANON_CFG || e.key===CANON_KEY || LEGACY_KEYS.includes(e.key)) {
+      const p = latestProfile(); saveCanonical(p); applyToModules(p);
+    }
+  });
+
+  window.UNO_VOICES = {
+    get: () => latestProfile(),
+    set: (p) => { saveCanonical(p); applyToModules(p); }
+  };
+
+  // ===== LS Panel injection (accordion) =====
+  function injectLSPanel(){
+    const panel = document.querySelector('#lsPanel, #ls-panel, [data-ls-panel]');
+    if (!panel || panel.__unoVoiceInjected) return;
+    panel.__unoVoiceInjected = true;
+
+    const sec = document.createElement('section');
+    sec.className='ls-acc';
+    sec.innerHTML = `
+<div class="acc">
+  <button class="acc-hdr" data-acc="voice"><strong>Voz (arch ⇄ brain)</strong><span class="mut">sincronizadas</span></button>
+  <div class="acc-body" id="acc-voice" hidden>
+    <div class="row">
+      <label>Preset</label>
+      <select id="unoVoiceSelect"></select>
+    </div>
+    <div class="row">
+      <label>Velocidade</label>
+      <input id="unoRate" type="range" min="0.5" max="2" step="0.05">
+      <output id="unoRateOut"></output>
+    </div>
+    <div class="row">
+      <label>Tom</label>
+      <input id="unoPitch" type="range" min="-12" max="12" step="1">
+      <output id="unoPitchOut"></output>
+    </div>
+    <div class="row">
+      <label>Volume</label>
+      <input id="unoVol" type="range" min="0" max="1" step="0.05">
+      <output id="unoVolOut"></output>
+    </div>
+    <div class="row actions">
+      <button id="unoTest" class="btn">Testar</button>
+      <button id="unoSave" class="btn prime">Salvar</button>
+      <button id="unoReset" class="btn">Reset</button>
+      <button id="unoClearAll" class="btn" title="Limpa LS, IDB, caches e SW">Reset All</button>
+    </div>
+  </div>
+</div>`;
+
+    panel.appendChild(sec);
+
+    // accord
+    sec.querySelector('.acc-hdr').addEventListener('click',()=>{
+      const body = sec.querySelector('.acc-body'); body.hidden = !body.hidden;
+    });
+
+    // populate voices
+    const select = sec.querySelector('#unoVoiceSelect');
+    const catalog = (() => {
+      try {
+        const c1 = JSON.parse(localStorage.getItem('uno:voices:catalog')||'[]');
+        if (Array.isArray(c1) && c1.length) return c1;
+      } catch {}
+      try {
+        const c2 = JSON.parse(localStorage.getItem('brain:voices')||'[]');
+        if (Array.isArray(c2) && c2.length) return c2;
+      } catch {}
+      return ['alloy','aria','verse','bright','calypso','cobalt','nova','sage'].map(id=>({id,name:id}));
+    })();
+
+    catalog.forEach(v=>{
+      const opt=document.createElement('option');
+      const id = typeof v==='string'? v : (v.id || v.name);
+      opt.value=id; opt.textContent=v.name || id;
+      select.appendChild(opt);
+    });
+
+    function syncUI(p){
+      if(!p) return;
+      select.value = p.id;
+      sec.querySelector('#unoRate').value = p.rate ?? 1;
+      sec.querySelector('#unoPitch').value = p.pitch ?? 0;
+      sec.querySelector('#unoVol').value = p.volume ?? 1;
+      sec.querySelector('#unoRateOut').textContent = (p.rate ?? 1).toFixed(2);
+      sec.querySelector('#unoPitchOut').textContent = (p.pitch ?? 0);
+      sec.querySelector('#unoVolOut').textContent = (p.volume ?? 1).toFixed(2);
+    }
+    syncUI(window.UNO_VOICES.get());
+
+    select.addEventListener('change', () => {
+      const p = {...window.UNO_VOICES.get(), id: select.value, name: select.selectedOptions[0]?.textContent || select.value};
+      window.UNO_VOICES.set(p); syncUI(p);
+    });
+    ['#unoRate','#unoPitch','#unoVol'].forEach(sel=>{
+      const el = sec.querySelector(sel);
+      const out = sec.querySelector(sel+'Out');
+      el.addEventListener('input',()=>{ out.textContent = sel==='#unoPitch' ? el.value : (+el.value).toFixed(2); });
+    });
+    sec.querySelector('#unoSave').addEventListener('click',()=>{
+      const p = {
+        id: select.value,
+        name: select.selectedOptions[0]?.textContent || select.value,
+        rate: +sec.querySelector('#unoRate').value,
+        pitch: +sec.querySelector('#unoPitch').value,
+        volume: +sec.querySelector('#unoVol').value
+      };
+      window.UNO_VOICES.set(p);
+    });
+    sec.querySelector('#unoReset').addEventListener('click',()=>{
+      const p = {id:'alloy', name:'alloy', rate:1, pitch:0, volume:1};
+      window.UNO_VOICES.set(p); syncUI(p);
+    });
+    sec.querySelector('#unoTest').addEventListener('click', async ()=>{
+      const p = window.UNO_VOICES.get();
+      const utter = new SpeechSynthesisUtterance('Nebula pulse');
+      utter.rate = Math.max(0.1, Math.min(10, p.rate || 1));
+      utter.pitch = 1 + (p.pitch || 0)/12;
+      utter.volume = Math.max(0, Math.min(1, p.volume||1));
+      window.speechSynthesis?.speak(utter);
+    });
+    sec.querySelector('#unoClearAll').addEventListener('click', async ()=>{
+      try { localStorage.clear(); } catch {}
+      if (indexedDB?.databases) {
+        const dbs = await indexedDB.databases();
+        for (const d of dbs) if(d?.name) await new Promise(r=>{
+          const req = indexedDB.deleteDatabase(d.name); req.onsuccess=req.onerror=req.onblocked=()=>r();
+        });
+      }
+      if (window.caches?.keys) { const ks = await caches.keys(); for (const k of ks) await caches.delete(k); }
+      if (navigator.serviceWorker?.getRegistrations) { const regs = await navigator.serviceWorker.getRegistrations(); for (const r of regs) await r.unregister(); }
+      location.reload();
+    });
+  }
+
+  function tryInject(){ injectLSPanel(); }
+  tryInject();
+  const mo = new MutationObserver(()=>tryInject());
+  mo.observe(document.documentElement, {subtree:true, childList:true});
+
+  // ===== Overscroll / scroll unlock =====
+  function unlockScroll(){
+    const html = document.documentElement;
+    const body = document.body;
+    [html, body].forEach(el=>{
+      el.style.overscrollBehavior = 'contain';
+      el.style.overflow = '';
+    });
+    document.querySelectorAll('main, .view, [data-scroll], .scroll, .scroll-y').forEach(el=>{
+      el.style.overflowY = 'auto';
+      el.style.overscrollBehaviorY = 'contain';
+      el.style.webkitOverflowScrolling = 'touch';
+      el.style.touchAction = 'pan-y';
+    });
+  }
+  unlockScroll();
+
+  // ===== Data URI → IDB migration =====
+  (function migrateLargeLS(){
+    const TH = 60_000; // ~60KB
+    const storeName='unoLargeBlobs';
+    const req = indexedDB.open('uno-blobs', 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(storeName);
+    req.onsuccess = () => {
+      const db = req.result;
+      const tx = db.transaction(storeName, 'readwrite');
+      const os = tx.objectStore(storeName);
+      for (let i=0;i<localStorage.length;i++){
+        const key = localStorage.key(i); if(!key) continue;
+        const val = localStorage.getItem(key)||'';
+        if (val.startsWith('data:') && val.length > TH){
+          os.put({key, data: val}, key);
+          localStorage.setItem(key, 'idb:uno-blobs:'+key);
+        }
+      }
+      tx.oncomplete = ()=> db.close();
+    };
+  })();
+
+  // ===== Defaults / ranges =====
+  try {
+    if (!localStorage.getItem('uno:arch:folder')) localStorage.setItem('uno:arch:folder','archetypes3d');
+    const fps = document.querySelector('[name=fps],[data-key="fps"]');
+    if (fps?.type==='range'){ fps.min='30'; fps.max='144'; fps.step='1'; }
+    const dens = document.querySelector('[name=density],[data-key="density"]');
+    if (dens?.type==='range'){ dens.min='10'; dens.max='300'; dens.step='1'; }
+  } catch {}
+
+  try { localStorage.setItem('uno:sw:cache', 'CACHE_V3'); } catch {}
+})();
+</script>
+<!-- /Δ -->
 </body></html>
