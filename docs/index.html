@@ -1591,7 +1591,32 @@ try{ document.documentElement.style.setProperty('--arch-overlay','rgba(64,158,25
   padding:10px 12px;border:var(--bd);background:rgba(255,255,255,.04);color:var(--fg)}
 .chat-composer .btn{white-space:nowrap}
 </style>
-<link rel="stylesheet" href="/orb/arch-orb.css">
+
+<style id="KOBLLUX_FINAL_LOCK">
+/* === FINAL LOCK: força mobile/compact & correções de superposição === */
+:root{
+  --ui-density: compact;
+}
+/* Tipografia e box-model consistentes */
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+/* Compact helpers (aplicados como fallback; evite duplicar em patches anteriores) */
+[hidden]{display:none !important}
+.container, .app, .hub-root{max-width:1280px;margin-inline:auto}
+img{max-width:100%;height:auto}
+/* Z-index saneado para overlays e painéis */
+.ls-panel, .dev-panel, .modal, .drawer, [data-overlay]{z-index:9999}
+/* Preferência final de tema (deixa como última palavra da cascata) */
+[data-theme="ambient"], .theme-ambient{--accent:#3DE39E;--accent-2:#0FA172}
+/* Botões utilitários e foco */
+:focus-visible{outline:2px dashed var(--accent,#3DE39E); outline-offset:3px}
+.btn,button{touch-action:manipulation}
+/* Mobile-first spacing */
+@media (max-width:720px){
+  .grid, .grid-two, .row{gap:10px}
+  .card, .panel{padding:14px}
+}
+</style>
 </head>
 <body>
   <!-- Splash screen displayed on initial load -->
@@ -6761,28 +6786,311 @@ push('assistant','Pronto','<p>Chat 13-Blocos iniciado. Escreva sua intenção e 
 }
 </style>
 
-  <div id="arch-orb-wrap"><svg id="arch-orb" viewBox="0 0 200 200"></svg></div>
+<!-- === UNO • ORB dos Arquétipos (Injected) === -->
+<style id="UNO_ARCH_ORB_STYLES">
+  #arch-orb-wrap{width:min(82vw,360px);aspect-ratio:1/1;display:grid;place-items:center;
+    background:radial-gradient(60% 60% at 50% 45%,#0b1424 0%,#0a1120 50%,#070d1a 100%);
+    border:1px solid #1a314a;border-radius:24px;box-shadow:0 0 32px #00e7ff1f,inset 0 0 24px #001b2f80;
+    padding:14px;margin:10px auto}
+  #arch-orb{width:100%;height:100%;display:block}
+</style>
 
+<div id="arch-orb-wrap" aria-label="Orb dos Arquétipos (UNO)">
+  <svg id="arch-orb" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="neo" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ff52e5"/><stop offset="1" stop-color="#00c5e5"/>
+      </linearGradient>
+      <linearGradient id="neo2" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#39FFB6"/><stop offset="1" stop-color="#00c5e5"/>
+      </linearGradient>
+      <radialGradient id="orbGlow" cx="50%" cy="50%" r="60%">
+        <stop offset="0%" stop-color="#00e7ff" stop-opacity=".25"/>
+        <stop offset="65%" stop-color="#00e7ff" stop-opacity=".05"/>
+        <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+      </radialGradient>
 
-<!-- UNO • ORB Modular Imports -->
-<script src="/orb/arch-orb.js" defer></script>
-<script src="/orb/bridge.js" defer></script>
-<script>
-  (function(){
-    async function boot(){
-      try{
-        await ArchOrb.loadDefs('/orb/arch-orb.svg');
-        ArchOrb.mount('#arch-orb');
-        // restore last or default atlas
-        try {
-          const last = localStorage.getItem('uno:arch:selected');
-          ArchOrb.set(last || 'atlas');
-        } catch { ArchOrb.set('atlas'); }
-      }catch(e){ console.error('ArchOrb boot failed:', e); }
-    }
-    if(document.readyState!=='loading') boot();
-    else document.addEventListener('DOMContentLoaded', boot);
-  })();
+      <symbol id="orb-horus" viewBox="0 0 200 200">
+        <circle cx="100" cy="100" r="80" fill="url(#orbGlow)" />
+        <circle cx="100" cy="100" r="78" fill="none" stroke="url(#neo)" stroke-width="3"/>
+        <circle cx="100" cy="100" r="68" fill="none" stroke="url(#neo2)" stroke-width="2" opacity=".8"/>
+        <g>
+          <path d="M45,100 Q60,80 100,80 Q140,80 155,100 Q140,120 100,120 Q60,120 45,100 Z"
+                fill="none" stroke="url(#neo)" stroke-width="4" stroke-linecap="round" />
+          <circle cx="100" cy="100" r="10" fill="url(#neo2)"/>
+          <path d="M105,112 q22,14 36,22" fill="none" stroke="#00e7ff" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+          <path d="M95,112 q-10,10 -14,18" fill="none" stroke="#ff52e5" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+          <path d="M60,95 q18,-16 40,-16 q22,0 40,16" fill="none" stroke="#39FFB6" stroke-width="2" opacity=".7"/>
+        </g>
+      </symbol>
+
+      <symbol id="delta-vortex" viewBox="0 0 200 200">
+        <polygon points="100,22 178,160 22,160" fill="none" stroke="url(#neo)" stroke-width="6" stroke-linejoin="round"/>
+        <g stroke="url(#neo2)" fill="none" stroke-width="2" opacity=".95">
+          <path d="M100,42 c40,0 54,30 58,48 c4,20 -6,42 -22,53 c-18,13 -43,13 -62,0 c-16,-11 -26,-33 -22,-53 c4,-18 18,-48 48,-48" />
+          <path d="M100,58 c30,0 42,22 45,36 c3,15 -5,31 -17,39 c-14,9 -33,9 -47,0 c-12,-8 -20,-24 -17,-39 c3,-14 14,-36 36,-36" opacity=".9"/>
+          <path d="M100,74 c20,0 28,14 30,24 c2,10 -3,20 -11,26 c-9,6 -22,6 -31,0 c-8,-6 -13,-16 -11,-26 c2,-10 9,-24 23,-24" opacity=".85"/>
+        </g>
+        <g>
+          <circle cx="100" cy="100" r="2" fill="#39FFB6"/>
+          <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="9s" repeatCount="indefinite"/>
+        </g>
+      </symbol>
+
+      <symbol id="icon-atlas" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="30" fill="none" stroke="url(#neo)" stroke-width="6"/>
+        <path d="M20 50h60M50 20v60" stroke="url(#neo)" stroke-width="4"/>
+      </symbol>
+      <symbol id="icon-nova" viewBox="0 0 100 100">
+        <g stroke="url(#neo)" fill="none" stroke-width="5">
+          <circle cx="50" cy="50" r="26"/>
+          <path d="M50 10v20M50 70v20M10 50h20M70 50h20M25 25l10 10M75 25l-10 10M25 75l10-10M75 75l-10-10"/>
+        </g>
+      </symbol>
+      <symbol id="icon-vitalis" viewBox="0 0 100 100">
+        <path d="M20 60 C30 30, 70 30, 80 60" stroke="url(#neo2)" stroke-width="6" fill="none"/>
+        <circle cx="50" cy="60" r="8" fill="url(#neo2)"/>
+      </symbol>
+      <symbol id="icon-pulse" viewBox="0 0 100 100">
+        <polyline points="10,60 30,60 40,30 50,70 60,45 70,60 90,60" fill="none" stroke="url(#neo2)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="icon-artemis" viewBox="0 0 100 100">
+        <path d="M20 80 Q50 20 80 80" fill="none" stroke="url(#neo)" stroke-width="6"/>
+        <circle cx="50" cy="28" r="6" fill="url(#neo)"/>
+      </symbol>
+      <symbol id="icon-serena" viewBox="0 0 100 100">
+        <path d="M20 60 a30 20 0 1 0 60 0" fill="none" stroke="url(#neo)" stroke-width="6"/>
+        <circle cx="50" cy="45" r="10" fill="url(#neo)"/>
+      </symbol>
+      <symbol id="icon-kaos" viewBox="0 0 100 100">
+        <path d="M20 50 L80 50 M50 20 L50 80" stroke="url(#neo)" stroke-width="6"/>
+        <path d="M20 20 L80 80 M80 20 L20 80" stroke="#d800d8" stroke-width="4" opacity=".6"/>
+      </symbol>
+      <symbol id="icon-genus" viewBox="0 0 100 100">
+        <rect x="22" y="22" width="56" height="56" fill="none" stroke="url(#neo)" stroke-width="6" rx="8"/>
+        <circle cx="50" cy="50" r="10" fill="url(#neo)"/>
+      </symbol>
+      <symbol id="icon-lumine" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="22" fill="none" stroke="url(#neo)" stroke-width="6"/>
+        <path d="M50 12v10M50 78v10M12 50h10M78 50h10M24 24l7 7M76 24l-7 7M24 76l7-7M76 76l-7-7"
+              stroke="url(#neo)" stroke-width="4"/>
+      </symbol>
+      <symbol id="icon-solus" viewBox="0 0 100 100">
+        <path d="M20 60 C35 30, 65 30, 80 60" fill="none" stroke="url(#neo)" stroke-width="6"/>
+        <path d="M30 55 Q50 30 70 55" fill="none" stroke="url(#neo)" stroke-width="4" opacity=".7"/>
+      </symbol>
+      <symbol id="icon-aion" viewBox="0 0 100 100">
+        <path d="M20 70 L50 30 L80 70 Z" fill="none" stroke="url(#neo)" stroke-width="6"/>
+        <path d="M35 60 L50 40 L65 60 Z" fill="none" stroke="url(#neo)" stroke-width="4" opacity=".6"/>
+      </symbol>
+      <symbol id="icon-rhea" viewBox="0 0 100 100">
+        <path d="M30 70 C30 50, 70 50, 70 70" stroke="url(#neo2)" stroke-width="6" fill="none"/>
+        <circle cx="50" cy="45" r="9" fill="url(#neo2)"/>
+      </symbol>
+    </defs>
+
+    <use href="#orb-horus"></use>
+    <g opacity=".28"><use href="#delta-vortex"></use></g>
+    <g id="arch-icon-holder" transform="translate(100,100) translate(-50,-50)">
+      <use id="arch-icon" href="#icon-atlas"></use>
+    </g>
+  </svg>
+</div>
+
+<script id="UNO_ARCH_ORB_SCRIPT">
+(function(){
+  const ARCHES=[
+    {id:'atlas',label:'Atlas'},{id:'nova',label:'Nova'},{id:'vitalis',label:'Vitalis'},{id:'pulse',label:'Pulse'},
+    {id:'artemis',label:'Artemis'},{id:'serena',label:'Serena'},{id:'kaos',label:'Kaos'},{id:'genus',label:'Genus'},
+    {id:'lumine',label:'Lumine'},{id:'solus',label:'Solus'},{id:'aion',label:'Aion'},{id:'rhea',label:'Rhea'}
+  ];
+  const $orb=document.getElementById('arch-orb');
+  const $use=document.getElementById('arch-icon');
+  let idx=0;
+  function setArch(key){
+    const i=typeof key==='number' ? ((key%ARCHES.length)+ARCHES.length)%ARCHES.length
+                                  : ARCHES.findIndex(a=>a.id===String(key).toLowerCase());
+    if(i<0) return;
+    idx=i;$use.setAttribute('href','#icon-'+ARCHES[i].id);
+    try{
+      // opcional: mudar overlay do site se usar --grad-a/--grad-b globais
+      const root=document.documentElement;
+      root.style.setProperty('--arch-overlay','rgba(64,158,255,.22)');
+    }catch{}
+  }
+  window.ArchOrb={set,set:setArch,get:()=>ARCHES[idx],svg:()=>new XMLSerializer().serializeToString($orb)};
+  const hash=location.hash.replace('#','').trim(); if(hash) setArch(hash);
+})();
 </script>
+<!-- === /UNO • ORB dos Arquétipos (Injected) === -->
 
+<script id="BOOT_ORDER_ORCHESTRATOR">
+(function(){
+  // ===== Boot Order Orchestrator v2 =====
+  const CANON_ORDER = [
+    'blue1Theme','customStyle','multiagent-styles','patch-blue1-theme',
+    'overlay-defaults','ls-panel-css','show-app-title-css',
+    'overlay-css-unify','overlay-guardian-css','orb-slot-css',
+    'hdpro-override','ATOM_UI_PATCH','OVERLAY_BG_ONLY','ARCH_FAB_ROUND_FIX',
+    'KOBLLUX_FINAL_LOCK' // lock sempre por último
+  ];
+
+  function dedupeById(){
+    ['style','script'].forEach(tag=>{
+      const els = Array.from(document.querySelectorAll(tag+'[id]'));
+      const seen = new Map();
+      els.forEach((el,idx)=>{
+        const id = el.id;
+        if(!id) return;
+        if(seen.has(id)){
+          // Mantém o último; remove os anteriores
+          const first = seen.get(id);
+          if(first && first.parentNode) first.parentNode.removeChild(first);
+        }
+        seen.set(id, el);
+      });
+    });
+  }
+
+  function enforceOrder(){
+    const head = document.head || document.querySelector('head');
+    if(!head) return;
+    CANON_ORDER.forEach(id=>{
+      const el = document.getElementById(id);
+      if(el && el.parentNode !== head){
+        // Garante que fique no head
+        head.appendChild(el);
+      }else if(el){
+        // move para o final mantendo a ordem de CANON_ORDER
+        head.appendChild(el);
+      }
+    });
+  }
+
+  function exposeDevAPI(){
+    const api = {
+      runAll(){ try{ dedupeById(); enforceOrder(); }catch(e){} },
+      styleOrder(){
+        return Array.from(document.querySelectorAll('style[id]')).map(s=>s.id);
+      },
+      duplicates(){
+        const ids = api.styleOrder();
+        const map = ids.reduce((acc,id)=> (acc[id]=(acc[id]||0)+1,acc),{});
+        return Object.entries(map).filter(([k,v])=>v>1);
+      },
+      reapply(){
+        // Tenta reaplicar iniciais se existirem no escopo global
+        ['applyTheme','applyCSS','sendVisualSettingsToFrame','renderApp','boot'].forEach(fn=>{
+          if(typeof window[fn]==='function'){ try{ window[fn](); }catch(e){} }
+        });
+      },
+      sw:{
+        async ping(){
+          if(!('serviceWorker' in navigator)) return 'NA';
+          const regs = await navigator.serviceWorker.getRegistrations();
+          return regs.map(r=>({scope:r.scope, active:!!r.active, installing:!!r.installing, waiting:!!r.waiting}));
+        },
+        async update(){
+          if(!('serviceWorker' in navigator)) return;
+          const reg = await navigator.serviceWorker.register('./sw.js', {scope:'./'}).catch(()=>null);
+          try{ reg && reg.update && reg.update(); }catch(e){}
+          if(reg && reg.waiting){ reg.waiting.postMessage({type:'SKIP_WAITING'}); }
+        },
+        clearCaches(){
+          if(!('caches' in window)) return;
+          caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k)))).then(()=>location.reload());
+        }
+      }
+    };
+    window.__KOBLLUX = api;
+    return api;
+  }
+
+  function patchLocalStorage(){
+    const _set = localStorage.setItem;
+    localStorage.setItem = function(k,v){
+      _set.apply(this, arguments);
+      try{ window.dispatchEvent(new CustomEvent('ls:changed', {detail:{key:k,value:v}})); }catch(e){}
+    };
+    // Se flags mudarem, reexecuta reapply
+    window.addEventListener('ls:changed', ()=>{
+      try{ window.__KOBLLUX && window.__KOBLLUX.reapply(); }catch(e){}
+    });
+  }
+
+  // Registro do SW externo + atualização (caso exista sw.js no host)
+  function registerSW(){
+    if(!('serviceWorker' in navigator)) return;
+    window.addEventListener('load', async () => {
+      try{
+        const reg = await navigator.serviceWorker.register('./sw.js', {scope:'./'});
+        try{ reg.update(); }catch(e){}
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', function(){
+          if (refreshing) return; refreshing = true; location.reload();
+        });
+        if (reg.waiting){
+          reg.waiting.postMessage({type:'SKIP_WAITING'});
+        }
+        reg.addEventListener('updatefound', () => {
+          const nw = reg.installing;
+          nw && nw.addEventListener('statechange', () => {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller){
+              nw.postMessage({type:'SKIP_WAITING'});
+            }
+          });
+        });
+      }catch(e){}
+    });
+  }
+
+  // Dev panel quick UI (toggle Alt+D)
+  function devPanel(){
+    const css = `
+      .dev-panel{position:fixed;right:10px;bottom:10px;z-index:99999;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);color:#eafff3;border:1px solid rgba(106,252,177,.35);border-radius:12px; padding:10px; width:320px; font:12px/1.4 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;}
+      .dev-panel h3{margin:0 0 8px; font-size:13px}
+      .dev-panel pre{white-space:pre-wrap; max-height:160px; overflow:auto; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); padding:6px; border-radius:6px}
+      .dev-panel .row{display:flex; gap:6px; flex-wrap:wrap; margin-top:6px}
+      .dev-panel button{border:1px solid rgba(106,252,177,.35); background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02)); color:#6afcb1; border-radius:8px; padding:6px 8px; cursor:pointer}
+      .dev-panel small{opacity:.8}
+    `;
+    const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
+    const wrap = document.createElement('div'); wrap.className='dev-panel'; wrap.style.display='none';
+    wrap.innerHTML = `
+      <h3>LS Dev • Patches & SW</h3>
+      <div><small>Pressione <b>Alt+D</b> para mostrar/ocultar • v2</small></div>
+      <pre id="dp-order"></pre>
+      <div class="row">
+        <button id="dp-run">Reorquestrar</button>
+        <button id="dp-reapply">Reaplicar temas/CSS</button>
+        <button id="dp-swping">SW: ping</button>
+        <button id="dp-swupd">SW: update</button>
+        <button id="dp-clear">Limpar caches</button>
+      </div>
+    `;
+    document.body.appendChild(wrap);
+    const p = wrap.querySelector('#dp-order');
+    function refresh(){
+      const order = (window.__KOBLLUX && window.__KOBLLUX.styleOrder()) || [];
+      const dups = (window.__KOBLLUX && window.__KOBLLUX.duplicates()) || [];
+      p.textContent = 'Style order (id):\n- ' + order.join('\n- ') + (dups.length ? ('\n\nDuplicados:\n- ' + dups.map(([k,v])=>k+' x'+v).join('\n- ')) : '');
+    }
+    wrap.querySelector('#dp-run').onclick = ()=>{ window.__KOBLLUX && window.__KOBLLUX.runAll(); refresh(); };
+    wrap.querySelector('#dp-reapply').onclick = ()=>{ window.__KOBLLUX && window.__KOBLLUX.reapply(); };
+    wrap.querySelector('#dp-swping').onclick = async ()=>{ const info = await (window.__KOBLLUX && window.__KOBLLUX.sw.ping()); alert(JSON.stringify(info)); };
+    wrap.querySelector('#dp-swupd').onclick = async ()=>{ await (window.__KOBLLUX && window.__KOBLLUX.sw.update()); };
+    wrap.querySelector('#dp-clear').onclick = ()=>{ window.__KOBLLUX && window.__KOBLLUX.sw.clearCaches(); };
+    window.addEventListener('keydown', (e)=>{ if(e.altKey && e.key.toLowerCase()==='d'){ wrap.style.display = (wrap.style.display==='none'?'block':'none'); refresh(); }});
+  }
+
+  try{
+    dedupeById();
+    enforceOrder();
+    exposeDevAPI();
+    patchLocalStorage();
+    registerSW();
+    if(document.readyState !== 'loading'){ devPanel(); } else { window.addEventListener('DOMContentLoaded', devPanel); }
+  }catch(e){}
+})();
+</script>
 </body></html>
